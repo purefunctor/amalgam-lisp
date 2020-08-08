@@ -89,6 +89,29 @@ version = "*"
 
 [[package]]
 category = "dev"
+description = "A library for property-based testing"
+name = "hypothesis"
+optional = false
+python-versions = ">=3.5.2"
+version = "5.23.11"
+
+[package.dependencies]
+attrs = ">=19.2.0"
+sortedcontainers = ">=2.1.0,<3.0.0"
+
+[package.extras]
+all = ["django (>=2.2)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "numpy (>=1.9.0)", "pandas (>=0.19)", "pytest (>=4.3)", "python-dateutil (>=1.4)", "pytz (>=2014.1)"]
+dateutil = ["python-dateutil (>=1.4)"]
+django = ["pytz (>=2014.1)", "django (>=2.2)"]
+dpcontracts = ["dpcontracts (>=0.4)"]
+lark = ["lark-parser (>=0.6.5)"]
+numpy = ["numpy (>=1.9.0)"]
+pandas = ["pandas (>=0.19)"]
+pytest = ["pytest (>=4.3)"]
+pytz = ["pytz (>=2014.1)"]
+
+[[package]]
+category = "dev"
 description = "File identification library for Python"
 name = "identify"
 optional = false
@@ -270,6 +293,14 @@ version = "1.15.0"
 
 [[package]]
 category = "dev"
+description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
+name = "sortedcontainers"
+optional = false
+python-versions = "*"
+version = "2.2.2"
+
+[[package]]
+category = "dev"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
 optional = false
@@ -320,7 +351,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "ea6eae747c1d5cf7852d57f843ace900c03c3b0724c541522f31649e2f11ebe3"
+content-hash = "20b4e1af8cf853f2245885de1a388e73c86e721c23dfb6437180e034e7ab7da1"
 lock-version = "1.0"
 python-versions = "^3.7"
 
@@ -360,6 +391,10 @@ filelock = [
 flake8 = [
     {file = "flake8-3.8.3-py2.py3-none-any.whl", hash = "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c"},
     {file = "flake8-3.8.3.tar.gz", hash = "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"},
+]
+hypothesis = [
+    {file = "hypothesis-5.23.11-py3-none-any.whl", hash = "sha256:c0ed9cbbba273fb4ff4148ff539b73b52d5b6422b1bb86a7901f8cbb43f49db3"},
+    {file = "hypothesis-5.23.11.tar.gz", hash = "sha256:69882d263175bd4731200c35c1bdfdc0a6c1af08a85672cdc51af26b18e3cac7"},
 ]
 identify = [
     {file = "identify-1.4.25-py2.py3-none-any.whl", hash = "sha256:ccd88716b890ecbe10920659450a635d2d25de499b9a638525a48b48261d989b"},
@@ -432,6 +467,10 @@ pyyaml = [
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
+]
+sortedcontainers = [
+    {file = "sortedcontainers-2.2.2-py2.py3-none-any.whl", hash = "sha256:c633ebde8580f241f274c1f8994a665c0e54a17724fecd0cae2f079e09c36d3f"},
+    {file = "sortedcontainers-2.2.2.tar.gz", hash = "sha256:4e73a757831fc3ca4de2859c422564239a31d8213d09a2a666e375807034d2ba"},
 ]
 toml = [
     {file = "toml-0.10.1-py2.py3-none-any.whl", hash = "sha256:bda89d5935c2eac546d648028b9901107a595863cb36bae0c73ac804a9b4ce88"},
