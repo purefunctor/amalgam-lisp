@@ -1,13 +1,16 @@
 import parsy
 
 
+IDENTIFIER_PATTERN = r"(?![0-9'])[\+\-\*/\\&<=>?!_a-zA-Z0-9']+"
+
+
 @parsy.generate
 def s_expression():
     """Parses a given S-Expression"""
 
     l_paren = yield parsy.string("(")
 
-    f = yield parsy.char_from("+-*/")
+    f = yield parsy.regex(IDENTIFIER_PATTERN)
 
     yield parsy.whitespace
 
