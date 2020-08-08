@@ -2,7 +2,7 @@ import parsy
 
 
 IDENTIFIER_PATTERN = r"(?![0-9'])[\+\-\*/\\&<=>?!_a-zA-Z0-9']+"
-NUMERIC_PATTERN = r"(0|[1-9][0-9]*)((\.[0-9]+)|(/(0|[1-9][0-9]*)))?"
+NUMERIC_PATTERN = r"-?(0|[1-9][0-9]*)((\.[0-9]+)|(/-?(0|[1-9][0-9]*)))?"
 
 
 @parsy.generate
