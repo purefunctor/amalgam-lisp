@@ -4,7 +4,7 @@ from amalgam.parser import numeric_literal, s_expression
 from amalgam.parser import IDENTIFIER_PATTERN
 
 from hypothesis import assume, given
-from hypothesis.strategies import integers, floats, fractions, from_regex
+from hypothesis.strategies import integers, floats, fractions, from_regex, lists, one_of
 
 
 _identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
@@ -17,6 +17,10 @@ _floating = floats(
 ).map(str).filter(lambda f: not re.search("[Ee][+-][0-9]+", f))
 
 _fraction = fractions().map(str)
+
+_literals = lists(
+    one_of(_integral, _floating, _fraction)
+).filter(lambda l: len(l) > 0)
 
 
 @given(_identifier)
@@ -37,6 +41,11 @@ def test_numeric_literal_floating(floating):
 @given(_fraction)
 def test_numeric_literal_fraction(fraction):
     assert numeric_literal.parse(fraction) == fraction
+
+
+@given(_identifier, _literals)
+def test_s_expression_literals(identifier, literals):
+    assert s_expression.parse(f"({identifier} {' '.join(literals)})") == ["(", identifier, *literals, ")"]
 
 
 def test_s_expression_arithmetic_simple():
