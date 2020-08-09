@@ -15,20 +15,20 @@ def test_identifier_pattern(identifier):
     assert not re.match("[0-9]", identifier[0])
 
 
-@given(integers())
+@given(integers().map(str))
 def test_numeric_integer_pattern(integer):
-    assert re.match(NUMERIC_PATTERN, str(integer))
+    assert re.match(NUMERIC_PATTERN, integer)
 
 
-@given(floats(allow_infinity=False, allow_nan=False))
+@given(floats(allow_infinity=False, allow_nan=False).map(str))
 def test_numeric_floating_pattern(floating):
-    assume(not re.search("[Ee][+-][0-9]+", str(floating)))
+    assume(not re.search("[Ee][+-][0-9]+", floating))
     assert re.match(NUMERIC_PATTERN, str(floating))
 
 
-@given(fractions())
+@given(fractions().map(str))
 def test_numeric_fraction_pattern(fraction):
-    assert re.match(NUMERIC_PATTERN, str(fraction))
+    assert re.match(NUMERIC_PATTERN, fraction)
 
 
 def test_s_expression_arithmetic_simple():
