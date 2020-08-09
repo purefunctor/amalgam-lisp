@@ -7,7 +7,7 @@ from hypothesis import assume, given
 from hypothesis.strategies import integers, floats, fractions, from_regex
 
 
-_random_identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
+_identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
 
 _integral = integers().map(str)
 
@@ -19,7 +19,7 @@ _floating = floats(
 _fraction = fractions().map(str)
 
 
-@given(_random_identifier)
+@given(_identifier)
 def test_identifier_pattern(identifier):
     assert not re.match("[0-9]", identifier[0])
 
