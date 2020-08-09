@@ -9,24 +9,28 @@ from hypothesis.strategies import integers, floats, fractions, from_regex
 
 _random_identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
 
+_integral = integers().map(str)
+_floating = floats(allow_infinity=False, allow_nan=False).map(str)
+_fraction = fractions().map(str)
+
 
 @given(_random_identifier)
 def test_identifier_pattern(identifier):
     assert not re.match("[0-9]", identifier[0])
 
 
-@given(integers().map(str))
+@given(_integral)
 def test_numeric_literal_integral(integral):
     assert numeric_literal.parse(integral) == integral
 
 
-@given(floats(allow_infinity=False, allow_nan=False).map(str))
+@given(_floating)
 def test_numeric_literal_floating(floating):
     assume(not re.search("[Ee][+-][0-9]+", floating))
     assert numeric_literal.parse(floating) == floating
 
 
-@given(fractions().map(str))
+@given(_fraction)
 def test_numeric_literal_fraction(fraction):
     assert numeric_literal.parse(fraction) == fraction
 
