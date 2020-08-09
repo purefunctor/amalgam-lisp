@@ -10,7 +10,12 @@ from hypothesis.strategies import integers, floats, fractions, from_regex
 _random_identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
 
 _integral = integers().map(str)
-_floating = floats(allow_infinity=False, allow_nan=False).map(str)
+
+_floating = floats(
+    allow_infinity=False,
+    allow_nan=False,
+).map(str).filter(lambda f: not re.search("[Ee][+-][0-9]+", f))
+
 _fraction = fractions().map(str)
 
 
@@ -26,7 +31,6 @@ def test_numeric_literal_integral(integral):
 
 @given(_floating)
 def test_numeric_literal_floating(floating):
-    assume(not re.search("[Ee][+-][0-9]+", floating))
     assert numeric_literal.parse(floating) == floating
 
 
