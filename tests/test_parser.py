@@ -3,7 +3,7 @@ import re
 from amalgam.parser import s_expression
 from amalgam.parser import IDENTIFIER_PATTERN, NUMERIC_PATTERN
 
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis.strategies import integers, floats, fractions, from_regex
 
 
@@ -22,6 +22,7 @@ def test_numeric_integer_pattern(integer):
 
 @given(floats(allow_infinity=False, allow_nan=False))
 def test_numeric_floating_pattern(floating):
+    assume(not re.search("[Ee][+-][0-9]+", str(floating)))
     assert re.match(NUMERIC_PATTERN, str(floating))
 
 
