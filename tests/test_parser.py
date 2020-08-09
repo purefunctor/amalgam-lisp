@@ -1,6 +1,6 @@
 import re
 
-from amalgam.parser import s_expression
+from amalgam.parser import numeric_literal, s_expression
 from amalgam.parser import IDENTIFIER_PATTERN, NUMERIC_PATTERN
 
 from hypothesis import assume, given
@@ -29,6 +29,22 @@ def test_numeric_floating_pattern(floating):
 @given(fractions().map(str))
 def test_numeric_fraction_pattern(fraction):
     assert re.match(NUMERIC_PATTERN, fraction)
+
+
+@given(integers().map(str))
+def test_numeric_literal_integral(integral):
+    assert numeric_literal.parse(integral) == integral
+
+
+@given(floats(allow_infinity=False, allow_nan=False).map(str))
+def test_numeric_literal_floating(floating):
+    assume(not re.search("[Ee][+-][0-9]+", floating))
+    assert numeric_literal.parse(floating) == floating
+
+
+@given(fractions().map(str))
+def test_numeric_literal_fraction(fraction):
+    assert numeric_literal.parse(fraction) == fraction
 
 
 def test_s_expression_arithmetic_simple():
