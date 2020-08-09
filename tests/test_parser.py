@@ -43,9 +43,14 @@ def test_numeric_literal_fraction(fraction):
     assert numeric_literal.parse(fraction) == fraction
 
 
+def naive_s_expression_parse(expression):
+    return expression.replace("(", " ( ").replace(")", " ) ").split()
+
+
 @given(_identifier, _literals)
 def test_s_expression_literals(identifier, literals):
-    assert s_expression.parse(f"({identifier} {' '.join(literals)})") == ["(", identifier, *literals, ")"]
+    expression = f"({identifier} {' '.join(literals)})"
+    assert s_expression.parse(expression) == naive_s_expression_parse(expression)
 
 
 # def test_s_expression_arithmetic_simple():
