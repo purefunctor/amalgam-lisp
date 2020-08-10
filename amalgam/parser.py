@@ -30,13 +30,15 @@ def numeric_literal():
 def s_expression():
     """Parses a given S-Expression"""
 
+    identifier = parsy.regex(IDENTIFIER_PATTERN)
+
     l_paren = yield parsy.string("(")
 
-    f = yield parsy.regex(IDENTIFIER_PATTERN)
+    f = yield identifier
 
     yield parsy.whitespace
 
-    v = yield (numeric_literal | s_expression).sep_by(parsy.whitespace)
+    v = yield (identifier | numeric_literal | s_expression).sep_by(parsy.whitespace)
 
     r_paren = yield parsy.string(")")
 
