@@ -1,10 +1,12 @@
+from collections import namedtuple
+from functools import partial
 import re
 
 from amalgam.parser import numeric_literal, s_expression
 from amalgam.parser import IDENTIFIER_PATTERN
 
 from hypothesis import assume, given
-from hypothesis.strategies import integers, floats, fractions, from_regex, lists, one_of
+from hypothesis.strategies import integers, floats, fractions, from_regex, lists, one_of, composite, recursive, builds
 
 
 _identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
@@ -21,6 +23,31 @@ _fraction = fractions().map(str)
 _literals = lists(
     one_of(_integral, _floating, _fraction)
 ).filter(lambda l: len(l) > 0)
+
+
+@composite
+def _recursive_literals(draw):
+    pair = namedtuple("pair", "iden succ")
+    coll = namedtuple("coll", "vals")
+
+    chosen = draw(recursive(_literals.map(coll), partial(builds, pair, _identifier)))
+
+    def as_string(chosen):
+        if isinstance(chosen, coll):
+            return " ".join(chosen.vals)
+        elif isinstance(chosen, pair):
+            return f"({chosen.iden} {as_string(chosen.succ)})"
+
+    def as_structure(chosen, *, recurse=False):
+        if isinstance(chosen, coll):
+            return chosen if recurse else chosen.vals
+        elif isinstance(chosen, pair):
+            succ = as_structure(chosen.succ, recurse=True)
+            if isinstance(succ, coll):
+                return ["(", chosen.iden, *succ.vals, ")"]
+            return ["(", chosen.iden, succ, ")"]
+
+    return as_string(chosen), as_structure(chosen)
 
 
 @given(_identifier)
