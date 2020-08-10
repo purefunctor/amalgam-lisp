@@ -11,9 +11,7 @@ language: python
 python:
   - "3.7.7"
   - "3.8.5"
-before_install:
-  - pip install poetry
 install:
-  - poetry install
+  - pip install tox tox-travis
 script:
-  - poetry run tox
+  - tox
