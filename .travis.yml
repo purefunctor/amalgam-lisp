@@ -1,5 +1,12 @@
 os: linux
 dist: xenial
+
+branches:
+  only:
+  - stable
+  - develop
+  - /^feature\/.+$/
+
 language: python
 python:
   - "3.8"
