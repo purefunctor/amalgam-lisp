@@ -51,7 +51,7 @@ def test_numeric_literal_fraction(fraction):
 
 
 @given(_arbitrary_s_expressions())
-def test_s_expression_literals(data):
+def test_s_expression_simple(data):
     expression, expected = data
     assert s_expression.parse(expression) == expected
 
