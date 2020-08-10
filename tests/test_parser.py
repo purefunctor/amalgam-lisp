@@ -32,7 +32,7 @@ def _arbitrary_s_expressions(draw):
 
 @given(_identifier)
 def test_identifier_pattern(identifier):
-    assert not re.match("[0-9]", identifier[0])
+    assert not (re.match("-?[0-9']", identifier))
 
 
 @given(_integral)
