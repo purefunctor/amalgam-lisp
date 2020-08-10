@@ -14,7 +14,7 @@ python:
   - "3.8.5"
 
 install:
-  - pip install tox tox-travis
+  - pip install poetry tox tox-travis
 
 script:
   - tox
