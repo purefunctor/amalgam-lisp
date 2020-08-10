@@ -27,7 +27,7 @@ def _s_expression_literals(draw):
         one_of(_integral, _floating, _fraction)
     ).filter(lambda l: len(l) > 0))
 
-    return f"({identifier} {' '.join(literals)})"
+    return f"({identifier} {' '.join(literals)})", ["(", identifier, *literals, ")"]
 
 
 @given(_identifier)
@@ -50,13 +50,10 @@ def test_numeric_literal_fraction(fraction):
     assert numeric_literal.parse(fraction) == fraction
 
 
-def naive_s_expression_parse(expression):
-    return expression.replace("(", " ( ").replace(")", " ) ").split()
-
-
 @given(_s_expression_literals())
-def test_s_expression_literals(expression):
-    assert s_expression.parse(expression) == naive_s_expression_parse(expression)
+def test_s_expression_literals(data):
+    expression, expected = data
+    assert s_expression.parse(expression) == expected
 
 
 # def test_s_expression_arithmetic_simple():
