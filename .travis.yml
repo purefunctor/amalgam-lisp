@@ -9,12 +9,11 @@ branches:
 
 language: python
 python:
+  - "3.7.7"
   - "3.8.5"
 before_install:
   - pip install poetry
 install:
   - poetry install
-  - poetry run pre-commit install
 script:
-  - poetry run pre-commit run --all-files
-  - poetry run pytest -v
+  - poetry run tox
