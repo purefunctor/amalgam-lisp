@@ -20,11 +20,11 @@ _fraction = fractions().map(str)
 
 
 @composite
-def _s_expression_literals(draw):
+def _arbitrary_s_expressions(draw):
     identifier = draw(_identifier)
 
     literals = draw(lists(
-        one_of(_integral, _floating, _fraction)
+        one_of(_integral, _floating, _fraction, _identifier)
     ).filter(lambda l: len(l) > 0))
 
     return f"({identifier} {' '.join(literals)})", ["(", identifier, *literals, ")"]
@@ -50,7 +50,7 @@ def test_numeric_literal_fraction(fraction):
     assert numeric_literal.parse(fraction) == fraction
 
 
-@given(_s_expression_literals())
+@given(_arbitrary_s_expressions())
 def test_s_expression_literals(data):
     expression, expected = data
     assert s_expression.parse(expression) == expected
