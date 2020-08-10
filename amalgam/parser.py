@@ -1,7 +1,7 @@
 import parsy
 
 
-IDENTIFIER_PATTERN = r"(?!-?[0-9'])[\+\-\*/\\&<=>?!_a-zA-Z0-9']+"
+IDENTIFIER_PATTERN = r"(?!-?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
 
 
 @parsy.generate
