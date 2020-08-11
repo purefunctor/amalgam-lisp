@@ -23,6 +23,11 @@ pytest = "^5.4.3"
 hypothesis = "^5.23.11"
 tox = "^3.19.0"
 tox-travis = "^0.12"
+coverage = "^5.2.1"
+
+[tool.coverage.run]
+source = ["amalgam"]
+omit = ["*tests*"]
 
 [build-system]
 requires = ["poetry>=0.12"]
