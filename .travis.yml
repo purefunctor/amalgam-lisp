@@ -22,10 +22,11 @@ python:
   - "3.8.5"
 
 install:
-  - pip install poetry tox tox-travis
+  - pip install poetry
+  - poetry install
 
 script:
-  - tox
+  - poetry run tox
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
