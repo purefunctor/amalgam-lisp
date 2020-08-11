@@ -5,6 +5,7 @@ cache:
   pip: true
   directories:
   - $HOME/.cache/pre-commit
+  - $HOME/.cache/pypoetry
   - .hypothesis
   - .pytest_cache
   - .tox
