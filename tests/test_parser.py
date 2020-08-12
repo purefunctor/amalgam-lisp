@@ -56,6 +56,17 @@ def test_s_expression_simple(data):
     assert s_expression.parse(expression) == expected
 
 
+@given(_arbitrary_s_expressions(), _arbitrary_s_expressions())
+def test_s_expression_nested(l, r):
+    ls, le = l
+    rs, re = r
+
+    ts = f"(T {ls} {rs})"
+    te = ["(", "T", le, re, ")"]
+
+    assert s_expression.parse(ts) == te
+
+
 # def test_s_expression_arithmetic_simple():
 #     assert s_expression.parse("(+ 21 42)") == ["(", "+", "21", "42", ")"]
 #
