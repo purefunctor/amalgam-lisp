@@ -13,12 +13,12 @@ def numeric_literal():
     floating_parser = parsy.seq(
         parsy.string("."),
         parsy.regex("[0-9]+"),
-    ).map("".join)
+    ).concat()
 
     fraction_parser = parsy.seq(
         parsy.string("/"),
         integral_parser,
-    ).map("".join)
+    ).concat()
 
     head = yield integral_parser
     tail = yield (floating_parser | fraction_parser).optional()
