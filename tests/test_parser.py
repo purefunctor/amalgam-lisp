@@ -4,7 +4,10 @@ from amalgam.parser import numeric_literal, s_expression
 from amalgam.parser import IDENTIFIER_PATTERN
 
 from hypothesis import assume, given
-from hypothesis.strategies import integers, floats, fractions, from_regex, composite, lists, one_of
+from hypothesis.strategies import (
+    integers, floats, fractions, from_regex,
+    composite, lists, one_of,
+)
 
 
 _identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
