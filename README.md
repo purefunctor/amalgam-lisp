@@ -6,8 +6,7 @@ Lisp-like interpreted language implemented in Python.
 - [x] S-Expressions
 - [x] Numeric types
 - [ ] Q-Expressions
-- [ ] List literals
-- [ ] Dotted pairs
+- [ ] Macros
 
 # Development Setup
 Install the following dependencies:
