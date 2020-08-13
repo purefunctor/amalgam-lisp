@@ -346,17 +346,6 @@ testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pathlib2 (>=2.3.3)", "psu
 
 [[package]]
 category = "dev"
-description = "Seamless integration of Tox into Travis CI"
-name = "tox-travis"
-optional = false
-python-versions = "*"
-version = "0.12"
-
-[package.dependencies]
-tox = ">=2.0"
-
-[[package]]
-category = "dev"
 description = "Virtual Python Environment builder"
 name = "virtualenv"
 optional = false
@@ -399,7 +388,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "d49485ec897c851e979782c621e803bb172ad1e02aace7a179e92b050abfb9e5"
+content-hash = "277e328c1a4517b41ea29c3900f9919c1da4672a048eb24e42550d6f3e158a40"
 lock-version = "1.0"
 python-versions = "^3.7"
 
@@ -563,10 +552,6 @@ toml = [
 tox = [
     {file = "tox-3.19.0-py2.py3-none-any.whl", hash = "sha256:3d94b6921a0b6dc90fd8128df83741f30bb41ccd6cd52d131a6a6944ca8f16e6"},
     {file = "tox-3.19.0.tar.gz", hash = "sha256:17e61a93afe5c49281fb969ab71f7a3f22d7586d1c56f9a74219910f356fe7d3"},
-]
-tox-travis = [
-    {file = "tox-travis-0.12.tar.gz", hash = "sha256:465cd8f71ad878962a3fce0e9e2e213994e0ae4e0c30f87fe6af1b04ea282dc4"},
-    {file = "tox_travis-0.12-py2.py3-none-any.whl", hash = "sha256:442c96b078333c94e272d0e90e4582e35e0529ea98bcd2f7f96053d690c4e7a4"},
 ]
 virtualenv = [
     {file = "virtualenv-20.0.30-py2.py3-none-any.whl", hash = "sha256:8cd7b2a4850b003a11be2fc213e206419efab41115cc14bca20e69654f2ac08e"},
