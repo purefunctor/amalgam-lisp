@@ -22,7 +22,7 @@ python:
   - "3.8.5"
 
 install:
-  - pip install poetry coverage tox tox-travis
+  - pip install poetry coverage tox-travis
 
 script:
   - tox
