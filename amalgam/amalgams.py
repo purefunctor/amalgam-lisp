@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from itertools import chain
 from typing import (
     Any,
     Dict,
@@ -79,7 +80,7 @@ class Environment(MutableMapping[str, Amalgam]):
             return self.iiter()
 
         else:
-            return iter(self.parent)
+            return chain(iter(self.parent), self.iiter())
 
     def __len__(self) -> int:
         """Performs `__len__` on nested environments."""
@@ -87,7 +88,7 @@ class Environment(MutableMapping[str, Amalgam]):
             return self.ilen()
 
         else:
-            return len(self.parent)
+            return len(self.parent) + self.ilen()
 
     def iget(self, item: str) -> Amalgam:
         """Performs `__getitem__` on the immediate environment."""
