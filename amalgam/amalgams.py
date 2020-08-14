@@ -21,7 +21,6 @@ class Amalgam(ABC):
         Given an `environment` and a list of optional `arguments`,
         evaluates or unwraps the `Amalgam` object.
         """
-        raise NotImplementedError("`Amalgam` does not implement evaluation")
 
 
 Bindings = Dict[str, Amalgam]
