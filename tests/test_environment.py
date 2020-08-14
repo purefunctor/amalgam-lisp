@@ -66,7 +66,7 @@ def test_immediate_environment_ilen(immediate):
 
 
 def test_immediate_environment_getitem(immediate):
-    assert immediate["foo"] == immediate.iget("foo")
+    assert immediate["foo"] == immediate.bindings.get("foo")
 
 
 def test_immediate_environment_getitem_fails(immediate):
@@ -91,6 +91,7 @@ def test_immediate_environment_delitem_fails(immediate):
 
 def test_immediate_environment_contains(immediate):
     assert ("foo" in immediate) == ("foo" in immediate.bindings)
+    assert ("nil" in immediate) == ("nil" in immediate.bindings)
 
 
 def test_immediate_environment_iter(immediate):
