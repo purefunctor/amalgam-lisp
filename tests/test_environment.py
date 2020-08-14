@@ -58,7 +58,7 @@ def test_immediate_environment_ihas(immediate):
 
 
 def test_immediate_environment_iiter(immediate):
-    assert list(immediate.iiter()) == list(iter(immediate.bindings))
+    assert list(immediate.iiter()) == list(immediate.bindings)
 
 
 def test_immediate_environment_ilen(immediate):
@@ -95,7 +95,7 @@ def test_immediate_environment_contains(immediate):
 
 
 def test_immediate_environment_iter(immediate):
-    assert list(iter(immediate)) == list(iter(immediate.bindings))
+    assert list(immediate) == list(immediate.bindings)
 
 
 def test_immediate_environment_len(immediate):
@@ -141,7 +141,7 @@ def test_nested_environment_ihas(nested):
 
 
 def test_nested_environment_iiter(nested):
-    assert list(nested.iiter()) == list(iter(nested.bindings))
+    assert list(nested.iiter()) == list(nested.bindings)
 
 
 def test_nested_environment_ilen(nested):
@@ -184,7 +184,7 @@ def test_nested_environment_contains(nested):
 
 
 def test_nested_environment_iter(nested):
-    assert list(iter(nested)) == list(chain(iter(nested.parent.bindings), nested.bindings))
+    assert list(nested) == list(chain(nested.parent.bindings, nested.bindings))
 
 
 def test_nested_environment_len(nested):

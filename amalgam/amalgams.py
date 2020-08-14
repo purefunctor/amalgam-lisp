@@ -80,7 +80,7 @@ class Environment(MutableMapping[str, Amalgam]):
             return self.iiter()
 
         else:
-            return chain(iter(self.parent), self.iiter())
+            return chain(self.parent, self.iiter())
 
     def __len__(self) -> int:
         """Performs `__len__` on nested environments."""
