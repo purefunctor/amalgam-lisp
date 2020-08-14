@@ -14,7 +14,7 @@ class Amalgam(ABC):
     """The abstract base class for language constructs."""
 
     @abstractmethod
-    def evaluate(self, environment: Any, *arguments: Any) -> Any:
+    def evaluate(self, environment: Environment, *arguments: Any) -> Any:
         """
         Protocol for evaluating or unwrapping `Amalgam` objects.
 
