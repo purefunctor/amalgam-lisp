@@ -47,7 +47,7 @@ class Environment(MutableMapping[str, Amalgam]):
         if self.ihas(item) or self.parent is None:
             return self.iget(item)
 
-        elif self.parent is not None:
+        else:
             return self.parent[item]
 
     def __setitem__(self, item: str, value: Amalgam) -> None:
@@ -55,7 +55,7 @@ class Environment(MutableMapping[str, Amalgam]):
         if self.ihas(item) or self.parent is None:
             self.iset(item, value)
 
-        elif self.parent is not None:
+        else:
             self.parent[item] = value
 
     def __delitem__(self, item: str) -> None:
@@ -63,7 +63,7 @@ class Environment(MutableMapping[str, Amalgam]):
         if self.ihas(item) or self.parent is None:
             self.idel(item)
 
-        elif self.parent is not None:
+        else:
             del self.parent[item]
 
     def __contains__(self, item: object) -> bool:
@@ -71,7 +71,7 @@ class Environment(MutableMapping[str, Amalgam]):
         if self.ihas(item) or self.parent is None:
             return self.ihas(item)
 
-        elif self.parent is not None:
+        else:
             return item in self.parent
 
     def __iter__(self) -> Iterator[str]:
