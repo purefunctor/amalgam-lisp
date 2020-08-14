@@ -1,4 +1,5 @@
 from typing import Any
+from itertools import chain
 
 from amalgam.amalgams import Amalgam, Environment
 
@@ -144,3 +145,46 @@ def test_nested_environment_iiter(nested):
 
 def test_nested_environment_ilen(nested):
     assert nested.ilen() == len(nested.bindings)
+
+
+def test_nested_environment_getitem(nested):
+    assert nested["ifoo"] == nested.bindings.get("ifoo")
+    assert nested["foo"] == nested.parent.bindings.get("foo")
+
+
+def test_nested_environment_getitem_fails(nested):
+    with raises(KeyError):
+        nested["key-error"]
+
+
+def test_nested_environment_setitem(nested):
+    nested["ifoo"] = 21
+    nested["foo"] = 42
+    assert nested.bindings.get("ifoo") == 21
+    assert nested.parent.bindings.get("foo") == 42
+
+
+def test_nested_environment_delitem(nested):
+    del nested["ifoo"]
+    del nested["foo"]
+    assert nested.bindings.get("ifoo", None) == None
+    assert nested.parent.bindings.get("foo", None) == None
+
+
+def test_nested_environment_delitem_fails(nested):
+    with raises(KeyError):
+        del nested["key-error"]
+
+
+def test_nested_environment_contains(nested):
+    assert ("ifoo" in nested) == ("ifoo" in nested.bindings)
+    assert ("foo" in nested) == ("foo" in nested.parent.bindings)
+    assert ("null" in nested) == ("null" in nested.bindings) == ("null" in nested.parent.bindings)
+
+
+def test_nested_environment_iter(nested):
+    assert list(iter(nested)) == list(chain(iter(nested.parent.bindings), nested.bindings))
+
+
+def test_nested_environment_len(nested):
+    assert len(nested) == len(nested.parent.bindings) + len(nested.bindings)
