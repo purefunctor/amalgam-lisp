@@ -188,3 +188,11 @@ def test_nested_environment_iter(nested):
 
 def test_nested_environment_len(nested):
     assert len(nested) == len(nested.parent.bindings) + len(nested.bindings)
+
+
+def test_nested_environment_push(nested):
+    assert nested.env_push().parent == nested
+
+
+def test_nested_environment_pop(nested):
+    assert nested.env_pop() == nested.parent
