@@ -20,6 +20,13 @@ def immediate():
     return Environment(None, {v: DummyAmalgam(v) for v in ("foo", "bar", "baz")})
 
 
+@fixture
+def nested():
+    e0 = Environment(None, {v: DummyAmalgam(v) for v in ("foo", "bar" "baz")})
+    e1 = Environment(e0, {v: DummyAmalgam(v) for v in ("ifoo", "ibar", "ibaz")})
+    return e1
+
+
 def test_immediate_environment_iget(immediate):
     assert immediate.iget("foo") == immediate.bindings.get("foo")
 
@@ -100,3 +107,40 @@ def test_immediate_environment_push(immediate):
 def test_immediate_environment_pop_fails(immediate):
     with raises(Exception):
         immediate.env_pop()
+
+
+def test_nested_environment_iget(nested):
+    assert nested.iget("ifoo") == nested.bindings.get("ifoo")
+
+
+def test_nested_environment_iget_fails(nested):
+    with raises(KeyError):
+        nested.iget("key-error")
+
+
+def test_nested_environment_iset(nested):
+    nested.iset("ifoo", 42)
+    assert nested.bindings.get("ifoo") == 42
+
+
+def test_nested_environment_idel(nested):
+    nested.idel("ifoo")
+    assert nested.bindings.get("ifoo", None) == None
+
+
+def test_nested_environment_idel_fails(nested):
+    with raises(KeyError):
+        nested.idel("key-error")
+
+
+def test_nested_environment_ihas(nested):
+    assert nested.ihas("ifoo") == ("ifoo" in nested.bindings)
+    assert nested.ihas("null") == ("null" in nested.bindings)
+
+
+def test_nested_environment_iiter(nested):
+    assert list(nested.iiter()) == list(iter(nested.bindings))
+
+
+def test_nested_environment_ilen(nested):
+    assert nested.ilen() == len(nested.bindings)
