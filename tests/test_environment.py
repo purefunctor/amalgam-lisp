@@ -91,3 +91,12 @@ def test_immediate_environment_iter(immediate):
 
 def test_immediate_environment_len(immediate):
     assert len(immediate) == len(immediate.bindings)
+
+
+def test_immediate_environment_push(immediate):
+    assert immediate.env_push().parent == immediate
+
+
+def test_immediate_environment_pop_fails(immediate):
+    with raises(Exception):
+        immediate.env_pop()
