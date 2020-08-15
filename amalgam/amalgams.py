@@ -27,8 +27,8 @@ class Amalgam(ABC):
         """
         Protocol for evaluating or unwrapping `Amalgam` objects.
 
-        Given an `environment` and a list of optional `arguments`,
-        evaluates or unwraps the `Amalgam` object.
+        This is responsible for evaluating or reducing `Amalgam`
+        objects given a specific `environment`.
         """
 
 
