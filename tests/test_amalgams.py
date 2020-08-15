@@ -1,6 +1,8 @@
 import re
+from typing import Any
 
 from amalgam.amalgams import (
+    Amalgam,
     Environment,
     Numeric,
 )
@@ -20,6 +22,10 @@ _non_scientific_float = floats(
 _numeric = one_of(integers(), _non_scientific_float, fractions()).map(Numeric)
 
 
+def _common_repr(inst: Amalgam):
+    return fr"<{inst.__class__.__name__} '.+' @ {hex(id(inst))}>"
+
+
 @given(_numeric)
 def test_numeric_evaluate(numeric):
     assert numeric == numeric.evaluate(Environment())
@@ -27,4 +33,4 @@ def test_numeric_evaluate(numeric):
 
 @given(_numeric)
 def test_numeric_repr(numeric):
-    assert re.match(fr"<Numeric '{str(numeric.value)}' @ {hex(id(numeric))}>", repr(numeric))
+    assert re.match(_common_repr(numeric), repr(numeric))
