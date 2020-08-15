@@ -14,6 +14,14 @@ from typing import (
 class Amalgam(ABC):
     """The abstract base class for language constructs."""
 
+    def bind(self, environment: Environment) -> Amalgam:
+        """
+        Protocol for binding environments to `Amalgam` objects.
+
+        This is responsible for binding `environment`s to `Amalgam`
+        objects that utilize closures such as curried functions.
+        """
+
     @abstractmethod
     def evaluate(self, environment: Environment, *arguments: Any) -> Any:
         """
