@@ -33,6 +33,10 @@ class Amalgam(ABC):
         objects given a specific `environment`.
         """
 
+    def _make_repr(self, value: Any) -> str:
+        """Helper method for creating `__repr__` for subclasses."""
+        return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
+
 
 class Numeric(Amalgam):
     """An `Amalgam` that wraps around numeric types."""
@@ -44,7 +48,7 @@ class Numeric(Amalgam):
         return self
 
     def __repr__(self) -> str:
-        return f"<Numeric '{self.value!s}' @ {hex(id(self))}>"
+        return self._make_repr(self.value)
 
 
 Bindings = Dict[str, Amalgam]
