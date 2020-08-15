@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from fractions import Fraction
 from itertools import chain
 from typing import (
     Any,
@@ -8,6 +9,7 @@ from typing import (
     Iterator,
     MutableMapping,
     Optional,
+    Union,
 )
 
 
@@ -30,6 +32,19 @@ class Amalgam(ABC):
         This is responsible for evaluating or reducing `Amalgam`
         objects given a specific `environment`.
         """
+
+
+class Numeric(Amalgam):
+    """An `Amalgam` that wraps around numeric types."""
+
+    def __init__(self, value: Union[int, float, Fraction]) -> None:
+        self.value = value
+
+    def evaluate(self, _environment: Environment, *arguments: Any) -> Numeric:
+        return self
+
+    def __repr__(self) -> str:
+        return f"<Numeric '{self.value!s}' @ {hex(id(self))}>"
 
 
 Bindings = Dict[str, Amalgam]
