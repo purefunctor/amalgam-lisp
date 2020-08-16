@@ -61,7 +61,7 @@ class String(Amalgam):
         return self
 
     def __repr__(self) -> str:
-        return self._make_repr(self.value)
+        return self._make_repr(f"\"{self.value}\"")
 
 
 Bindings = Dict[str, Amalgam]
