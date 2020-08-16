@@ -5,11 +5,12 @@ from amalgam.amalgams import (
     Amalgam,
     Environment,
     Numeric,
+    String,
 )
 
 from hypothesis import given
 from hypothesis.strategies import (
-    integers, floats, fractions,
+    integers, floats, fractions, text,
     lists, one_of,
 )
 
@@ -20,6 +21,8 @@ _non_scientific_float = floats(
 ).map(str).filter(lambda f: not re.search("[Ee][+-][0-9]+", f)).map(float)
 
 _numeric = one_of(integers(), _non_scientific_float, fractions()).map(Numeric)
+
+_string = text().map(String)
 
 
 def _common_repr(inst: Amalgam):
@@ -34,3 +37,13 @@ def test_numeric_evaluate(numeric):
 @given(_numeric)
 def test_numeric_repr(numeric):
     assert re.match(_common_repr(numeric), repr(numeric))
+
+
+@given(_string)
+def test_string_evaluate(string):
+    assert string == string.evaluate(Environment())
+
+
+@given(_string)
+def test_string_repr(string):
+    assert re.match(_common_repr(string), repr(string))
