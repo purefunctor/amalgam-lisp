@@ -44,7 +44,7 @@ class Numeric(Amalgam):
     def __init__(self, value: Union[int, float, Fraction]) -> None:
         self.value = value
 
-    def evaluate(self, _environment: Environment, *arguments: Any) -> Numeric:
+    def evaluate(self, _environment: Environment, *_arguments: Any) -> Numeric:
         return self
 
     def __repr__(self) -> str:
@@ -57,7 +57,7 @@ class String(Amalgam):
     def __init__(self, value: str) -> None:
         self.value = value
 
-    def evaluate(self, _environment: Environment, *arguments: Any) -> String:
+    def evaluate(self, _environment: Environment, *_arguments: Any) -> String:
         return self
 
     def __repr__(self) -> str:
