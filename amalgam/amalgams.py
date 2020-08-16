@@ -51,6 +51,19 @@ class Numeric(Amalgam):
         return self._make_repr(self.value)
 
 
+class String(Amalgam):
+    """An `Amalgam` that wraps around strings."""
+
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+    def evaluate(self, _environment: Environment, *arguments: Any) -> String:
+        return self
+
+    def __repr__(self) -> str:
+        return self._make_repr(self.value)
+
+
 Bindings = Dict[str, Amalgam]
 
 
