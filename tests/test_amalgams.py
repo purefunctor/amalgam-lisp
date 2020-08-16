@@ -26,7 +26,7 @@ _string = text().map(String)
 
 
 def _common_repr(inst: Amalgam):
-    return fr"<{inst.__class__.__name__} '.+' @ {hex(id(inst))}>"
+    return fr"<{inst.__class__.__name__} '[\s\S]+' @ {hex(id(inst))}>"
 
 
 @given(_numeric)
