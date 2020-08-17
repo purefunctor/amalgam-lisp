@@ -35,6 +35,11 @@ def test_numeric_evaluate(numeric):
 
 
 @given(_numeric)
+def test_numeric_bind(numeric):
+    assert numeric == numeric.bind(Environment())
+
+
+@given(_numeric)
 def test_numeric_repr(numeric):
     assert re.match(_common_repr(numeric), repr(numeric))
 
@@ -42,6 +47,11 @@ def test_numeric_repr(numeric):
 @given(_string)
 def test_string_evaluate(string):
     assert string == string.evaluate(Environment())
+
+
+@given(_string)
+def test_string_bind(string):
+    assert string == string.bind(Environment())
 
 
 @given(_string)
