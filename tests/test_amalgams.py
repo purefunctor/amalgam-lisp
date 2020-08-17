@@ -2,8 +2,10 @@ import re
 from typing import Any
 
 from amalgam.amalgams import (
+    create_fn,
     Amalgam,
     Environment,
+    Function,
     Numeric,
     String,
 )
@@ -14,6 +16,8 @@ from hypothesis.strategies import (
     lists, one_of,
 )
 
+from pytest import fixture
+
 
 _non_scientific_float = floats(
     allow_infinity=False,
@@ -23,6 +27,16 @@ _non_scientific_float = floats(
 _numeric = one_of(integers(), _non_scientific_float, fractions()).map(Numeric)
 
 _string = text().map(String)
+
+
+@fixture
+def num():
+    return Numeric(42)
+
+
+@fixture
+def env():
+    return Environment()
 
 
 def _common_repr(inst: Amalgam):
@@ -57,3 +71,13 @@ def test_string_bind(string):
 @given(_string)
 def test_string_repr(string):
     assert re.match(_common_repr(string), repr(string))
+
+
+def test_function_evaluate_literal(num, env):
+    fnc = create_fn("literal-test", "_x", num)
+    assert fnc.bind(env).call(num).value == num.value
+
+
+def test_function_bind(num, env):
+    fnc = create_fn("bind-test", "_x", num)
+    assert fnc.bind(env).env == env
