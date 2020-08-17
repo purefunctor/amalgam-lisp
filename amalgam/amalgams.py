@@ -4,11 +4,14 @@ from abc import ABC, abstractmethod
 from fractions import Fraction
 from itertools import chain
 from typing import (
+    cast,
     Any,
+    Callable,
     Dict,
     Iterator,
     MutableMapping,
     Optional,
+    Sequence,
     Union,
 )
 
@@ -23,6 +26,7 @@ class Amalgam(ABC):
         This is responsible for binding `environment`s to `Amalgam`
         objects that utilize closures such as curried functions.
         """
+        return self
 
     @abstractmethod
     def evaluate(self, environment: Environment, *arguments: Any) -> Any:
@@ -62,6 +66,53 @@ class String(Amalgam):
 
     def __repr__(self) -> str:
         return self._make_repr(f"\"{self.value}\"")
+
+
+class Function(Amalgam):
+    """An `Amalgam` that wraps around functions."""
+
+    def __init__(self, name: str, fn: Callable[..., Amalgam]) -> None:
+        self.name = name
+        self.fn = fn
+        self.env = cast(Environment, None)
+
+    def bind(self, env: Environment) -> Function:
+        self.env = env
+        return self
+
+    def evaluate(self, _environment: Environment, *_arguments: Any) -> Function:
+        return self
+
+    def call(self, *arguments: Amalgam) -> Amalgam:
+        return self.fn(self.env, *arguments).evaluate(self.env)
+
+    def __repr__(self) -> str:
+        return self._make_repr(self.name)
+
+
+def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
+    """Helper function for creating `Function` objects.
+
+    Given the name of the function: `fname`, a sequence of argument
+    names: `fargs`, and the `Amalgam` to be evaluated: `fbody`,
+    creates a new `closure_fn` to be wrapped by a `Function`.
+    """
+
+    def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
+        """Callable responsible for evaluating `fbody`."""
+
+        # Create a child environment and bind args to their names.
+        # TODO: Raise an error when missing arguments instead.
+        cl_env = environment.env_push(dict(zip(fargs, arguments)))
+
+        # Bind the environment to the function body and evaluate.
+        # For most `Amalgam` subclasses, the `bind` method will
+        # simply return `self`, except for `Function` which sets
+        # the provided `Environment` as an instance attribute
+        # and uses that when performing evaluations.
+        return fbody.bind(cl_env).evaluate(cl_env)
+
+    return Function(fname, closure_fn)
 
 
 Bindings = Dict[str, Amalgam]
