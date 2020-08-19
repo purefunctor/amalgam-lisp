@@ -83,3 +83,20 @@ def test_function_evaluate_literal(num, env):
 def test_function_repr(num, env):
     fnc = create_fn("function-test", "_x", num)
     assert re.match(_common_repr(fnc), repr(fnc))
+
+
+def test_function_evaluate_symbol_global(num, env):
+    env["foo"] = num
+    fnc = create_fn("global-test", "", Symbol("foo"))
+    assert fnc.evaluate(env).call().value == num.value
+
+
+def test_function_evaluate_symbol_local(num, env):
+    env["x"] = String("fail")
+    fnc = create_fn("local-test", "x", Symbol("x"))
+    assert fnc.evaluate(env).call(num).value == num.value
+
+
+def test_function_evaluate_symbol_closure(num, env):
+    fnc = create_fn("closure-test", "x", create_fn("inner", "y", Symbol("x")))
+    assert fnc.evaluate(env).call(num).call(num).value == num.value
