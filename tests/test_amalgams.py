@@ -66,3 +66,8 @@ def test_function_evaluate_binding(num, env):
 def test_function_evaluate_literal(num, env):
     fnc = create_fn("literal-test", "_x", num)
     assert fnc.evaluate(env).call(num).value == num.value
+
+
+def test_function_repr(num, env):
+    fnc = create_fn("function-test", "_x", num)
+    assert re.match(_common_repr(fnc), repr(fnc))
