@@ -20,7 +20,7 @@ class Amalgam(ABC):
     """The abstract base class for language constructs."""
 
     @abstractmethod
-    def evaluate(self, environment: Environment, *arguments: Any) -> Any:
+    def evaluate(self, environment: Environment) -> Any:
         """
         Protocol for evaluating or unwrapping `Amalgam` objects.
 
@@ -41,7 +41,7 @@ class Numeric(Amalgam):
     def __init__(self, value: Union[int, float, Fraction]) -> None:
         self.value = value
 
-    def evaluate(self, _environment: Environment, *_arguments: Any) -> Numeric:
+    def evaluate(self, _environment: Environment) -> Numeric:
         return self
 
     def __repr__(self) -> str:
@@ -54,7 +54,7 @@ class String(Amalgam):
     def __init__(self, value: str) -> None:
         self.value = value
 
-    def evaluate(self, _environment: Environment, *_arguments: Any) -> String:
+    def evaluate(self, _environment: Environment) -> String:
         return self
 
     def __repr__(self) -> str:
@@ -67,7 +67,7 @@ class Symbol(Amalgam):
     def __init__(self, value: str) -> None:
         self.value = value
 
-    def evaluate(self, environment: Environment, *arguments: Any) -> Amalgam:
+    def evaluate(self, environment: Environment) -> Amalgam:
         return environment[self.value]
 
     def __repr__(self) -> str:
@@ -82,7 +82,7 @@ class Function(Amalgam):
         self.fn = fn
         self.env = cast(Environment, None)
 
-    def evaluate(self, environment: Environment, *_arguments: Any) -> Function:
+    def evaluate(self, environment: Environment) -> Function:
         self.env = environment
         return self
 
