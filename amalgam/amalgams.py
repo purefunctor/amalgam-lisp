@@ -19,22 +19,15 @@ from typing import (
 class Amalgam(ABC):
     """The abstract base class for language constructs."""
 
-    def bind(self, environment: Environment) -> Amalgam:
-        """
-        Protocol for binding environments to `Amalgam` objects.
-
-        This is responsible for binding `environment`s to `Amalgam`
-        objects that utilize closures such as curried functions.
-        """
-        return self
-
     @abstractmethod
     def evaluate(self, environment: Environment, *arguments: Any) -> Any:
         """
         Protocol for evaluating or unwrapping `Amalgam` objects.
 
         This is responsible for evaluating or reducing `Amalgam`
-        objects given a specific `environment`.
+        objects given a specific `environment`. The `Function`
+        subclass extends this method by binding the environment
+        as an instance attribute `env`.
         """
 
     def _make_repr(self, value: Any) -> str:
@@ -89,15 +82,19 @@ class Function(Amalgam):
         self.fn = fn
         self.env = cast(Environment, None)
 
-    def bind(self, env: Environment) -> Function:
-        self.env = env
-        return self
-
-    def evaluate(self, _environment: Environment, *_arguments: Any) -> Function:
+    def evaluate(self, environment: Environment, *_arguments: Any) -> Function:
+        self.env = environment
         return self
 
     def call(self, *arguments: Amalgam) -> Amalgam:
-        return self.fn(self.env, *arguments).evaluate(self.env)
+        result = self.fn(self.env, *arguments)
+
+        # Prevent the closure environment created
+        # by `closure_fn` from being overwritten.
+        if isinstance(result, Function):
+            return result
+
+        return result.evaluate(self.env)
 
     def __repr__(self) -> str:
         return self._make_repr(self.name)
@@ -118,12 +115,10 @@ def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
         # TODO: Raise an error when missing arguments instead.
         cl_env = environment.env_push(dict(zip(fargs, arguments)))
 
-        # Bind the environment to the function body and evaluate.
-        # For most `Amalgam` subclasses, the `bind` method will
-        # simply return `self`, except for `Function` which sets
-        # the provided `Environment` as an instance attribute
-        # and uses that when performing evaluations.
-        return fbody.bind(cl_env).evaluate(cl_env)
+        # Evaluate the function body to `cl_env`. If the function
+        # body is another function, `cl_env` is then bound to the
+        # `env` attribute of that function creating a closure.
+        return fbody.evaluate(cl_env)
 
     return Function(fname, closure_fn)
 

@@ -49,11 +49,6 @@ def test_numeric_evaluate(numeric):
 
 
 @given(_numeric)
-def test_numeric_bind(numeric):
-    assert numeric == numeric.bind(Environment())
-
-
-@given(_numeric)
 def test_numeric_repr(numeric):
     assert re.match(_common_repr(numeric), repr(numeric))
 
@@ -64,20 +59,15 @@ def test_string_evaluate(string):
 
 
 @given(_string)
-def test_string_bind(string):
-    assert string == string.bind(Environment())
-
-
-@given(_string)
 def test_string_repr(string):
     assert re.match(_common_repr(string), repr(string))
 
 
+def test_function_evaluate_binding(num, env):
+    fnc = create_fn("binding-test", "_x", num)
+    assert fnc.evaluate(env).env == env
+
+
 def test_function_evaluate_literal(num, env):
     fnc = create_fn("literal-test", "_x", num)
-    assert fnc.bind(env).call(num).value == num.value
-
-
-def test_function_bind(num, env):
-    fnc = create_fn("bind-test", "_x", num)
-    assert fnc.bind(env).env == env
+    assert fnc.evaluate(env).call(num).value == num.value
