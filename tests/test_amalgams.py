@@ -11,13 +11,7 @@ from amalgam.amalgams import (
     String,
 )
 
-from hypothesis import given
-from hypothesis.strategies import text
-
 from pytest import fixture
-
-
-_string = text().map(String)
 
 
 @fixture
@@ -28,6 +22,11 @@ def num():
 @fixture
 def numerics():
     return Numeric(21), Numeric(21.42), Numeric(Fraction(21, 42))
+
+
+@fixture
+def strings():
+    return String(""), String("\n\t"), String("foo-bar-baz")
 
 
 @fixture
@@ -49,14 +48,14 @@ def test_numeric_repr(numerics):
         assert re.match(_common_repr(numeric), repr(numeric))
 
 
-@given(_string)
-def test_string_evaluate(string):
-    assert string == string.evaluate(Environment())
+def test_string_evaluate(strings):
+    for string in strings:
+        assert string == string.evaluate(Environment())
 
 
-@given(_string)
-def test_string_repr(string):
-    assert re.match(_common_repr(string), repr(string))
+def test_string_repr(strings):
+    for string in strings:
+        assert re.match(_common_repr(string), repr(string))
 
 
 def test_function_evaluate_binding(num, env):
