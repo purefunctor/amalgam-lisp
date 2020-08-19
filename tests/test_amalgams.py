@@ -9,6 +9,7 @@ from amalgam.amalgams import (
     Function,
     Numeric,
     String,
+    Symbol,
 )
 
 from pytest import fixture
@@ -46,6 +47,17 @@ def test_string_evaluate(strings):
 def test_string_repr(strings):
     for string in strings:
         assert re.match(_common_repr(string), repr(string))
+
+
+def test_symbol_evaluate():
+    symbol = Symbol("foo")
+    environ = Environment(None, {"foo": String("bar")})
+    assert symbol.evaluate(environ) == environ["foo"]
+
+
+def test_symbol_repr():
+    symbol = Symbol("foo")
+    assert re.match(_common_repr(symbol), repr(symbol))
 
 
 @fixture
