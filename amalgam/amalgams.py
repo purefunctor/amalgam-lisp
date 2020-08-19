@@ -68,6 +68,19 @@ class String(Amalgam):
         return self._make_repr(f"\"{self.value}\"")
 
 
+class Symbol(Amalgam):
+    """An `Amalgam` that wraps around symbols."""
+
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+    def evaluate(self, environment: Environment, *arguments: Any) -> Amalgam:
+        return environment[self.value]
+
+    def __repr__(self) -> str:
+        return self._make_repr(self.value)
+
+
 class Function(Amalgam):
     """An `Amalgam` that wraps around functions."""
 
