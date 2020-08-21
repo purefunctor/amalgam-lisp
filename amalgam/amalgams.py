@@ -68,7 +68,7 @@ class Symbol(Amalgam):
         self.value = value
 
     def evaluate(self, environment: Environment) -> Amalgam:
-        return environment[self.value]
+        return environment[self.value].evaluate(environment)
 
     def __repr__(self) -> str:
         return self._make_repr(self.value)
@@ -92,6 +92,20 @@ class Function(Amalgam):
 
     def __repr__(self) -> str:
         return self._make_repr(self.name)
+
+
+class SExpression(Amalgam):
+    """An `Amalgam` that wraps around S-Expressions."""
+
+    def __init__(self, func: Symbol, *vals: Amalgam) -> None:
+        self.func = func
+        self.vals = vals
+
+    def evaluate(self, environment: Environment) -> Amalgam:
+        return self.func.evaluate(environment).call(*self.vals)
+
+    def __repr__(self) -> str:
+        return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
 def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
