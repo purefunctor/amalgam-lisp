@@ -86,8 +86,8 @@ def test_function_repr(num, env):
 
 
 def test_function_evaluate_symbol_global(num, env):
-    env["foo"] = num
-    fnc = create_fn("global-test", "", Symbol("foo"))
+    env["x"] = num
+    fnc = create_fn("global-test", "", Symbol("x"))
     assert fnc.evaluate(env).call().value == num.value
 
 
