@@ -83,18 +83,12 @@ class Function(Amalgam):
         self.env = cast(Environment, None)
 
     def evaluate(self, environment: Environment) -> Function:
-        self.env = environment
+        if self.env is None:
+            self.env = environment
         return self
 
     def call(self, *arguments: Amalgam) -> Amalgam:
-        result = self.fn(self.env, *arguments)
-
-        # Prevent the closure environment created
-        # by `closure_fn` from being overwritten.
-        if isinstance(result, Function):
-            return result
-
-        return result.evaluate(self.env)
+        return self.fn(self.env, *arguments).evaluate(self.env)
 
     def __repr__(self) -> str:
         return self._make_repr(self.name)
