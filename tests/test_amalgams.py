@@ -5,6 +5,7 @@ from typing import Any
 from amalgam.amalgams import (
     create_fn,
     Amalgam,
+    Deferred,
     Environment,
     Function,
     Numeric,
@@ -58,6 +59,20 @@ def test_symbol_evaluate():
 def test_symbol_repr():
     symbol = Symbol("foo")
     assert re.match(_common_repr(symbol), repr(symbol))
+
+
+def test_deferred_evaluate(num, env):
+    deferred_one = Deferred(num)
+    deferred_many = Deferred(num, num)
+    assert deferred_one.evaluate(env) == deferred_one
+    assert deferred_many.evaluate(env) == deferred_many
+
+
+def test_deferred_repr(num, env):
+    deferred_one = Deferred(num)
+    deferred_many = Deferred(num, num)
+    assert re.match(_common_repr(deferred_one), repr(deferred_one))
+    assert re.match(_common_repr(deferred_many), repr(deferred_many))
 
 
 @fixture
