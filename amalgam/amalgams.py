@@ -109,6 +109,19 @@ class SExpression(Amalgam):
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
+class ListLiteral(Amalgam):
+    """An `Amalgam` that wraps around literal lists."""
+
+    def __init__(self, *vals: Amalgam) -> None:
+        self.vals = vals
+
+    def evaluate(self, _environment: Environment) -> Amalgam:
+        return self
+
+    def __repr__(self) -> str:
+        return self._make_repr(" ".join(map(repr, self.vals)))
+
+
 class Deferred(Amalgam):
     """An `Amalgam` that wraps around deferred values."""
 
