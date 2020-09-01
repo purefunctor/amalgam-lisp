@@ -102,7 +102,8 @@ class SExpression(Amalgam):
         self.vals = vals
 
     def evaluate(self, environment: Environment) -> Amalgam:
-        return self.func.evaluate(environment).call(*self.vals)
+        vals = (val.evaluate(environment) for val in self.vals)
+        return self.func.evaluate(environment).call(*vals)
 
     def __repr__(self) -> str:
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
