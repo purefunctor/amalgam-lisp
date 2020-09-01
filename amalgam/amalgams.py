@@ -109,30 +109,20 @@ class SExpression(Amalgam):
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
-class ListLiteral(Amalgam):
-    """An `Amalgam` that wraps around literal lists."""
+class Deferred(Amalgam):
+    """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
     def __init__(self, *vals: Amalgam) -> None:
-        self.vals = vals
+        self.vals: Union[Amalgam, Sequence[Amalgam]]
+        self.vals = vals[0] if len(vals) == 1 else vals
 
     def evaluate(self, _environment: Environment) -> Amalgam:
         return self
 
     def __repr__(self) -> str:
-        return self._make_repr(" ".join(map(repr, self.vals)))
-
-
-class Deferred(Amalgam):
-    """An `Amalgam` that wraps around deferred values."""
-
-    def __init__(self, value: Amalgam) -> None:
-        self.value = value
-
-    def evaluate(self, _environment: Environment) -> Amalgam:
-        return self
-
-    def __repr__(self) -> str:
-        return self._make_repr(repr(self.value))
+        if isinstance(self.vals, Sequence):
+            return self._make_repr(" ".join(map(repr, self.vals)))
+        return self._make_repr(repr(self.vals))
 
 
 def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
