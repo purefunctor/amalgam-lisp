@@ -9,6 +9,7 @@ from amalgam.amalgams import (
     Environment,
     Function,
     Numeric,
+    SExpression,
     String,
     Symbol,
 )
@@ -59,6 +60,36 @@ def test_symbol_evaluate():
 def test_symbol_repr():
     symbol = Symbol("foo")
     assert re.match(_common_repr(symbol), repr(symbol))
+
+
+def test_s_expression_evaluate_simple(num, env):
+    """
+    Simple test for SExpression
+
+    Aside from testing basic usage of SExpression, this test also
+    showcases how simple builtin functions are to be implemented.
+    """
+
+    # Define the function within Python
+    def plus_func(_environment: Environment, x: Numeric, y: Numeric):
+        return Numeric(x.value + y.value)
+
+    # Wrap the function inside of a Function
+    plus = Function("plus", plus_func)
+
+    # Bind the Function to the environment
+    env["plus"] = plus
+
+    # Create the S-Expression
+    s_expression = SExpression(Symbol("plus"), num, num)
+
+    # Evaluate the S-Expression
+    assert s_expression.evaluate(env).value == num.value + num.value
+
+
+def test_s_expression_repr(num, env):
+    s_expression = SExpression(Symbol("repr-test"), num, num)
+    assert re.match(_common_repr(s_expression), repr(s_expression))
 
 
 def test_deferred_evaluate(num, env):
