@@ -109,6 +109,19 @@ class SExpression(Amalgam):
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
+class Deferred(Amalgam):
+    """An `Amalgam` that wraps around deferred values."""
+
+    def __init__(self, value: Amalgam) -> None:
+        self.value = value
+
+    def evaluate(self, _environment: Environment) -> Amalgam:
+        return self
+
+    def __repr__(self) -> str:
+        return self._make_repr(repr(self.value))
+
+
 def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
     """Helper function for creating `Function` objects.
 
