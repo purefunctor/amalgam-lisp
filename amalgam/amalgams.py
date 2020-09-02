@@ -32,6 +32,17 @@ class Amalgam(ABC):
         as an instance attribute `env`.
         """
 
+    def call(self, *arguments: Amalgam) -> Amalgam:  # pragma: no cover
+        """
+        Protocol for implementing function calls for `Function`.
+
+        This base implementation is responsible for making the
+        type signature for the `func` attribute of `SExpression`
+        to properly type check when the `evaluate` method is
+        called.
+        """
+        raise NotImplementedError(f"{self.__class__.__name__} is not callable")
+
     def _make_repr(self, value: Any) -> str:
         """Helper method for creating `__repr__` for subclasses."""
         return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
