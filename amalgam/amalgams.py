@@ -130,17 +130,14 @@ class Vector(Amalgam, Generic[T]):
 class Deferred(Amalgam):
     """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
-    def __init__(self, *vals: Amalgam) -> None:
-        self.vals: Union[Amalgam, Sequence[Amalgam]]
-        self.vals = vals[0] if len(vals) == 1 else vals
+    def __init__(self, value: Amalgam) -> None:
+        self.value = value
 
     def evaluate(self, _environment: Environment) -> Amalgam:
         return self
 
     def __repr__(self) -> str:
-        if isinstance(self.vals, Sequence):
-            return self._make_repr(" ".join(map(repr, self.vals)))
-        return self._make_repr(repr(self.vals))
+        return self._make_repr(repr(self.value))
 
 
 def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
