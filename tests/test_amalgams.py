@@ -93,17 +93,13 @@ def test_s_expression_repr(num, env):
 
 
 def test_deferred_evaluate(num, env):
-    deferred_one = Deferred(num)
-    deferred_many = Deferred(num, num)
-    assert deferred_one.evaluate(env) == deferred_one
-    assert deferred_many.evaluate(env) == deferred_many
+    deferred = Deferred(num)
+    assert deferred.evaluate(env) == deferred
 
 
 def test_deferred_repr(num, env):
-    deferred_one = Deferred(num)
-    deferred_many = Deferred(num, num)
-    assert re.match(_common_repr(deferred_one), repr(deferred_one))
-    assert re.match(_common_repr(deferred_many), repr(deferred_many))
+    deferred = Deferred(num)
+    assert re.match(_common_repr(deferred), repr(deferred))
 
 
 @fixture
