@@ -113,7 +113,7 @@ class Function(Amalgam):
 class SExpression(Amalgam):
     """An `Amalgam` that wraps around S-Expressions."""
 
-    def __init__(self, func: Symbol[Function], *vals: Amalgam) -> None:
+    def __init__(self, func: Amalgam, *vals: Amalgam) -> None:
         self.func = func
         self.vals = vals
 
