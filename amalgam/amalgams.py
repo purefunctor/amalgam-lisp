@@ -114,6 +114,19 @@ class SExpression(Amalgam):
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
+class Vector(Amalgam, Generic[T]):
+    """An `Amalgam` that wraps around a homogenous vector."""
+
+    def __init__(self, *vals: T) -> None:
+        self.vals = vals
+
+    def evaluate(self, environment: Environment) -> Vector:
+        return Vector(*(val.evaluate(environment) for val in self.vals))
+
+    def __repr__(self) -> str:
+        return self._make_repr(" ".join(map(repr, self.vals)))
+
+
 class Deferred(Amalgam):
     """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
