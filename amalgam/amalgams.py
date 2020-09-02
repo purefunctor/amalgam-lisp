@@ -9,8 +9,10 @@ from typing import (
     Callable,
     Dict,
     Iterator,
+    Generic,
     MutableMapping,
     Optional,
+    TypeVar,
     Sequence,
     Union,
 )
@@ -61,13 +63,16 @@ class String(Amalgam):
         return self._make_repr(f"\"{self.value}\"")
 
 
-class Symbol(Amalgam):
+T = TypeVar("T", bound=Amalgam)
+
+
+class Symbol(Amalgam, Generic[T]):
     """An `Amalgam` that wraps around symbols."""
 
     def __init__(self, value: str) -> None:
         self.value = value
 
-    def evaluate(self, environment: Environment) -> Amalgam:
+    def evaluate(self, environment: Environment) -> T:
         return environment[self.value].evaluate(environment)
 
     def __repr__(self) -> str:
@@ -97,7 +102,7 @@ class Function(Amalgam):
 class SExpression(Amalgam):
     """An `Amalgam` that wraps around S-Expressions."""
 
-    def __init__(self, func: Symbol, *vals: Amalgam) -> None:
+    def __init__(self, func: Symbol[Function], *vals: Amalgam) -> None:
         self.func = func
         self.vals = vals
 
