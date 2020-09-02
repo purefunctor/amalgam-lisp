@@ -127,13 +127,13 @@ class Vector(Amalgam, Generic[T]):
         return self._make_repr(" ".join(map(repr, self.vals)))
 
 
-class Deferred(Amalgam):
+class Deferred(Amalgam, Generic[T]):
     """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
-    def __init__(self, value: Amalgam) -> None:
+    def __init__(self, value: T) -> None:
         self.value = value
 
-    def evaluate(self, _environment: Environment) -> Amalgam:
+    def evaluate(self, _environment: Environment) -> Deferred:
         return self
 
     def __repr__(self) -> str:
