@@ -17,10 +17,6 @@ from amalgam.amalgams import (
 from pytest import fixture
 
 
-def _common_repr(inst: Amalgam):
-    return fr"<{inst.__class__.__name__} '[\s\S]+' @ {hex(id(inst))}>"
-
-
 @fixture
 def numerics():
     return Numeric(21), Numeric(21.42), Numeric(Fraction(21, 42))
@@ -29,11 +25,6 @@ def numerics():
 def test_numeric_evaluate(numerics):
     for numeric in numerics:
         assert numeric == numeric.evaluate(Environment())
-
-
-def test_numeric_repr(numerics):
-    for numeric in numerics:
-        assert re.match(_common_repr(numeric), repr(numeric))
 
 
 @fixture
@@ -46,20 +37,10 @@ def test_string_evaluate(strings):
         assert string == string.evaluate(Environment())
 
 
-def test_string_repr(strings):
-    for string in strings:
-        assert re.match(_common_repr(string), repr(string))
-
-
 def test_symbol_evaluate():
     symbol = Symbol("foo")
     environ = Environment(None, {"foo": String("bar")})
     assert symbol.evaluate(environ) == environ["foo"]
-
-
-def test_symbol_repr():
-    symbol = Symbol("foo")
-    assert re.match(_common_repr(symbol), repr(symbol))
 
 
 def test_s_expression_evaluate_simple(num, env):
@@ -87,19 +68,9 @@ def test_s_expression_evaluate_simple(num, env):
     assert s_expression.evaluate(env).value == num.value + num.value
 
 
-def test_s_expression_repr(num, env):
-    s_expression = SExpression(Symbol("repr-test"), num, num)
-    assert re.match(_common_repr(s_expression), repr(s_expression))
-
-
 def test_deferred_evaluate(num, env):
     deferred = Deferred(num)
     assert deferred.evaluate(env) == deferred
-
-
-def test_deferred_repr(num, env):
-    deferred = Deferred(num)
-    assert re.match(_common_repr(deferred), repr(deferred))
 
 
 @fixture
@@ -120,11 +91,6 @@ def test_function_evaluate_binding(num, env):
 def test_function_evaluate_literal(num, env):
     fnc = create_fn("literal-test", "_x", num)
     assert fnc.evaluate(env).call(num).value == num.value
-
-
-def test_function_repr(num, env):
-    fnc = create_fn("function-test", "_x", num)
-    assert re.match(_common_repr(fnc), repr(fnc))
 
 
 def test_function_evaluate_symbol_global(num, env):

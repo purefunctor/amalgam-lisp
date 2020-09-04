@@ -43,7 +43,7 @@ class Amalgam(ABC):
         """
         raise NotImplementedError(f"{self.__class__.__name__} is not callable")
 
-    def _make_repr(self, value: Any) -> str:
+    def _make_repr(self, value: Any) -> str:  # pragma: no cover
         """Helper method for creating `__repr__` for subclasses."""
         return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
 
@@ -57,7 +57,7 @@ class Numeric(Amalgam):
     def evaluate(self, _environment: Environment) -> Numeric:
         return self
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
 
@@ -70,7 +70,7 @@ class String(Amalgam):
     def evaluate(self, _environment: Environment) -> String:
         return self
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"\"{self.value}\"")
 
 
@@ -86,7 +86,7 @@ class Symbol(Amalgam, Generic[T]):
     def evaluate(self, environment: Environment) -> T:
         return environment[self.value].evaluate(environment)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
 
@@ -106,7 +106,7 @@ class Function(Amalgam):
     def call(self, *arguments: Amalgam) -> Amalgam:
         return self.fn(self.env, *arguments).evaluate(self.env)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.name)
 
 
@@ -121,7 +121,7 @@ class SExpression(Amalgam):
         vals = (val.evaluate(environment) for val in self.vals)
         return self.func.evaluate(environment).call(*vals)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
@@ -134,7 +134,7 @@ class Vector(Amalgam, Generic[T]):
     def evaluate(self, environment: Environment) -> Vector:
         return Vector(*(val.evaluate(environment) for val in self.vals))
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(" ".join(map(repr, self.vals)))
 
 
@@ -147,7 +147,7 @@ class Deferred(Amalgam, Generic[T]):
     def evaluate(self, _environment: Environment) -> Deferred:
         return self
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(repr(self.value))
 
 
