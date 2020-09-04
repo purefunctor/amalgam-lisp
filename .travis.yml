@@ -22,7 +22,8 @@ python:
   - "3.8.5"
 
 install:
-  - pip install poetry coverage tox-travis
+  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+  - pip install coverage tox-travis
 
 script:
   - tox
