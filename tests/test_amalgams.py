@@ -69,6 +69,53 @@ def test_s_expression_evaluate_simple(num, env):
     assert s_expression.evaluate(env).value == num.value + num.value
 
 
+def test_s_expression_evaluate_macro(num, env):
+    """
+    Macro test for SExpression
+
+    This test details how a macro such as `fn` for defining lambdas
+    can be defined within Python, as well as testing the cascading
+    `evaluate` functionality of SExpression.
+    """
+
+    # Define the variadic plus function
+    def plus_func(_environment: Environment, *numbers: Numeric) -> Numeric:
+        return Numeric(sum(number.value for number in numbers))
+
+    # Inject it to the environment
+    env["+"] = Function("+", plus_func)
+
+    # Define the fn macro for defining lambdas
+    def fn_func(
+        _env: Environment, args: Deferred[Vector[Symbol]], body: Deferred[SExpression],
+    ) -> Function:
+        return create_fn("<lambda>", [arg.value for arg in args.value.vals], body.value)
+
+    # Inject it to the environment
+    env["fn"] = Function("fn", fn_func)
+
+    # Inject a global Numeric
+    env["z"] = num
+
+    # Build the S-Expression: ((fn (x y) (+ x y z)) 42 42)
+    expr = SExpression(
+        SExpression(
+            Symbol("fn"),
+            Deferred(
+                Vector(Symbol("x"), Symbol("y"))
+            ),
+            Deferred(
+                SExpression(Symbol("+"), Symbol("x"), Symbol("y"), Symbol("z"))
+            ),
+        ),
+        num,
+        num,
+    )
+
+    # Evaluate the S-Expression given the Environment
+    expr.evaluate(env) == Numeric(num.value + num.value + num.value)
+
+
 def test_vector_evaluate_literals(numerics, env):
     vector = Vector(*numerics)
     assert vector.evaluate(env) == vector
