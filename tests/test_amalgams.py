@@ -74,6 +74,13 @@ def test_vector_evaluate_literals(numerics, env):
     assert vector.evaluate(env) == vector
 
 
+def test_vector_evaluate_symbols(numerics, env):
+    vector = Vector(*map(Symbol, "xyz"))
+    for name, numeric in zip("xyz", numerics):
+        env[name] = numeric
+    assert vector.evaluate(env) == Vector(*numerics)
+
+
 def test_deferred_evaluate(num, env):
     deferred = Deferred(num)
     assert deferred.evaluate(env) == deferred
