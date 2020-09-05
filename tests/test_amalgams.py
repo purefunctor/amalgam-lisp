@@ -12,6 +12,7 @@ from amalgam.amalgams import (
     SExpression,
     String,
     Symbol,
+    Vector,
 )
 
 from pytest import fixture
@@ -66,6 +67,11 @@ def test_s_expression_evaluate_simple(num, env):
 
     # Evaluate the S-Expression
     assert s_expression.evaluate(env).value == num.value + num.value
+
+
+def test_vector_evaluate_literals(numerics, env):
+    vector = Vector(*numerics)
+    assert vector.evaluate(env) == vector
 
 
 def test_deferred_evaluate(num, env):
