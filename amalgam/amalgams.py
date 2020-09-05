@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from fractions import Fraction
 from itertools import chain
 from typing import (
@@ -12,6 +13,7 @@ from typing import (
     Generic,
     MutableMapping,
     Optional,
+    Tuple,
     TypeVar,
     Sequence,
     Union,
@@ -48,11 +50,11 @@ class Amalgam(ABC):
         return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
 
 
+@dataclass(repr=False, order=True)
 class Numeric(Amalgam):
     """An `Amalgam` that wraps around numeric types."""
 
-    def __init__(self, value: Union[int, float, Fraction]) -> None:
-        self.value = value
+    value: Union[int, float, Fraction]
 
     def evaluate(self, _environment: Environment) -> Numeric:
         return self
@@ -61,11 +63,11 @@ class Numeric(Amalgam):
         return self._make_repr(self.value)
 
 
+@dataclass(repr=False, order=True)
 class String(Amalgam):
     """An `Amalgam` that wraps around strings."""
 
-    def __init__(self, value: str) -> None:
-        self.value = value
+    value: str
 
     def evaluate(self, _environment: Environment) -> String:
         return self
@@ -77,11 +79,11 @@ class String(Amalgam):
 T = TypeVar("T", bound=Amalgam)
 
 
+@dataclass(repr=False)
 class Symbol(Amalgam, Generic[T]):
     """An `Amalgam` that wraps around symbols."""
 
-    def __init__(self, value: str) -> None:
-        self.value = value
+    value: str
 
     def evaluate(self, environment: Environment) -> T:
         return environment[self.value].evaluate(environment)
@@ -90,12 +92,14 @@ class Symbol(Amalgam, Generic[T]):
         return self._make_repr(self.value)
 
 
+@dataclass(repr=False)
 class Function(Amalgam):
     """An `Amalgam` that wraps around functions."""
 
-    def __init__(self, name: str, fn: Callable[..., Amalgam]) -> None:
-        self.name = name
-        self.fn = fn
+    name: str
+    fn: Callable[..., Amalgam]
+
+    def __post_init__(self):
         self.env = cast(Environment, None)
 
     def evaluate(self, environment: Environment) -> Function:
@@ -110,8 +114,12 @@ class Function(Amalgam):
         return self._make_repr(self.name)
 
 
+@dataclass(init=False, repr=False)
 class SExpression(Amalgam):
     """An `Amalgam` that wraps around S-Expressions."""
+
+    func: Amalgam
+    vals: Tuple[Amalgam, ...]
 
     def __init__(self, func: Amalgam, *vals: Amalgam) -> None:
         self.func = func
@@ -125,8 +133,11 @@ class SExpression(Amalgam):
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
 
 
+@dataclass(init=False, repr=False)
 class Vector(Amalgam, Generic[T]):
     """An `Amalgam` that wraps around a homogenous vector."""
+
+    vals: Tuple[T, ...]
 
     def __init__(self, *vals: T) -> None:
         self.vals = vals
@@ -138,11 +149,11 @@ class Vector(Amalgam, Generic[T]):
         return self._make_repr(" ".join(map(repr, self.vals)))
 
 
+@dataclass(repr=False)
 class Deferred(Amalgam, Generic[T]):
     """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
-    def __init__(self, value: T) -> None:
-        self.value = value
+    value: T
 
     def evaluate(self, _environment: Environment) -> Deferred:
         return self
