@@ -51,6 +51,7 @@ def test_s_expression_evaluate_simple(num, env):
     Aside from testing basic usage of SExpression, this test also
     showcases how simple builtin functions are to be implemented.
     """
+
     # Define the variadic plus function
     def plus_func(_environment: Environment, *numbers: Numeric) -> Numeric:
         return Numeric(sum(number.value for number in numbers))
@@ -83,7 +84,7 @@ def test_s_expression_evaluate_macro(num, env):
 
     # Define the fn macro for defining lambdas
     def fn_func(
-        _env: Environment, args: Deferred[Vector[Symbol]], body: Deferred[SExpression],
+        _env: Environment, args: Deferred[Vector[Symbol]], body: Deferred[Amalgam],
     ) -> Function:
         return create_fn("<lambda>", [arg.value for arg in args.value.vals], body.value)
 
