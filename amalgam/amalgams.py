@@ -34,7 +34,19 @@ class Amalgam(ABC):
         as an instance attribute `env`.
         """
 
-    def call(self, *arguments: Amalgam) -> Amalgam:  # pragma: no cover
+    def bind(self, environment: Environment) -> Amalgam:  # pragma: no cover
+        """
+        Protocol for implementing environment binding for `Function`.
+
+        This base implementation is responsible for allowing `bind`
+        to be called on other `Amalgam` subclasses by performing
+        no operation aside from returning `self`.
+        """
+        return self
+
+    def call(
+        self, environment: Environment, *arguments: Amalgam
+    ) -> Amalgam:  # pragma: no cover
         """
         Protocol for implementing function calls for `Function`.
 
@@ -76,17 +88,14 @@ class String(Amalgam):
         return self._make_repr(f"\"{self.value}\"")
 
 
-T = TypeVar("T", bound=Amalgam)
-
-
 @dataclass(repr=False)
-class Symbol(Amalgam, Generic[T]):
+class Symbol(Amalgam):
     """An `Amalgam` that wraps around symbols."""
 
     value: str
 
-    def evaluate(self, environment: Environment) -> T:
-        return environment[self.value].evaluate(environment)
+    def evaluate(self, environment: Environment) -> Amalgam:
+        return environment[self.value]
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
@@ -102,13 +111,17 @@ class Function(Amalgam):
     def __post_init__(self):
         self.env = cast(Environment, None)
 
-    def evaluate(self, environment: Environment) -> Function:
-        if self.env is None:
-            self.env = environment
+    def evaluate(self, _environment: Environment) -> Function:
         return self
 
-    def call(self, *arguments: Amalgam) -> Amalgam:
-        return self.fn(self.env, *arguments).evaluate(self.env)
+    def bind(self, environment: Environment) -> Function:
+        self.env = environment
+        return self
+
+    def call(self, environment: Environment, *arguments: Amalgam) -> Amalgam:
+        if self.env is not None:
+            return self.fn(self.env, *arguments)
+        return self.fn(environment, *arguments)
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.name)
@@ -127,10 +140,13 @@ class SExpression(Amalgam):
 
     def evaluate(self, environment: Environment) -> Amalgam:
         vals = (val.evaluate(environment) for val in self.vals)
-        return self.func.evaluate(environment).call(*vals)
+        return self.func.evaluate(environment).call(environment, *vals)
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
+
+
+T = TypeVar("T", bound=Amalgam)
 
 
 @dataclass(init=False, repr=False)
@@ -177,10 +193,10 @@ def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
         # TODO: Raise an error when missing arguments instead.
         cl_env = environment.env_push(dict(zip(fargs, arguments)))
 
-        # Evaluate the function body to `cl_env`. If the function
-        # body is another function, `cl_env` is then bound to the
-        # `env` attribute of that function creating a closure.
-        return fbody.evaluate(cl_env)
+        # Call the `evaluate` method on the function body with
+        # `cl_env` and then call `bind` on the result with the
+        # same environment.
+        return fbody.evaluate(cl_env).bind(cl_env)
 
     return Function(fname, closure_fn)
 
