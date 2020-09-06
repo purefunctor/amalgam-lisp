@@ -125,7 +125,7 @@ def test_s_expression_evaluate_macro(num, store_env):
     )
 
     # Evaluate the S-Expression given the Environment
-    expr.evaluate(store_env) == Numeric(num.value + num.value + num.value)
+    expr.evaluate(store_env).value == num.value + num.value + num.value
 
 
 def test_s_expression_evaluate_binding(num, store_env):
@@ -166,7 +166,7 @@ def test_s_expression_evaluate_binding(num, store_env):
     )
 
     # Evaluate the S-Expression given the Environment
-    assert expr.evaluate(store_env) == Numeric(num.value + num.value + num.value)
+    assert expr.evaluate(store_env).value == num.value + num.value + num.value
 
 
 def test_s_expression_evaluate_infect(num, store_env):
@@ -190,7 +190,7 @@ def test_s_expression_evaluate_infect(num, store_env):
         ),
     )
 
-    assert expr.evaluate(store_env).vals[1] == Numeric(num.value + num.value)
+    assert expr.evaluate(store_env).vals[1].value == num.value + num.value
 
 
 def test_vector_evaluate_literals(numerics, fresh_env):
