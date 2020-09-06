@@ -139,28 +139,33 @@ def env():
     return Environment()
 
 
-def test_function_evaluate_binding(num, env):
+def test_function_binding(num, env):
     fnc = create_fn("binding-test", "_x", num)
-    assert fnc.evaluate(env).env == env
+    assert fnc.bind(env).env == env
+
+
+def test_function_evalulate(num, env):
+    fnc = create_fn("evaluate-test", "_x", num)
+    assert fnc.evaluate(env) == fnc
 
 
 def test_function_evaluate_literal(num, env):
     fnc = create_fn("literal-test", "_x", num)
-    assert fnc.evaluate(env).call(num).value == num.value
+    assert fnc.call(env, num).value == num.value
 
 
 def test_function_evaluate_symbol_global(num, env):
     env["x"] = num
     fnc = create_fn("global-test", "", Symbol("x"))
-    assert fnc.evaluate(env).call().value == num.value
+    assert fnc.call(env).value == num.value
 
 
 def test_function_evaluate_symbol_local(num, env):
     env["x"] = String("fail")
     fnc = create_fn("local-test", "x", Symbol("x"))
-    assert fnc.evaluate(env).call(num).value == num.value
+    assert fnc.call(env, num).value == num.value
 
 
 def test_function_evaluate_symbol_closure(num, env):
     fnc = create_fn("closure-test", "x", create_fn("inner", "y", Symbol("x")))
-    assert fnc.evaluate(env).call(num).call(num).value == num.value
+    assert fnc.call(env, num).call(env, num).value == num.value
