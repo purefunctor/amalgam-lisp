@@ -174,6 +174,64 @@ def test_s_expression_evaluate_binding(num, env):
     assert expr.evaluate(env) == Numeric(num.value + num.value + num.value)
 
 
+def test_s_expression_evaluate_infect(num, env):
+    """
+    Injection test for SExpression
+
+    This test showcases the ability of SExpression and Function to
+    inject values into the environment.
+    """
+
+    # Define the variadic plus function
+    def plus_func(_environment: Environment, *numbers: Numeric) -> Numeric:
+        return Numeric(sum(number.value for number in numbers))
+
+    # Inject it to the environment
+    env["+"] = Function("+", plus_func)
+
+    # Define the fn macro for defining lambdas
+    def fn_func(
+        _env: Environment, args: Deferred[Vector[Symbol]], body: Deferred[Amalgam],
+    ) -> Function:
+        return create_fn("<lambda>", [arg.value for arg in args.value.vals], body.value)
+
+    # Inject it to the environment
+    env["fn"] = Function("fn", fn_func)
+
+    # Define the defun macro for defining functions
+    def defun_func(
+        env: Environment, name: Deferred[String], args: Deferred[Vector[Symbol]], body: Deferred[Amalgam]
+    ) -> Function:
+        env[name.value.value] = fn_func(env, args, body)
+        return env[name.value.value]
+
+    # Inject it to the environment
+    env["defun"] = Function("defun", defun_func)
+
+    # Define the prog macro for defining a program
+    def prog_func(env: Environment, *expressions: Deferred[SExpression]) -> Vector[Amalgam]:
+        return Vector(*(expression.evaluate(env) for expression in expressions))
+
+    # Inject it to the environment
+    env["prog"] = Function("prog", prog_func)
+
+    # Build the S-Expression: (prog (defun my-plus (x y) (+ x y)) (my-plus 42 42))
+    expr = SExpression(
+        Symbol("prog"),
+        SExpression(
+            Symbol("defun"),
+            Deferred(String("my-plus")),
+            Deferred(Vector(Symbol("x"), Symbol("y"))),
+            Deferred(SExpression(Symbol("+"), Symbol("x"), Symbol("y"))),
+        ),
+        SExpression(
+            Symbol("my-plus"), num, num,
+        ),
+    )
+
+    assert expr.evaluate(env).vals[1] == Numeric(num.value + num.value)
+
+
 def test_vector_evaluate_literals(numerics, env):
     vector = Vector(*numerics)
     assert vector.evaluate(env) == vector
