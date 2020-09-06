@@ -44,6 +44,16 @@ def test_symbol_evaluate():
     assert symbol.evaluate(environ) == environ["foo"]
 
 
+@fixture
+def num():
+    return Numeric(42)
+
+
+@fixture
+def env():
+    return Environment()
+
+
 def test_s_expression_evaluate_simple(num, env):
     """
     Simple test for SExpression
@@ -247,16 +257,6 @@ def test_vector_evaluate_symbols(numerics, env):
 def test_deferred_evaluate(num, env):
     deferred = Deferred(num)
     assert deferred.evaluate(env) == deferred
-
-
-@fixture
-def num():
-    return Numeric(42)
-
-
-@fixture
-def env():
-    return Environment()
 
 
 def test_function_binding(num, env):
