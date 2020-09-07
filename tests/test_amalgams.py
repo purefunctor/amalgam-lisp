@@ -33,17 +33,6 @@ def strings():
     return String(""), String("\n\t"), String("foo-bar-baz")
 
 
-def test_string_evaluate(strings):
-    for string in strings:
-        assert string == string.evaluate(Environment())
-
-
-def test_symbol_evaluate():
-    symbol = Symbol("foo")
-    environ = Environment(None, {"foo": String("bar")})
-    assert symbol.evaluate(environ) == environ["foo"]
-
-
 @fixture
 def num():
     return Numeric(42)
@@ -83,6 +72,17 @@ def store_env():
     env["z"] = Numeric(42)
 
     return env
+
+
+def test_string_evaluate(strings):
+    for string in strings:
+        assert string == string.evaluate(Environment())
+
+
+def test_symbol_evaluate():
+    symbol = Symbol("foo")
+    environ = Environment(None, {"foo": String("bar")})
+    assert symbol.evaluate(environ) == environ["foo"]
 
 
 def test_s_expression_evaluate_simple(num, store_env):
