@@ -107,6 +107,7 @@ class Function(Amalgam):
 
     name: str
     fn: Callable[..., Amalgam]
+    defer: bool = False
 
     def __post_init__(self):
         self.env = cast(Environment, None)
@@ -120,7 +121,13 @@ class Function(Amalgam):
 
     def call(self, environment: Environment, *arguments: Amalgam) -> Amalgam:
         if self.env is not None:
-            return self.fn(self.env, *arguments)
+            environment = self.env
+
+        if self.defer:
+            arguments = tuple(map(Deferred[Amalgam], arguments))
+        else:
+            arguments = tuple(arg.evaluate(environment) for arg in arguments)
+
         return self.fn(environment, *arguments)
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -139,8 +146,7 @@ class SExpression(Amalgam):
         self.vals = vals
 
     def evaluate(self, environment: Environment) -> Amalgam:
-        vals = (val.evaluate(environment) for val in self.vals)
-        return self.func.evaluate(environment).call(environment, *vals)
+        return self.func.evaluate(environment).call(environment, *self.vals)
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
@@ -178,7 +184,9 @@ class Deferred(Amalgam, Generic[T]):
         return self._make_repr(repr(self.value))
 
 
-def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
+def create_fn(
+    fname: str, fargs: Sequence[str], fbody: Amalgam, defer: bool = False
+) -> Function:
     """Helper function for creating `Function` objects.
 
     Given the name of the function: `fname`, a sequence of argument
@@ -198,7 +206,7 @@ def create_fn(fname: str, fargs: Sequence[str], fbody: Amalgam) -> Function:
         # same environment.
         return fbody.evaluate(cl_env).bind(cl_env)
 
-    return Function(fname, closure_fn)
+    return Function(fname, closure_fn, defer)
 
 
 Bindings = Dict[str, Amalgam]
