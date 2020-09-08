@@ -50,7 +50,7 @@ expression_parser = pp.Forward()
 s_expression_parser = (
     LPAREN + expression_parser[...] + RPAREN
 ).setParseAction(
-    lambda tokens: postprocess(am.SExpression(*tokens))
+    lambda tokens: am.SExpression(*tokens)
 )
 
 vector_parser = (
@@ -60,14 +60,3 @@ vector_parser = (
 )
 
 expression_parser <<= _literal_parser | s_expression_parser | vector_parser
-
-
-def postprocess(s_expression: am.SExpression) -> am.SExpression:
-    """Applies post-processing steps to an SExpression"""
-    if isinstance(s_expression.func, am.Symbol):
-        if s_expression.func.value == "fn":
-            return am.SExpression(
-                am.Symbol("fn"),
-                *map(am.Deferred[am.Amalgam], s_expression.vals)
-            )
-    return s_expression
