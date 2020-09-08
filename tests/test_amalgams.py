@@ -61,12 +61,12 @@ def store_env():
         env[name.value.value] = fn_func(env, args, body)
         return env[name.value.value]
 
-    def prog_func(env: Environment, *expressions: Deferred[SExpression]) -> Vector[Amalgam]:
+    def prog_func(env: Environment, *expressions: SExpression) -> Vector[Amalgam]:
         return Vector(*(expression.evaluate(env) for expression in expressions))
 
     env["+"] = Function("+", plus_func)
-    env["fn"] = Function("fn", fn_func)
-    env["defun"] = Function("defun", defun_func)
+    env["fn"] = Function("fn", fn_func, defer=True)
+    env["defun"] = Function("defun", defun_func, defer=True)
     env["prog"] = Function("prog", prog_func)
 
     env["z"] = Numeric(42)
@@ -113,12 +113,8 @@ def test_s_expression_evaluate_macro(num, store_env):
     expr = SExpression(
         SExpression(
             Symbol("fn"),
-            Deferred(
-                Vector(Symbol("x"), Symbol("y"))
-            ),
-            Deferred(
-                SExpression(Symbol("+"), Symbol("x"), Symbol("y"), Symbol("z"))
-            ),
+            Vector(Symbol("x"), Symbol("y")),
+            SExpression(Symbol("+"), Symbol("x"), Symbol("y"), Symbol("z")),
         ),
         num,
         num,
@@ -140,24 +136,16 @@ def test_s_expression_evaluate_binding(num, store_env):
         SExpression(
             SExpression(
                 Symbol("fn"),
-                Deferred(
-                    Vector(Symbol("x"))
-                ),
-                Deferred(
+                Vector(Symbol("x")),
+                SExpression(
+                    Symbol("fn"),
+                    Vector(Symbol("y")),
                     SExpression(
-                        Symbol("fn"),
-                        Deferred(
-                            Vector(Symbol("y"))
-                        ),
-                        Deferred(
-                            SExpression(
-                                Symbol("+"),
-                                Symbol("x"),
-                                Symbol("y"),
-                                Symbol("z"),
-                            )
-                        ),
-                    )
+                        Symbol("+"),
+                        Symbol("x"),
+                        Symbol("y"),
+                        Symbol("z"),
+                    ),
                 ),
             ),
             num,
@@ -181,9 +169,9 @@ def test_s_expression_evaluate_infect(num, store_env):
         Symbol("prog"),
         SExpression(
             Symbol("defun"),
-            Deferred(String("my-plus")),
-            Deferred(Vector(Symbol("x"), Symbol("y"))),
-            Deferred(SExpression(Symbol("+"), Symbol("x"), Symbol("y"))),
+            String("my-plus"),
+            Vector(Symbol("x"), Symbol("y")),
+            SExpression(Symbol("+"), Symbol("x"), Symbol("y")),
         ),
         SExpression(
             Symbol("my-plus"), num, num,
