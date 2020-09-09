@@ -43,8 +43,6 @@ numeric_parser = (
     lambda tokens: am.Numeric(*tokens)
 )
 
-_literal_parser = numeric_parser | symbol_parser | string_parser
-
 expression_parser = pp.Forward()
 
 s_expression_parser = (
@@ -59,4 +57,10 @@ vector_parser = (
     lambda tokens: am.Vector(*tokens)
 )
 
-expression_parser <<= _literal_parser | s_expression_parser | vector_parser
+expression_parser <<= (
+    numeric_parser
+    | symbol_parser
+    | string_parser
+    | s_expression_parser
+    | vector_parser
+)
