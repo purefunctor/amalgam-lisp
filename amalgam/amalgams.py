@@ -124,7 +124,7 @@ class Function(Amalgam):
             environment = self.env
 
         if self.defer:
-            arguments = tuple(map(Deferred[Amalgam], arguments))
+            arguments = tuple(Deferred(arg) for arg in arguments)
         else:
             arguments = tuple(arg.evaluate(environment) for arg in arguments)
 
