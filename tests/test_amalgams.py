@@ -5,10 +5,10 @@ from typing import Any
 from amalgam.amalgams import (
     create_fn,
     Amalgam,
-    Deferred,
     Environment,
     Function,
     Numeric,
+    Quoted,
     SExpression,
     String,
     Symbol,
@@ -51,12 +51,12 @@ def store_env():
         return Numeric(sum(number.value for number in numbers))
 
     def fn_func(
-        _env: Environment, args: Deferred[Vector[Symbol]], body: Deferred[Amalgam],
+        _env: Environment, args: Quoted[Vector[Symbol]], body: Quoted[Amalgam],
     ) -> Function:
         return create_fn("<lambda>", [arg.value for arg in args.value.vals], body.value)
 
     def defun_func(
-        env: Environment, name: Deferred[String], args: Deferred[Vector[Symbol]], body: Deferred[Amalgam]
+        env: Environment, name: Quoted[String], args: Quoted[Vector[Symbol]], body: Quoted[Amalgam]
     ) -> Function:
         env[name.value.value] = fn_func(env, args, body)
         return env[name.value.value]
@@ -193,9 +193,9 @@ def test_vector_evaluate_symbols(numerics, fresh_env):
     assert vector.evaluate(fresh_env) == Vector(*numerics)
 
 
-def test_deferred_evaluate(num, fresh_env):
-    deferred = Deferred(num)
-    assert deferred.evaluate(fresh_env) == deferred
+def test_quoted_evaluate(num, fresh_env):
+    quoted = Quoted(num)
+    assert quoted.evaluate(fresh_env) == quoted
 
 
 def test_function_binding(num, fresh_env):

@@ -124,7 +124,7 @@ class Function(Amalgam):
             environment = self.env
 
         if self.defer:
-            arguments = tuple(Deferred(arg) for arg in arguments)
+            arguments = tuple(Quoted(arg) for arg in arguments)
         else:
             arguments = tuple(arg.evaluate(environment) for arg in arguments)
 
@@ -172,12 +172,12 @@ class Vector(Amalgam, Generic[T]):
 
 
 @dataclass(repr=False)
-class Deferred(Amalgam, Generic[T]):
+class Quoted(Amalgam, Generic[T]):
     """An `Amalgam` that defers evaluation of other `Amalgam`s."""
 
     value: T
 
-    def evaluate(self, _environment: Environment) -> Deferred:
+    def evaluate(self, _environment: Environment) -> Quoted:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
