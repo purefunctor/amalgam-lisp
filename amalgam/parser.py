@@ -45,6 +45,12 @@ numeric_parser = (
 
 expression_parser = pp.Forward()
 
+quoted_parser = (
+    pp.Suppress("'") + expression_parser
+).setParseAction(
+    lambda tokens: am.Quoted(*tokens)
+)
+
 s_expression_parser = (
     LPAREN + expression_parser[...] + RPAREN
 ).setParseAction(
@@ -58,7 +64,8 @@ vector_parser = (
 )
 
 expression_parser <<= (
-    numeric_parser
+    quoted_parser
+    | numeric_parser
     | symbol_parser
     | string_parser
     | s_expression_parser
