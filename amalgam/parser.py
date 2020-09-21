@@ -24,7 +24,7 @@ def apply_splat(func):
 LPAREN, RPAREN, LBRACE, RBRACE = map(pp.Suppress, "()[]")
 
 symbol_parser = pp.Regex(
-    r"(?!-?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
+    r"(?![+-]?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
 ).setParseAction(
     apply_splat(am.Symbol)
 )
