@@ -48,7 +48,9 @@ _floating_parser = pp.Combine(
 )
 
 _fraction_parser = (
-    _integral_parser + pp.Suppress("/") + _integral_parser
+    _integral_parser
+    + pp.Suppress("/").leaveWhitespace()
+    + _integral_parser.copy().leaveWhitespace()
 ).setParseAction(
     apply_splat(Fraction)
 )
