@@ -35,7 +35,7 @@ string_parser = pp.QuotedString(
     apply_splat(am.String)
 )
 
-_string_integral_parser = pp.Regex(r"-?(0|[1-9]\d*)")
+_string_integral_parser = pp.Regex(r"[+-]?(0|[1-9]\d*)")
 
 _integral_parser = _string_integral_parser.copy().setParseAction(
     apply_splat(int)
