@@ -1,70 +1,55 @@
-# import re
-#
-# from amalgam.parser import numeric_literal, s_expression
-# from amalgam.parser import IDENTIFIER_PATTERN
-#
-# from hypothesis import assume, given
-# from hypothesis.strategies import (
-#     integers, floats, fractions, from_regex,
-#     composite, lists, one_of,
-# )
-#
-#
-# _identifier = from_regex(fr"\A{IDENTIFIER_PATTERN}\Z")
-#
-# _integral = integers().map(str)
-#
-# _floating = floats(
-#     allow_infinity=False,
-#     allow_nan=False,
-# ).map(str).filter(lambda f: not re.search("[Ee][+-][0-9]+", f))
-#
-# _fraction = fractions().map(str)
-#
-#
-# @composite
-# def _arbitrary_s_expressions(draw):
-#     identifier = draw(_identifier)
-#
-#     literals = draw(lists(
-#         one_of(_integral, _floating, _fraction, _identifier)
-#     ).filter(lambda l: len(l) > 0))
-#
-#     return f"({identifier} {' '.join(literals)})", ["(", identifier, *literals, ")"]
-#
-#
-# @given(_identifier)
-# def test_identifier_pattern(identifier):
-#     assert not re.match("^-?[0-9]", identifier)
-#
-#
-# @given(_integral)
-# def test_numeric_literal_integral(integral):
-#     assert numeric_literal.parse(integral) == integral
-#
-#
-# @given(_floating)
-# def test_numeric_literal_floating(floating):
-#     assert numeric_literal.parse(floating) == floating
-#
-#
-# @given(_fraction)
-# def test_numeric_literal_fraction(fraction):
-#     assert numeric_literal.parse(fraction) == fraction
-#
-#
-# @given(_arbitrary_s_expressions())
-# def test_s_expression_simple(data):
-#     expression, expected = data
-#     assert s_expression.parse(expression) == expected
-#
-#
-# @given(_arbitrary_s_expressions(), _arbitrary_s_expressions())
-# def test_s_expression_nested(l, r):
-#     ls, le = l
-#     rs, re = r
-#
-#     ts = f"(T {ls} {rs})"
-#     te = ["(", "T", le, re, ")"]
-#
-#     assert s_expression.parse(ts) == te
+from fractions import Fraction
+
+import amalgam.amalgams as am
+import amalgam.parser as pr
+
+from pyparsing import ParseException
+from pytest import raises
+
+
+def test_numeric_parser_integral():
+    assert pr.numeric_parser.parseString("42")[0] == am.Numeric(42)
+
+
+def test_numeric_parser_floating():
+    assert pr.numeric_parser.parseString("21.42")[0] == am.Numeric(21.42)
+
+
+def test_numeric_parser_fraction():
+    assert pr.numeric_parser.parseString("21/42")[0] == am.Numeric(Fraction(21, 42))
+
+
+def test_numeric_parser_integral_negative():
+    assert pr.numeric_parser.parseString("-42")[0] == am.Numeric(-42)
+
+
+def test_numeric_parser_floating_negative():
+    assert pr.numeric_parser.parseString("-21.42")[0] == am.Numeric(-21.42)
+
+
+def test_numeric_parser_fraction_negative_numerator():
+    assert pr.numeric_parser.parseString("-21/42")[0] == am.Numeric(Fraction(-21, 42))
+
+
+def test_numeric_parser_fraction_negative_denominator():
+    assert pr.numeric_parser.parseString("21/-42")[0] == am.Numeric(Fraction(21, -42))
+
+
+def test_numeric_parser_fraction_negative_num_denom():
+    assert pr.numeric_parser.parseString("-21/-42")[0] == am.Numeric(Fraction(-21, -42))
+
+
+def test_numeric_parser_floating_raises_ParseException_on_space():
+    with raises(ParseException):
+        pr.numeric_parser.parseString("21. 42", parseAll=True)
+
+    with raises(ParseException):
+        pr.numeric_parser.parseString("21 .42", parseAll=True)
+
+
+def test_numeric_parser_fraction_raises_ParseException_on_space():
+    with raises(ParseException):
+        pr.numeric_parser.parseString("21/ 42", parseAll=True)
+
+    with raises(ParseException):
+        pr.numeric_parser.parseString("21 /42", parseAll=True)
