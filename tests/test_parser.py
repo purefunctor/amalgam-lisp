@@ -23,15 +23,36 @@ def test_symbol_parser_raises_ParseException_on_positive_number():
 
 
 def test_numeric_parser_integral():
-    assert pr.numeric_parser.parseString("42")[0] == am.Numeric(42)
+    parse_func = pr.numeric_parser.parseString
+
+    unsigned = parse_func("42")[0]
+    positive = parse_func("+42")[0]
+
+    assert unsigned == positive == am.Numeric(42)
 
 
 def test_numeric_parser_floating():
-    assert pr.numeric_parser.parseString("21.42")[0] == am.Numeric(21.42)
+    parse_func = pr.numeric_parser.parseString
+
+    unsigned = parse_func("21.42")[0]
+    positive = parse_func("+21.42")[0]
+
+    assert unsigned == positive == am.Numeric(21.42)
 
 
 def test_numeric_parser_fraction():
-    assert pr.numeric_parser.parseString("21/42")[0] == am.Numeric(Fraction(21, 42))
+    from functools import reduce
+    from operator import eq
+
+    parse_func = pr.numeric_parser.parseString
+
+    positives = [
+        parse_func(f"{n}/{d}")[0]
+        for n in ("21", "+21")
+        for d in ("42", "+42")
+    ]
+
+    return all(am.Numeric(Fraction(21,42)) == positive for positive in positives)
 
 
 def test_numeric_parser_integral_negative():
