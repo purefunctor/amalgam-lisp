@@ -12,14 +12,15 @@ def test_symbol_parser_allowed_characters():
     assert pr.symbol_parser.parseString(text)[0] == am.Symbol(text)
 
 
-def test_symbol_parser_raises_ParseException_on_negative_number():
+def test_symbol_parser_raises_ParseException_on_numerics():
     with raises(ParseException):
-        pr.symbol_parser.parseString("-1")
+        pr.symbol_parser.parseString("1")
 
-
-def test_symbol_parser_raises_ParseException_on_positive_number():
     with raises(ParseException):
         pr.symbol_parser.parseString("+1")
+
+    with raises(ParseException):
+        pr.symbol_parser.parseString("-1")
 
 
 def test_numeric_parser_integral():
