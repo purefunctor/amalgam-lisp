@@ -7,19 +7,19 @@ from pyparsing import ParseException
 from pytest import raises
 
 
-def test_symbol_parser_letters_and_operators():
-    letters_and_operators = r"-Spam21?+-*/\&<=>?!_42Eggs!-"
-    assert pr.symbol_parser.parseString(letters_and_operators)[0] == am.Symbol(letters_and_operators)
+def test_symbol_parser_allowed_characters():
+    text = r"-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
+    assert pr.symbol_parser.parseString(text)[0] == am.Symbol(text)
 
 
-def test_symbol_parser_no_negative_integers():
+def test_symbol_parser_raises_ParseException_on_negative_number():
     with raises(ParseException):
-        pr.symbol_parser.parseString(f"-42")
+        pr.symbol_parser.parseString("-1")
 
 
-def test_symbol_parser_no_positive_integers():
+def test_symbol_parser_raises_ParseException_on_positive_number():
     with raises(ParseException):
-        pr.symbol_parser.parseString(f"+42")
+        pr.symbol_parser.parseString("+1")
 
 
 def test_numeric_parser_integral():
