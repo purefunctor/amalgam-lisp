@@ -29,8 +29,25 @@ symbol_parser = pp.Regex(
     apply_splat(am.Symbol)
 )
 
-string_parser = pp.QuotedString(
-    "\"", convertWhitespaceEscapes=False,
+_escaped_characters = (
+    pp.Literal("\\")
+    + (
+        pp.Literal("\\")
+        | pp.Literal("\"")
+        | pp.CharsNotIn("\\\"").setResultsName("character")
+    )
+).setParseAction(
+    lambda tokens: tokens.character if tokens.character else tokens
+)
+
+_regular_characters = pp.CharsNotIn("\\\"")
+
+_string_contents = pp.Combine(
+    (_escaped_characters | _regular_characters)[...]
+).leaveWhitespace()
+
+string_parser = (
+    pp.Suppress("\"") + _string_contents + pp.Suppress("\"")
 ).setParseAction(
     apply_splat(am.String)
 )
