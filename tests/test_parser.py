@@ -23,6 +23,32 @@ def test_symbol_parser_raises_ParseException_on_numerics():
         pr.symbol_parser.parseString("-1")
 
 
+def test_string_parser_regular_characters():
+    regular = "Spam21 Eggs42 +-*/&<=>?!_="
+    assert pr.string_parser.parseString(f"\"{regular}\"")[0] == am.String(regular)
+
+
+def test_string_parser_escaped_characters():
+    regular = "Spam21 Eggs42 +-*/&<=>?!_="
+    escaped = "".join(f"\\{character}" for character in regular)
+    assert pr.string_parser.parseString(f"\"{escaped}\"")[0] == am.String(regular)
+
+
+def test_string_parser_escaped_backslash():
+    assert pr.string_parser.parseString("\"\\\\\"")[0] == am.String("\\\\")
+
+
+def test_string_parser_escaped_double_quote():
+    regular = "Spam21 Eggs42 +-*/&<=>?!_="
+    escaped = f"\\\"{regular}\\\""
+    assert pr.string_parser.parseString(f"\"{escaped}\"")[0] == am.String(escaped)
+
+
+def test_string_parser_raises_ParseException_on_unescaped_quote():
+    with raises(ParseException):
+        pr.string_parser.parseString("\" \" \"", parseAll=True)
+
+
 def test_numeric_parser_integral():
     parse_func = pr.numeric_parser.parseString
 
