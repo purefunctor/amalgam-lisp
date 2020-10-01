@@ -133,3 +133,20 @@ def test_s_expression_nested():
     expr_r = am.SExpression(am.Symbol("+"), inner_r, inner_r)
 
     assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
+
+
+def test_vector_flat():
+    vect_s = "[add 42 42]"
+    vect_r = am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42))
+
+    assert pr.vector_parser.parseString(vect_s)[0] == vect_r
+
+
+def test_vector_nested():
+    inner_s = "[add 42 42]"
+    vect_s = f"[add {inner_s} {inner_s}]"
+
+    inner_r = am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42))
+    vect_r = am.Vector(am.Symbol("add"), inner_r, inner_r)
+
+    assert pr.vector_parser.parseString(vect_s)[0] == vect_r
