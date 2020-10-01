@@ -116,3 +116,20 @@ def test_numeric_parser_fraction_raises_ParseException_on_space():
 
     with raises(ParseException):
         pr.numeric_parser.parseString("21 /42", parseAll=True)
+
+
+def test_s_expression_flat():
+    expr_s = "(+ 42 42)"
+    expr_r = am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42))
+
+    assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
+
+
+def test_s_expression_nested():
+    inner_s = "(+ 42 42)"
+    expr_s = f"(+ {inner_s} {inner_s})"
+
+    inner_r = am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42))
+    expr_r = am.SExpression(am.Symbol("+"), inner_r, inner_r)
+
+    assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
