@@ -23,25 +23,23 @@ def test_symbol_parser_raises_ParseException_on_numerics():
         pr.symbol_parser.parseString("-1")
 
 
-def test_string_parser_regular_characters():
-    regular = "Spam21 Eggs42 +-*/&<=>?!_="
-    assert pr.string_parser.parseString(f"\"{regular}\"")[0] == am.String(regular)
+_string_contents = "Spam21 Eggs42 +-*/&<=>?!_="
+_escaped_characters = "".join(map("\\{}".format, _string_contents))
+
+strings = (
+    param(expr_st, expr_rs, id=expr_id)
+    for expr_st, expr_rs, expr_id in (
+        (f"\"{_string_contents}\"", am.String(_string_contents), "regular-string"),
+        (f"\"{_escaped_characters}\"", am.String(_string_contents), "escaped-characters"),
+        ("\"\\\\\"", am.String("\\\\"), "escaped-backslash"),
+        ("\"\\\"\\\"\"", am.String("\\\"\\\""), "escaped-quotes"),
+    )
+)
 
 
-def test_string_parser_escaped_characters():
-    regular = "Spam21 Eggs42 +-*/&<=>?!_="
-    escaped = "".join(f"\\{character}" for character in regular)
-    assert pr.string_parser.parseString(f"\"{escaped}\"")[0] == am.String(regular)
-
-
-def test_string_parser_escaped_backslash():
-    assert pr.string_parser.parseString("\"\\\\\"")[0] == am.String("\\\\")
-
-
-def test_string_parser_escaped_double_quote():
-    regular = "Spam21 Eggs42 +-*/&<=>?!_="
-    escaped = f"\\\"{regular}\\\""
-    assert pr.string_parser.parseString(f"\"{escaped}\"")[0] == am.String(escaped)
+@mark.parametrize(("expr_s", "expr_r"), strings)
+def test_string_parser(expr_s, expr_r):
+    assert pr.string_parser.parseString(expr_s)[0] == expr_r
 
 
 def test_string_parser_raises_ParseException_on_unescaped_quote():
