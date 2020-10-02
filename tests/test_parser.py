@@ -119,20 +119,19 @@ def test_quoted(expr_s, expr_r):
     assert pr.quoted_parser.parseString(expr_s)[0] == expr_r
 
 
-def test_s_expression_flat():
-    expr_s = "(+ 42 42)"
-    expr_r = am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42))
+_s_expression_flat = am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42))
+_s_expression_nested = am.SExpression(am.Symbol("+"), _s_expression_flat, _s_expression_flat)
+s_expressions = (
+    param(expr_st, expr_rs, id=expr_id)
+    for expr_st, expr_rs, expr_id in (
+        ("(+ 42 42)", _s_expression_flat, "flat"),
+        ("(+ (+ 42 42) (+ 42 42))", _s_expression_nested, "nested"),
+    )
+)
 
-    assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
 
-
-def test_s_expression_nested():
-    inner_s = "(+ 42 42)"
-    expr_s = f"(+ {inner_s} {inner_s})"
-
-    inner_r = am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42))
-    expr_r = am.SExpression(am.Symbol("+"), inner_r, inner_r)
-
+@mark.parametrize(("expr_s", "expr_r"), s_expressions)
+def test_s_expression(expr_s, expr_r):
     assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
 
 
