@@ -49,73 +49,46 @@ def test_string_parser_raises_ParseException_on_unescaped_quote():
         pr.string_parser.parseString("\" \" \"", parseAll=True)
 
 
-def test_numeric_parser_integral():
-    parse_func = pr.numeric_parser.parseString
-
-    unsigned = parse_func("42")[0]
-    positive = parse_func("+42")[0]
-
-    assert unsigned == positive == am.Numeric(42)
-
-
-def test_numeric_parser_floating():
-    parse_func = pr.numeric_parser.parseString
-
-    unsigned = parse_func("21.42")[0]
-    positive = parse_func("+21.42")[0]
-
-    assert unsigned == positive == am.Numeric(21.42)
-
-
-def test_numeric_parser_fraction():
-    from functools import reduce
-    from operator import eq
-
-    parse_func = pr.numeric_parser.parseString
-
-    positives = [
-        parse_func(f"{n}/{d}")[0]
-        for n in ("21", "+21")
-        for d in ("42", "+42")
-    ]
-
-    return all(am.Numeric(Fraction(21,42)) == positive for positive in positives)
+numerics = (
+    param(expr_st, expr_rs, id=expr_id)
+    for expr_st, expr_rs, expr_id in (
+        ("42", am.Numeric(42), "unsigned-integral"),
+        ("+42", am.Numeric(42), "positive-integral"),
+        ("-42", am.Numeric(-42), "negative-integral"),
+        ("21.42", am.Numeric(21.42), "unsigned-floating"),
+        ("+21.42", am.Numeric(21.42), "positive-floating"),
+        ("-21.42", am.Numeric(-21.42), "negative-floating"),
+        ("21/42", am.Numeric(Fraction(21, 42)), "unsigned-fraction"),
+        ("+21/42", am.Numeric(Fraction(21, 42)), "positive-fraction-numerator"),
+        ("-21/42", am.Numeric(Fraction(-21, 42)), "negative-fraction-numerator"),
+        ("21/+42", am.Numeric(Fraction(21, 42)), "positive-fraction-denominator"),
+        ("21/-42", am.Numeric(Fraction(21, -42)), "negative-fraction-denominator"),
+        ("+21/+42", am.Numeric(Fraction(21, 42)), "positive-fraction"),
+        ("-21/-42", am.Numeric(Fraction(-21, -42)), "negative-fraction"),
+    )
+)
 
 
-def test_numeric_parser_integral_negative():
-    assert pr.numeric_parser.parseString("-42")[0] == am.Numeric(-42)
+@mark.parametrize(("expr_s", "expr_r"), numerics)
+def test_numeric_parser(expr_s, expr_r):
+    assert pr.numeric_parser.parseString(expr_s)[0] == expr_r
 
 
-def test_numeric_parser_floating_negative():
-    assert pr.numeric_parser.parseString("-21.42")[0] == am.Numeric(-21.42)
+numerics_failing_space = (
+    param(expr_st, id=expr_id)
+    for expr_st, expr_id in (
+        ("21. 42", "floating-integral"),
+        ("21 .42", "floating-decimal"),
+        ("21/ 42", "fraction-numerator"),
+        ("21 /42", "fraction-denominator"),
+    )
+)
 
 
-def test_numeric_parser_fraction_negative_numerator():
-    assert pr.numeric_parser.parseString("-21/42")[0] == am.Numeric(Fraction(-21, 42))
-
-
-def test_numeric_parser_fraction_negative_denominator():
-    assert pr.numeric_parser.parseString("21/-42")[0] == am.Numeric(Fraction(21, -42))
-
-
-def test_numeric_parser_fraction_negative_num_denom():
-    assert pr.numeric_parser.parseString("-21/-42")[0] == am.Numeric(Fraction(-21, -42))
-
-
-def test_numeric_parser_floating_raises_ParseException_on_space():
+@mark.parametrize("expr_s", numerics_failing_space)
+def test_numeric_parser_raises_ParseException_on_space(expr_s):
     with raises(ParseException):
-        pr.numeric_parser.parseString("21. 42", parseAll=True)
-
-    with raises(ParseException):
-        pr.numeric_parser.parseString("21 .42", parseAll=True)
-
-
-def test_numeric_parser_fraction_raises_ParseException_on_space():
-    with raises(ParseException):
-        pr.numeric_parser.parseString("21/ 42", parseAll=True)
-
-    with raises(ParseException):
-        pr.numeric_parser.parseString("21 /42", parseAll=True)
+        pr.numeric_parser.parseString(expr_s, parseAll=True)
 
 
 expressions_simple = (
