@@ -4,7 +4,7 @@ import amalgam.amalgams as am
 import amalgam.parser as pr
 
 from pyparsing import ParseException
-from pytest import raises
+from pytest import mark, param, raises
 
 
 def test_symbol_parser_allowed_characters():
@@ -116,6 +116,34 @@ def test_numeric_parser_fraction_raises_ParseException_on_space():
 
     with raises(ParseException):
         pr.numeric_parser.parseString("21 /42", parseAll=True)
+
+
+expressions_simple = (
+    ("42", am.Numeric(42), "numeric_integral"),
+    ("21.42", am.Numeric(21.42), "numeric_floating"),
+    ("21/42", am.Numeric(Fraction(21, 42)), "numeric_fraction"),
+    ("-+>", am.Symbol("-+>"), "symbol_glyph"),
+    ("add", am.Symbol("add"), "symbol_names"),
+    ("\"hello, world\"", am.String("hello, world"), "string"),
+    ("(+ 42 42)", am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42)), "s_expression"),
+    ("[add 42 42]", am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42)), "vector"),
+)
+
+
+quoted_single = (
+    param(f"'{expr_st}", am.Quoted(expr_rs), id=f"{expr_id}-single")
+    for expr_st, expr_rs, expr_id in expressions_simple
+)
+
+quoted_multi = (
+    param(f"''{expr_st}", am.Quoted(am.Quoted(expr_rs)), id=f"{expr_id}-multi")
+    for expr_st, expr_rs, expr_id in expressions_simple
+)
+
+
+@mark.parametrize(("expr_s", "expr_r"), (*quoted_single, *quoted_multi))
+def test_quoted(expr_s, expr_r):
+    assert pr.quoted_parser.parseString(expr_s)[0] == expr_r
 
 
 def test_s_expression_flat():
