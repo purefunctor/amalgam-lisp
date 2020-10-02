@@ -138,18 +138,24 @@ class Function(Amalgam):
 class SExpression(Amalgam):
     """An `Amalgam` that wraps around S-Expressions."""
 
-    func: Amalgam
     vals: Tuple[Amalgam, ...]
 
-    def __init__(self, func: Amalgam, *vals: Amalgam) -> None:
-        self.func = func
+    def __init__(self, *vals: Amalgam) -> None:
         self.vals = vals
 
+    @property
+    def func(self) -> Amalgam:
+        return self.vals[0]
+
+    @property
+    def args(self) -> Tuple[Amalgam, ...]:
+        return self.vals[1:]
+
     def evaluate(self, environment: Environment) -> Amalgam:
-        return self.func.evaluate(environment).call(environment, *self.vals)
+        return self.func.evaluate(environment).call(environment, *self.args)
 
     def __repr__(self) -> str:  # pragma: no cover
-        return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.vals))}")
+        return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
 
 
 T = TypeVar("T", bound=Amalgam)
