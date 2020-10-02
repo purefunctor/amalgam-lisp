@@ -2,12 +2,6 @@
 
 Lisp-like interpreted language implemented in Python.
 
-# Constructs
-- [x] S-Expressions
-- [x] Numeric types
-- [ ] Q-Expressions
-- [ ] Macros
-
 # Development Setup
 Install the following dependencies:
 * Python 3.7 & 3.8
