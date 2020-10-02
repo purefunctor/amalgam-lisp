@@ -74,19 +74,21 @@ def test_numeric_parser(expr_s, expr_r):
     assert pr.numeric_parser.parseString(expr_s)[0] == expr_r
 
 
-numerics_failing_space = (
+numerics_invalid = (
     param(expr_st, id=expr_id)
     for expr_st, expr_id in (
-        ("21. 42", "floating-integral"),
-        ("21 .42", "floating-decimal"),
-        ("21/ 42", "fraction-numerator"),
-        ("21 /42", "fraction-denominator"),
+        ("21. 42", "floating-space-after-period"),
+        ("21 .42", "floating-space-before-period"),
+        ("21 . 42", "floating-space-after-and-before-period"),
+        ("21/ 42", "fraction-space-after-slash"),
+        ("21 /42", "fraction-space-before-slash"),
+        ("21 / 42", "fraction-space-after-and-before-slash"),
     )
 )
 
 
-@mark.parametrize("expr_s", numerics_failing_space)
-def test_numeric_parser_raises_ParseException_on_space(expr_s):
+@mark.parametrize("expr_s", numerics_invalid)
+def test_numeric_parser_raises_ParseException_on(expr_s):
     with raises(ParseException):
         pr.numeric_parser.parseString(expr_s, parseAll=True)
 
