@@ -135,18 +135,17 @@ def test_s_expression(expr_s, expr_r):
     assert pr.s_expression_parser.parseString(expr_s)[0] == expr_r
 
 
-def test_vector_flat():
-    vect_s = "[add 42 42]"
-    vect_r = am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42))
+_vector_flat = am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42))
+_vector_nested = am.Vector(am.Symbol("add"), _vector_flat, _vector_flat)
+vectors = [
+    param(expr_st, expr_rs, id=expr_id)
+    for expr_st, expr_rs, expr_id in (
+        ("[add 42 42]", _vector_flat, "flat"),
+        ("[add [add 42 42] [add 42 42]]", _vector_nested, "nested")
+    )
+]
 
-    assert pr.vector_parser.parseString(vect_s)[0] == vect_r
 
-
-def test_vector_nested():
-    inner_s = "[add 42 42]"
-    vect_s = f"[add {inner_s} {inner_s}]"
-
-    inner_r = am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42))
-    vect_r = am.Vector(am.Symbol("add"), inner_r, inner_r)
-
-    assert pr.vector_parser.parseString(vect_s)[0] == vect_r
+@mark.parametrize(("expr_s", "expr_r"), vectors)
+def test_vector(expr_s, expr_r):
+    assert pr.vector_parser.parseString(expr_s)[0] == expr_r
