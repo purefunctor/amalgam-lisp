@@ -3,10 +3,14 @@ from functools import partial
 from typing import Callable, Dict, TypeVar, Union
 
 from amalgam.amalgams import (
+    create_fn,
     Amalgam,
     Environment,
     Function,
     Numeric,
+    Quoted,
+    Symbol,
+    Vector,
 )
 
 
@@ -63,3 +67,29 @@ def _div(_env: Environment, *nums: Numeric) -> Numeric:
     for n in ns:
         y *= n
     return Numeric(x / y)
+
+
+@_make_function("setn", defer=True)
+def _setn(env: Environment, name: Quoted[Symbol], amalgam: Quoted[Amalgam]) -> Amalgam:
+    env.iset(name.value.value, amalgam.value)
+    return env.iget(name.value.value)
+
+
+@_make_function("fn", defer=True)
+def _fn(
+    _env: Environment, args: Quoted[Vector[Symbol]], body: Quoted[Amalgam],
+) -> Function:
+    return create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
+
+
+@_make_function("mkfn", defer=True)
+def _mkfn(
+    env: Environment,
+    name: Quoted[Symbol],
+    args: Quoted[Vector[Symbol]],
+    body: Quoted[Amalgam],
+) -> Amalgam:
+    func = _fn(env, args, body)
+    func.name = name.value.value
+    env.iset(name.value.value, func)
+    return func
