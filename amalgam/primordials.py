@@ -89,7 +89,5 @@ def _mkfn(
     args: Quoted[Vector[Symbol]],
     body: Quoted[Amalgam],
 ) -> Amalgam:
-    func = _fn(env, args, body)
-    func.name = name.value.value
-    env.iset(name.value.value, func)
-    return func
+    env.iset(name.value.value, _fn(env, args, body).with_name(name.value.value))
+    return env.iget(name.value.value)
