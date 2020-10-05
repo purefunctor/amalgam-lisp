@@ -228,3 +228,13 @@ def test_function_evaluate_symbol_local(num, fresh_env):
 def test_function_evaluate_symbol_closure(num, fresh_env):
     fnc = create_fn("closure-test", "x", create_fn("inner", "y", Symbol("x")))
     assert fnc.call(fresh_env, num).call(fresh_env, num).value == num.value
+
+
+def test_function_with_name_new_name(num):
+    fnc = create_fn("~lambda~", "", num)
+    assert fnc.with_name("with-name-test").name == "with-name-test"
+
+
+def test_function_with_name_instance(num):
+    fnc = create_fn("~lambda~", "", num)
+    assert fnc.with_name("with-name-test") is fnc
