@@ -130,6 +130,10 @@ class Function(Amalgam):
 
         return self.fn(environment, *arguments)
 
+    def with_name(self, name: str) -> Function:
+        self.name = name
+        return self
+
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.name)
 
