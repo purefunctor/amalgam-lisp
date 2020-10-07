@@ -1,7 +1,9 @@
-from amalgam.amalgams import Environment, Numeric
+from amalgam.amalgams import Numeric
 from amalgam.primordials import _add, _sub, _mul, _div
 
 from pytest import mark, param
+
+from tests.utils import MockEnvironment
 
 
 arithmetics = (
@@ -26,4 +28,4 @@ arithmetics = (
 
 @mark.parametrize(("arith_fn", "arith_nm", "arith_rs"), arithmetics)
 def test_arithmetic_function(arith_fn, arith_nm, arith_rs):
-    assert arith_fn(Environment(), *map(Numeric, arith_nm)).value == arith_rs
+    assert arith_fn(MockEnvironment(), *map(Numeric, arith_nm)).value == arith_rs
