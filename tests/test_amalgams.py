@@ -23,11 +23,6 @@ def numerics():
     return Numeric(21), Numeric(21.42), Numeric(Fraction(21, 42))
 
 
-def test_numeric_evaluate(numerics):
-    for numeric in numerics:
-        assert numeric == numeric.evaluate(Environment())
-
-
 @fixture
 def strings():
     return String(""), String("\n\t"), String("foo-bar-baz")
@@ -74,9 +69,19 @@ def store_env():
     return env
 
 
-def test_string_evaluate(strings):
-    for string in strings:
-        assert string == string.evaluate(Environment())
+def test_string_evaluate():
+    string = String("string-test")
+    assert string.evaluate(Environment()) == string
+
+
+def test_numeric_evaluate():
+    numeric = Numeric(42)
+    assert numeric.evaluate(Environment()) == numeric
+
+
+def test_quoted_evaluate():
+    quoted = Quoted(Symbol("quoted-test"))
+    assert quoted.evaluate(Environment()) == quoted
 
 
 def test_symbol_evaluate():
@@ -191,11 +196,6 @@ def test_vector_evaluate_symbols(numerics, fresh_env):
     for name, numeric in zip("xyz", numerics):
         fresh_env[name] = numeric
     assert vector.evaluate(fresh_env) == Vector(*numerics)
-
-
-def test_quoted_evaluate(num, fresh_env):
-    quoted = Quoted(num)
-    assert quoted.evaluate(fresh_env) == quoted
 
 
 def test_function_binding(num, fresh_env):
