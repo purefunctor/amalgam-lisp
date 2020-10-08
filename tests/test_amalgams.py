@@ -152,25 +152,3 @@ def test_function_with_name():
 
     assert function_with_name_result == function
     assert function.name == new_name
-
-
-def test_function_evaluate_literal(num, fresh_env):
-    fnc = create_fn("literal-test", "_x", num)
-    assert fnc.call(fresh_env, num).value == num.value
-
-
-def test_function_evaluate_symbol_global(num, fresh_env):
-    fresh_env["x"] = num
-    fnc = create_fn("global-test", "", Symbol("x"))
-    assert fnc.call(fresh_env).value == num.value
-
-
-def test_function_evaluate_symbol_local(num, fresh_env):
-    fresh_env["x"] = String("fail")
-    fnc = create_fn("local-test", "x", Symbol("x"))
-    assert fnc.call(fresh_env, num).value == num.value
-
-
-def test_function_evaluate_symbol_closure(num, fresh_env):
-    fnc = create_fn("closure-test", "x", create_fn("inner", "y", Symbol("x")))
-    assert fnc.call(fresh_env, num).call(fresh_env, num).value == num.value
