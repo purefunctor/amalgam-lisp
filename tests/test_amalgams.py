@@ -139,9 +139,9 @@ def test_function_bind():
     assert function.env == environment
 
 
-def test_function_evalulate(num, fresh_env):
-    fnc = create_fn("evaluate-test", "_x", num)
-    assert fnc.evaluate(fresh_env) == fnc
+def test_function_evalulate():
+    function = Function("function-evaluate-test", lambda _e, *_a: Vector(*_a), False)
+    assert function.evaluate(Environment()) == function
 
 
 def test_function_evaluate_literal(num, fresh_env):
