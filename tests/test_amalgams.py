@@ -17,6 +17,9 @@ from amalgam.amalgams import (
 
 from pytest import fixture
 
+from tests.utils import (
+    MockEnvironment,
+)
 
 @fixture
 def numerics():
@@ -84,10 +87,16 @@ def test_quoted_evaluate():
     assert quoted.evaluate(Environment()) == quoted
 
 
-def test_symbol_evaluate():
-    symbol = Symbol("foo")
-    environ = Environment(None, {"foo": String("bar")})
-    assert symbol.evaluate(environ) == environ["foo"]
+def test_symbol_evaluate(mocker):
+    mock_environment = MockEnvironment()
+    mock_amalgam_result = mocker.MagicMock()
+    mock_environment.__getitem__.return_value = mock_amalgam_result
+    mock_value = mocker.MagicMock()
+
+    symbol_evaluate_result = Symbol(mock_value).evaluate(mock_environment)
+
+    mock_environment.__getitem__.assert_called_once_with(mock_value)
+    assert symbol_evaluate_result == mock_amalgam_result
 
 
 def test_s_expression_evaluate_simple(num, store_env):
