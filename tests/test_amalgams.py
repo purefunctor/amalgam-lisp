@@ -1,10 +1,5 @@
-from fractions import Fraction
-import re
-from typing import Any
-
 from amalgam.amalgams import (
     create_fn,
-    Amalgam,
     Environment,
     Function,
     Numeric,
@@ -15,62 +10,10 @@ from amalgam.amalgams import (
     Vector,
 )
 
-from pytest import fixture
-
 from tests.utils import (
     MockAmalgam,
     MockEnvironment,
 )
-
-@fixture
-def numerics():
-    return Numeric(21), Numeric(21.42), Numeric(Fraction(21, 42))
-
-
-@fixture
-def strings():
-    return String(""), String("\n\t"), String("foo-bar-baz")
-
-
-@fixture
-def num():
-    return Numeric(42)
-
-
-@fixture
-def fresh_env():
-    return Environment()
-
-
-@fixture
-def store_env():
-    env = Environment()
-
-    def plus_func(_environment: Environment, *numbers: Numeric) -> Numeric:
-        return Numeric(sum(number.value for number in numbers))
-
-    def fn_func(
-        _env: Environment, args: Quoted[Vector[Symbol]], body: Quoted[Amalgam],
-    ) -> Function:
-        return create_fn("<lambda>", [arg.value for arg in args.value.vals], body.value)
-
-    def defun_func(
-        env: Environment, name: Quoted[String], args: Quoted[Vector[Symbol]], body: Quoted[Amalgam]
-    ) -> Function:
-        env[name.value.value] = fn_func(env, args, body)
-        return env[name.value.value]
-
-    def prog_func(env: Environment, *expressions: SExpression) -> Vector[Amalgam]:
-        return Vector(*(expression.evaluate(env) for expression in expressions))
-
-    env["+"] = Function("+", plus_func)
-    env["fn"] = Function("fn", fn_func, defer=True)
-    env["defun"] = Function("defun", defun_func, defer=True)
-    env["prog"] = Function("prog", prog_func)
-
-    env["z"] = Numeric(42)
-
-    return env
 
 
 def test_string_evaluate():
