@@ -144,6 +144,16 @@ def test_function_evalulate():
     assert function.evaluate(Environment()) == function
 
 
+def test_function_with_name():
+    function = Function("function-with-name-test", lambda _e, *_a: Vector(*_a), False)
+    new_name = "new-name"
+
+    function_with_name_result = function.with_name(new_name)
+
+    assert function_with_name_result == function
+    assert function.name == new_name
+
+
 def test_function_evaluate_literal(num, fresh_env):
     fnc = create_fn("literal-test", "_x", num)
     assert fnc.call(fresh_env, num).value == num.value
@@ -164,13 +174,3 @@ def test_function_evaluate_symbol_local(num, fresh_env):
 def test_function_evaluate_symbol_closure(num, fresh_env):
     fnc = create_fn("closure-test", "x", create_fn("inner", "y", Symbol("x")))
     assert fnc.call(fresh_env, num).call(fresh_env, num).value == num.value
-
-
-def test_function_with_name_new_name(num):
-    fnc = create_fn("~lambda~", "", num)
-    assert fnc.with_name("with-name-test").name == "with-name-test"
-
-
-def test_function_with_name_instance(num):
-    fnc = create_fn("~lambda~", "", num)
-    assert fnc.with_name("with-name-test") is fnc
