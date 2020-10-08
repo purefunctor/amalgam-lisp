@@ -129,9 +129,14 @@ def test_s_expression_evaluate(mocker):
     assert sexpr_evaluate_result == mock_func_result
 
 
-def test_function_binding(num, fresh_env):
-    fnc = create_fn("binding-test", "_x", num)
-    assert fnc.bind(fresh_env).env == fresh_env
+def test_function_bind():
+    environment = Environment()
+    function = Function("function-bind-test", lambda _e, *_a: Vector(*_a), False)
+
+    function_bind_result = function.bind(environment)
+
+    assert function_bind_result == function
+    assert function.env == environment
 
 
 def test_function_evalulate(num, fresh_env):
