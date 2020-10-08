@@ -99,6 +99,20 @@ def test_symbol_evaluate(mocker):
     assert symbol_evaluate_result == mock_amalgam_result
 
 
+def test_vector_evaluate(mocker):
+    mock_environment = MockEnvironment()
+    mock_v0 = mocker.MagicMock()
+    mock_v1 = mocker.MagicMock()
+    mock_v0.evaluate.return_value = mock_v0
+    mock_v1.evaluate.return_value = mock_v1
+
+    vector_evaluate_result = Vector(mock_v0, mock_v1).evaluate(mock_environment)
+
+    mock_v0.evaluate.assert_called_once_with(mock_environment)
+    mock_v1.evaluate.assert_called_once_with(mock_environment)
+    assert vector_evaluate_result == Vector(mock_v0, mock_v1)
+
+
 def test_s_expression_evaluate_simple(num, store_env):
     """
     Simple test for SExpression
@@ -193,18 +207,6 @@ def test_s_expression_evaluate_infect(num, store_env):
     )
 
     assert expr.evaluate(store_env).vals[1].value == num.value + num.value
-
-
-def test_vector_evaluate_literals(numerics, fresh_env):
-    vector = Vector(*numerics)
-    assert vector.evaluate(fresh_env) == vector
-
-
-def test_vector_evaluate_symbols(numerics, fresh_env):
-    vector = Vector(*map(Symbol, "xyz"))
-    for name, numeric in zip("xyz", numerics):
-        fresh_env[name] = numeric
-    assert vector.evaluate(fresh_env) == Vector(*numerics)
 
 
 def test_function_binding(num, fresh_env):
