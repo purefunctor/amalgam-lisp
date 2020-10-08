@@ -113,100 +113,20 @@ def test_vector_evaluate(mocker):
     assert vector_evaluate_result == Vector(mock_v0, mock_v1)
 
 
-def test_s_expression_evaluate_simple(num, store_env):
-    """
-    Simple test for SExpression
+def test_s_expression_evaluate(mocker):
+    mock_environment = MockEnvironment()
 
-    Aside from testing basic usage of SExpression, this test also
-    showcases how simple builtin functions are to be implemented.
-    """
+    mock_func = mocker.MagicMock()
+    mock_func.evaluate.return_value = mock_func
+    mock_func_result = mocker.MagicMock()
+    mock_func.call.return_value = mock_func_result
+    mock_args = (mocker.MagicMock(), mocker.MagicMock())
 
-    # Build the S-Expression: (+ 42 42)
-    s_expression = SExpression(Symbol("+"), num, num)
+    sexpr_evaluate_result = SExpression(mock_func, *mock_args).evaluate(mock_environment)
 
-    # Evaluate the S-Expression given the Environment
-    assert s_expression.evaluate(store_env).value == num.value + num.value
-
-
-def test_s_expression_evaluate_macro(num, store_env):
-    """
-    Macro test for SExpression
-
-    This test details how a macro such as `fn` for defining lambdas
-    can be defined within Python, as well as testing the cascading
-    `evaluate` functionality of SExpression.
-    """
-
-    # Build the S-Expression: ((fn (x y) (+ x y z)) 42 42)
-    expr = SExpression(
-        SExpression(
-            Symbol("fn"),
-            Vector(Symbol("x"), Symbol("y")),
-            SExpression(Symbol("+"), Symbol("x"), Symbol("y"), Symbol("z")),
-        ),
-        num,
-        num,
-    )
-
-    # Evaluate the S-Expression given the Environment
-    expr.evaluate(store_env).value == num.value + num.value + num.value
-
-
-def test_s_expression_evaluate_binding(num, store_env):
-    """
-    Binding test for SExpression
-
-    This test showcases the ability of SExpression and Function to
-    create and remember closures.
-    """
-    # Build the S-Expression: (((fn (x) (fn (y) (+ x y z))) 42) 42)
-    expr = SExpression(
-        SExpression(
-            SExpression(
-                Symbol("fn"),
-                Vector(Symbol("x")),
-                SExpression(
-                    Symbol("fn"),
-                    Vector(Symbol("y")),
-                    SExpression(
-                        Symbol("+"),
-                        Symbol("x"),
-                        Symbol("y"),
-                        Symbol("z"),
-                    ),
-                ),
-            ),
-            num,
-        ),
-        num
-    )
-
-    # Evaluate the S-Expression given the Environment
-    assert expr.evaluate(store_env).value == num.value + num.value + num.value
-
-
-def test_s_expression_evaluate_infect(num, store_env):
-    """
-    Injection test for SExpression
-
-    This test showcases the ability of SExpression and Function to
-    inject values into the environment.
-    """
-    # Build the S-Expression: (prog (defun my-plus (x y) (+ x y)) (my-plus 42 42))
-    expr = SExpression(
-        Symbol("prog"),
-        SExpression(
-            Symbol("defun"),
-            String("my-plus"),
-            Vector(Symbol("x"), Symbol("y")),
-            SExpression(Symbol("+"), Symbol("x"), Symbol("y")),
-        ),
-        SExpression(
-            Symbol("my-plus"), num, num,
-        ),
-    )
-
-    assert expr.evaluate(store_env).vals[1].value == num.value + num.value
+    mock_func.evaluate.assert_called_once_with(mock_environment)
+    mock_func.call.assert_called_once_with(mock_environment, *mock_args)
+    assert sexpr_evaluate_result == mock_func_result
 
 
 def test_function_binding(num, fresh_env):
