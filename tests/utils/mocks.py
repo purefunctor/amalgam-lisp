@@ -1,5 +1,7 @@
 from dataclasses import fields
+from enum import Enum
 from functools import partial
+from typing import Sequence
 
 import amalgam.amalgams as am
 import unittest.mock as mk
@@ -89,3 +91,41 @@ class MockSExpression(VariadicAmalgamMixin, AmalgamMockMixin, mk.MagicMock):
 class MockVector(VariadicAmalgamMixin, AmalgamMockMixin, mk.MagicMock):
     """Mocks a `Vector` `Amalgam`."""
     spec_set = am.Vector(mk.MagicMock(), mk.MagicMock())
+
+
+class MockAmalgam(AmalgamMockMixin, mk.MagicMock):
+    """
+    Mocks a generalized `Amalgam` object.
+
+    The `value` and `vals` attributes are mocked and can be set
+    through the `value` and `vals` keyword arguments respectively.
+
+    The return values for the `evaluate` and `call` methods are also
+    mocked and can be set with the `evaluate` and `call` keyword
+    arguments, while the return value for the `bind` method is the
+    `MockAmalgam` instance.
+    """
+
+    spec_set = ("value", "vals", "evaluate", "bind", "call")
+
+    def __init__(
+        self,
+        *,
+        value=None,
+        vals=None,
+        evaluate=None,
+        call=None,
+        **keywords,
+    ):
+        super().__init__(**keywords)
+
+        self.value = value if value is not None else mk.MagicMock()
+        self.vals = tuple(vals) if isinstance(vals, Sequence) else mk.MagicMock()
+
+        self.evaluate.return_value = evaluate if evaluate is not None else self
+        self.bind.return_value = self
+
+        if call is None:
+            self.call.side_effect = NotImplementedError
+        else:
+            self.call.return_value = call
