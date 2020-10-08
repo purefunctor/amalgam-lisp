@@ -18,6 +18,7 @@ from amalgam.amalgams import (
 from pytest import fixture
 
 from tests.utils import (
+    MockAmalgam,
     MockEnvironment,
 )
 
@@ -101,10 +102,8 @@ def test_symbol_evaluate(mocker):
 
 def test_vector_evaluate(mocker):
     mock_environment = MockEnvironment()
-    mock_v0 = mocker.MagicMock()
-    mock_v1 = mocker.MagicMock()
-    mock_v0.evaluate.return_value = mock_v0
-    mock_v1.evaluate.return_value = mock_v1
+    mock_v0 = MockAmalgam()
+    mock_v1 = MockAmalgam()
 
     vector_evaluate_result = Vector(mock_v0, mock_v1).evaluate(mock_environment)
 
@@ -159,10 +158,8 @@ def test_function_call_naive(mocker):
     mock_fn = mocker.MagicMock()
     mock_fn_result = mocker.MagicMock()
     mock_fn.return_value = mock_fn_result
-    mock_a0 = mocker.MagicMock()
-    mock_a1 = mocker.MagicMock()
-    mock_a0.evaluate.return_value = mock_a0
-    mock_a1.evaluate.return_value = mock_a1
+    mock_a0 = MockAmalgam()
+    mock_a1 = MockAmalgam()
 
     function = Function("naive-call-test", mock_fn)
     function_call_result = function.call(mock_environment, mock_a0, mock_a1)
