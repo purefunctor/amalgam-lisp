@@ -152,3 +152,22 @@ def test_function_with_name():
 
     assert function_with_name_result == function
     assert function.name == new_name
+
+
+def test_function_call_naive(mocker):
+    mock_environment = MockEnvironment()
+    mock_fn = mocker.MagicMock()
+    mock_fn_result = mocker.MagicMock()
+    mock_fn.return_value = mock_fn_result
+    mock_a0 = mocker.MagicMock()
+    mock_a1 = mocker.MagicMock()
+    mock_a0.evaluate.return_value = mock_a0
+    mock_a1.evaluate.return_value = mock_a1
+
+    function = Function("naive-call-test", mock_fn)
+    function_call_result = function.call(mock_environment, mock_a0, mock_a1)
+
+    mock_a0.evaluate.assert_called_once_with(mock_environment)
+    mock_a1.evaluate.assert_called_once_with(mock_environment)
+    mock_fn.assert_called_once_with(mock_environment, mock_a0, mock_a1)
+    assert function_call_result == mock_fn_result
