@@ -1,6 +1,5 @@
 from amalgam.amalgams import (
     create_fn,
-    Environment,
     Function,
     Numeric,
     Quoted,
@@ -10,29 +9,35 @@ from amalgam.amalgams import (
     Vector,
 )
 
+from pytest import fixture
+
 from tests.utils import (
     MockAmalgam,
     MockEnvironment,
 )
 
 
-def test_string_evaluate():
+@fixture
+def mock_environment():
+    return MockEnvironment()
+
+
+def test_string_evaluate(mock_environment):
     string = String("string-test")
-    assert string.evaluate(Environment()) == string
+    assert string.evaluate(mock_environment) == string
 
 
-def test_numeric_evaluate():
+def test_numeric_evaluate(mock_environment):
     numeric = Numeric(42)
-    assert numeric.evaluate(Environment()) == numeric
+    assert numeric.evaluate(mock_environment) == numeric
 
 
-def test_quoted_evaluate():
+def test_quoted_evaluate(mock_environment):
     quoted = Quoted(Symbol("quoted-test"))
-    assert quoted.evaluate(Environment()) == quoted
+    assert quoted.evaluate(mock_environment) == quoted
 
 
-def test_symbol_evaluate(mocker):
-    mock_environment = MockEnvironment()
+def test_symbol_evaluate(mocker, mock_environment):
     mock_amalgam_result = mocker.MagicMock()
     mock_environment.__getitem__.return_value = mock_amalgam_result
     mock_value = mocker.MagicMock()
@@ -43,8 +48,7 @@ def test_symbol_evaluate(mocker):
     assert symbol_evaluate_result == mock_amalgam_result
 
 
-def test_vector_evaluate(mocker):
-    mock_environment = MockEnvironment()
+def test_vector_evaluate(mocker, mock_environment):
     mock_v0 = MockAmalgam()
     mock_v1 = MockAmalgam()
 
@@ -55,9 +59,7 @@ def test_vector_evaluate(mocker):
     assert vector_evaluate_result == Vector(mock_v0, mock_v1)
 
 
-def test_s_expression_evaluate(mocker):
-    mock_environment = MockEnvironment()
-
+def test_s_expression_evaluate(mocker, mock_environment):
     mock_func = mocker.MagicMock()
     mock_func.evaluate.return_value = mock_func
     mock_func_result = mocker.MagicMock()
@@ -71,19 +73,18 @@ def test_s_expression_evaluate(mocker):
     assert sexpr_evaluate_result == mock_func_result
 
 
-def test_function_bind():
-    environment = Environment()
+def test_function_bind(mock_environment):
     function = Function("function-bind-test", lambda _e, *_a: Vector(*_a), False)
 
-    function_bind_result = function.bind(environment)
+    function_bind_result = function.bind(mock_environment)
 
     assert function_bind_result == function
-    assert function.env == environment
+    assert function.env == mock_environment
 
 
-def test_function_evalulate():
+def test_function_evalulate(mock_environment):
     function = Function("function-evaluate-test", lambda _e, *_a: Vector(*_a), False)
-    assert function.evaluate(Environment()) == function
+    assert function.evaluate(mock_environment) == function
 
 
 def test_function_with_name():
@@ -96,8 +97,7 @@ def test_function_with_name():
     assert function.name == new_name
 
 
-def test_function_call_naive(mocker):
-    mock_environment = MockEnvironment()
+def test_function_call_naive(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
     mock_fn_result = mocker.MagicMock()
     mock_fn.return_value = mock_fn_result
@@ -113,8 +113,7 @@ def test_function_call_naive(mocker):
     assert function_call_result == mock_fn_result
 
 
-def test_function_call_defer(mocker):
-    mock_environment = MockEnvironment()
+def test_function_call_defer(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
     mock_fn_result = mocker.MagicMock()
     mock_fn.return_value = mock_fn_result
@@ -134,16 +133,15 @@ def test_function_call_defer(mocker):
     assert function_call_result == mock_fn_result
 
 
-def test_function_call_env_override(mocker):
-    mock_env = MockEnvironment()
+def test_function_call_env_override(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
     mock_fn_result = mocker.MagicMock()
     mock_fn.return_value = mock_fn_result
     mock_ag = MockAmalgam()
 
     function = Function("env-override-test", mock_fn)
-    function.env = mock_env
+    function.env = mock_environment
     function_call_result = function.call(MockEnvironment(), mock_ag)
 
-    mock_fn.assert_called_once_with(mock_env, mock_ag)
+    mock_fn.assert_called_once_with(mock_environment, mock_ag)
     assert function_call_result == mock_fn_result
