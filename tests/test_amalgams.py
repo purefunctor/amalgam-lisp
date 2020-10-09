@@ -97,26 +97,31 @@ def test_function_with_name():
     assert function.name == new_name
 
 
-def test_function_call_naive(mocker, mock_environment):
+def test_function_call_return(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
     mock_fn_result = mocker.MagicMock()
     mock_fn.return_value = mock_fn_result
+
+    function = Function("call-return-test", mock_fn)
+
+    assert function.call(mock_environment, MockAmalgam()) == mock_fn_result
+
+
+def test_function_call_naive(mocker, mock_environment):
+    mock_fn = mocker.MagicMock()
     mock_a0 = MockAmalgam()
     mock_a1 = MockAmalgam()
 
     function = Function("naive-call-test", mock_fn)
-    function_call_result = function.call(mock_environment, mock_a0, mock_a1)
+    function.call(mock_environment, mock_a0, mock_a1)
 
     mock_a0.evaluate.assert_called_once_with(mock_environment)
     mock_a1.evaluate.assert_called_once_with(mock_environment)
     mock_fn.assert_called_once_with(mock_environment, mock_a0, mock_a1)
-    assert function_call_result == mock_fn_result
 
 
 def test_function_call_defer(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
-    mock_fn_result = mocker.MagicMock()
-    mock_fn.return_value = mock_fn_result
     mock_a0 = MockAmalgam()
     mock_a1 = MockAmalgam()
     mock_q0 = MockAmalgam()
@@ -126,22 +131,18 @@ def test_function_call_defer(mocker, mock_environment):
     mocker.patch("amalgam.amalgams.Quoted", mock_Quoted)
 
     function = Function("defer-call-test", mock_fn, defer=True)
-    function_call_result = function.call(mock_environment, mock_a0, mock_a1)
+    function.call(mock_environment, mock_a0, mock_a1)
 
     assert mock_Quoted.mock_calls == [mocker.call(mock_a0), mocker.call(mock_a1)]
     mock_fn.assert_called_once_with(mock_environment, mock_q0, mock_q1)
-    assert function_call_result == mock_fn_result
 
 
 def test_function_call_env_override(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
-    mock_fn_result = mocker.MagicMock()
-    mock_fn.return_value = mock_fn_result
     mock_ag = MockAmalgam()
 
     function = Function("env-override-test", mock_fn)
     function.env = mock_environment
-    function_call_result = function.call(MockEnvironment(), mock_ag)
+    function.call(MockEnvironment(), mock_ag)
 
     mock_fn.assert_called_once_with(mock_environment, mock_ag)
-    assert function_call_result == mock_fn_result
