@@ -132,3 +132,18 @@ def test_function_call_defer(mocker):
     assert mock_Quoted.mock_calls == [mocker.call(mock_a0), mocker.call(mock_a1)]
     mock_fn.assert_called_once_with(mock_environment, mock_q0, mock_q1)
     assert function_call_result == mock_fn_result
+
+
+def test_function_call_env_override(mocker):
+    mock_env = MockEnvironment()
+    mock_fn = mocker.MagicMock()
+    mock_fn_result = mocker.MagicMock()
+    mock_fn.return_value = mock_fn_result
+    mock_ag = MockAmalgam()
+
+    function = Function("env-override-test", mock_fn)
+    function.env = mock_env
+    function_call_result = function.call(MockEnvironment(), mock_ag)
+
+    mock_fn.assert_called_once_with(mock_env, mock_ag)
+    assert function_call_result == mock_fn_result
