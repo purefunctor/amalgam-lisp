@@ -22,6 +22,11 @@ def mock_environment():
     return MockEnvironment()
 
 
+@fixture
+def mock_fn(mocker):
+    return mocker.MagicMock(return_value=mocker.MagicMock())
+
+
 def test_string_evaluate(mock_environment):
     string = String("string-test")
     assert string.evaluate(mock_environment) == string
@@ -97,18 +102,12 @@ def test_function_with_name():
     assert function.name == new_name
 
 
-def test_function_call_return(mocker, mock_environment):
-    mock_fn = mocker.MagicMock()
-    mock_fn_result = mocker.MagicMock()
-    mock_fn.return_value = mock_fn_result
-
+def test_function_call_return(mock_environment, mock_fn):
     function = Function("call-return-test", mock_fn)
+    assert function.call(mock_environment, MockAmalgam()) == mock_fn.return_value
 
-    assert function.call(mock_environment, MockAmalgam()) == mock_fn_result
 
-
-def test_function_call_naive(mocker, mock_environment):
-    mock_fn = mocker.MagicMock()
+def test_function_call_naive(mock_environment, mock_fn):
     mock_ev = MockAmalgam()
     mock_a0 = MockAmalgam(evaluate=mock_ev)
     mock_a1 = MockAmalgam()
@@ -121,8 +120,7 @@ def test_function_call_naive(mocker, mock_environment):
     mock_fn.assert_called_once_with(mock_environment, mock_ev, mock_a1)
 
 
-def test_function_call_defer(mocker, mock_environment):
-    mock_fn = mocker.MagicMock()
+def test_function_call_defer(mocker, mock_environment, mock_fn):
     mock_a0 = MockAmalgam()
     mock_a1 = MockAmalgam()
     mock_q0 = MockAmalgam()
@@ -138,8 +136,7 @@ def test_function_call_defer(mocker, mock_environment):
     mock_fn.assert_called_once_with(mock_environment, mock_q0, mock_q1)
 
 
-def test_function_call_env_override(mocker, mock_environment):
-    mock_fn = mocker.MagicMock()
+def test_function_call_env_override(mock_environment, mock_fn):
     mock_ag = MockAmalgam()
 
     function = Function("env-override-test", mock_fn)
