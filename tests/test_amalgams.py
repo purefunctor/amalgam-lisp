@@ -109,7 +109,8 @@ def test_function_call_return(mocker, mock_environment):
 
 def test_function_call_naive(mocker, mock_environment):
     mock_fn = mocker.MagicMock()
-    mock_a0 = MockAmalgam()
+    mock_ev = MockAmalgam()
+    mock_a0 = MockAmalgam(evaluate=mock_ev)
     mock_a1 = MockAmalgam()
 
     function = Function("naive-call-test", mock_fn)
@@ -117,7 +118,7 @@ def test_function_call_naive(mocker, mock_environment):
 
     mock_a0.evaluate.assert_called_once_with(mock_environment)
     mock_a1.evaluate.assert_called_once_with(mock_environment)
-    mock_fn.assert_called_once_with(mock_environment, mock_a0, mock_a1)
+    mock_fn.assert_called_once_with(mock_environment, mock_ev, mock_a1)
 
 
 def test_function_call_defer(mocker, mock_environment):
