@@ -144,3 +144,15 @@ def test_function_call_env_override(mock_environment, mock_fn):
     function.call(MockEnvironment(), mock_ag)
 
     mock_fn.assert_called_once_with(mock_environment, mock_ag)
+
+
+def test_create_fn(mocker, mock_fn):
+    mock_fname = mocker.MagicMock()
+    mock_defer = mocker.MagicMock()
+
+    mocker.patch("amalgam.amalgams.Function", mock_fn)
+
+    create_fn_result = create_fn(mock_fname, mocker.MagicMock(), mocker.MagicMock(), mock_defer)
+
+    mock_fn.assert_called_once_with(mock_fname, mocker.ANY, mock_defer)
+    assert create_fn_result == mock_fn.return_value
