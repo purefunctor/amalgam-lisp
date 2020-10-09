@@ -156,3 +156,29 @@ def test_create_fn(mocker, mock_fn):
 
     mock_fn.assert_called_once_with(mock_fname, mocker.ANY, mock_defer)
     assert create_fn_result == mock_fn.return_value
+
+
+def test_closure_fn(mocker, mock_environment, mock_fn):
+    mock_fargs = mocker.MagicMock()
+    mock_fargs.__iter__.return_value = (mocker.Mock(), mocker.Mock())
+
+    mock_args = mocker.MagicMock()
+    mock_args.__iter__.return_value = (mocker.Mock(), mocker.Mock())
+
+    mock_fbody = MockAmalgam()
+    mock_fbody_result = MockAmalgam()
+    mock_fbody.evaluate.return_value = mock_fbody_result
+
+    mock_child_environment = MockEnvironment()
+    mock_environment.env_push.return_value = mock_child_environment
+
+    mocker.patch("amalgam.amalgams.Function", mock_fn)
+    create_fn(mocker.MagicMock(), mock_fargs, mock_fbody, mocker.MagicMock())
+    _, closure_fn, _ = mock_fn.call_args[0]
+
+    closure_fn_result = closure_fn(mock_environment, *mock_args)
+
+    mock_environment.env_push.assert_called_once_with(dict(zip(mock_fargs, mock_args)))
+    mock_fbody.evaluate.assert_called_once_with(mock_child_environment)
+    mock_fbody_result.bind.assert_called_once_with(mock_child_environment)
+    assert closure_fn_result == mock_fbody_result
