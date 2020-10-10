@@ -62,6 +62,19 @@ class Amalgam(ABC):
         return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
 
 
+@dataclass(repr=False)
+class Atom(Amalgam):
+    """An `Amalgam` that represents different atoms."""
+
+    value: str
+
+    def evaluate(self, _environment: Environment) -> Atom:
+        return self
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return self._make_repr(self.value)
+
+
 @dataclass(repr=False, order=True)
 class Numeric(Amalgam):
     """An `Amalgam` that wraps around numeric types."""
