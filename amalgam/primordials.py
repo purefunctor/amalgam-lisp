@@ -92,7 +92,7 @@ def _mkfn(
     args: Quoted[Vector[Symbol]],
     body: Quoted[Amalgam],
 ) -> Amalgam:
-    return _setn(env, name, _fn(env, args, body).with_name(name.value.value))
+    return _setn(env, name, Quoted(_fn(env, args, body).with_name(name.value.value)))
 
 
 @_make_function("bool")
