@@ -26,6 +26,8 @@ from amalgam.primordials import (
     _ge,
     _le,
     _not,
+    _and,
+    _or,
 )
 
 from pytest import fixture, mark, param
@@ -157,3 +159,39 @@ comps = (
 @mark.parametrize(("comp_func", "comp_x", "comp_y", "comp_rslt"), comps)
 def test_comp(env, comp_func, comp_x, comp_y, comp_rslt):
     assert comp_func(env, comp_x, comp_y) == comp_rslt
+
+
+def test_and(env):
+    exprs = (
+        SExpression(Symbol("setn"), Symbol("x"), Atom("TRUE")),
+        Atom("FALSE"),
+        SExpression(Symbol("setn"), Symbol("y"), Atom("TRUE")),
+    )
+
+    _and_result = _and(env, *map(Quoted, exprs))
+
+    assert _and_result == Atom("FALSE")
+    assert env.ihas("x")
+    assert not env.ihas("y")
+
+
+def test_and_default(env):
+    assert _and(env, Quoted(Atom("TRUE"))) == Atom("TRUE")
+
+
+def test_or(env):
+    exprs = (
+        SExpression(Symbol("setn"), Symbol("x"), Atom("FALSE")),
+        Atom("TRUE"),
+        SExpression(Symbol("setn"), Symbol("y"), Atom("FALSE")),
+    )
+
+    _or_result = _or(env, *map(Quoted, exprs))
+
+    assert _or_result == Atom("TRUE")
+    assert env.ihas("x")
+    assert not env.ihas("y")
+
+
+def test_or_default(env):
+    assert _or(env, Quoted(Atom("FALSE"))) == Atom("FALSE")
