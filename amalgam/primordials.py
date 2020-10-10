@@ -73,7 +73,7 @@ def _div(_env: Environment, *nums: Numeric) -> Numeric:
 
 @_make_function("setn", defer=True)
 def _setn(env: Environment, name: Quoted[Symbol], amalgam: Quoted[Amalgam]) -> Amalgam:
-    env.iset(name.value.value, amalgam.value)
+    env.iset(name.value.value, amalgam.value.evaluate(env))
     return env.iget(name.value.value)
 
 
