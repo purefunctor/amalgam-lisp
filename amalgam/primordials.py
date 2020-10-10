@@ -10,6 +10,7 @@ from amalgam.amalgams import (
     Function,
     Numeric,
     Quoted,
+    SExpression,
     String,
     Symbol,
     Vector,
@@ -174,3 +175,25 @@ def _or(env: Environment, *qexprs: Quoted[Amalgam]) -> Atom:
         if cond == Atom("TRUE"):
             return cond
     return Atom("FALSE")
+
+
+@_make_function("if", defer=True)
+def _if(
+    env: Environment,
+    qcond: Quoted[Amalgam],
+    qthen: Quoted[Amalgam],
+    qelse: Quoted[Amalgam],
+) -> Amalgam:
+    cond = _bool(env, qcond.value)
+    if cond == Atom("TRUE"):
+        return qthen.value.evaluate(env)
+    return qelse.value.evaluate(env)
+
+
+@_make_function("cond", defer=True)
+def _cond(env: Environment, *qpairs: Quoted[Vector[SExpression]]) -> Amalgam:
+    for qpair in qpairs:
+        pred, expr = qpair.value.vals
+        if _bool(env, pred.evaluate(env)) == Atom("TRUE"):
+            return expr.evaluate(env)
+    return Atom("NIL")
