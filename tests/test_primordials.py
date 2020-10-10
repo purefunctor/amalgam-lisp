@@ -129,23 +129,27 @@ def test_not(env, not_expr, not_rslt):
     return _not(env, not_expr) == not_rslt
 
 
+_four = Numeric(4)
+_five = Numeric(5)
+
+
 comps = (
     param(comp_func, comp_x, comp_y, comp_rslt, id=comp_iden)
     for comp_func, comp_x, comp_y, comp_rslt, comp_iden in (
-        (_gt, Numeric(5), Numeric(4), Atom("TRUE"), "gt"),
-        (_gt, Numeric(4), Numeric(5), Atom("FALSE"), "gt-complement"),
-        (_lt, Numeric(4), Numeric(5), Atom("TRUE"), "lt"),
-        (_lt, Numeric(5), Numeric(4), Atom("FALSE"), "lt-complement"),
-        (_eq, Numeric(5), Numeric(5), Atom("TRUE"), "eq"),
-        (_eq, Numeric(4), Numeric(5), Atom("FALSE"), "eq-complement"),
-        (_ne, Numeric(4), Numeric(5), Atom("TRUE"), "ne"),
-        (_ne, Numeric(5), Numeric(5), Atom("FALSE"), "ne-complement"),
-        (_ge, Numeric(5), Numeric(4), Atom("TRUE"), "ge"),
-        (_ge, Numeric(4), Numeric(5), Atom("FALSE"), "ge-complement"),
-        (_le, Numeric(4), Numeric(5), Atom("TRUE"), "le"),
-        (_le, Numeric(5), Numeric(4), Atom("FALSE"), "le-complement"),
-        (_ge, Numeric(5), Numeric(5), Atom("TRUE"), "ge-equality"),
-        (_le, Numeric(5), Numeric(5), Atom("TRUE"), "le-equality")
+        (_gt, _five, _four, _t, "gt"),
+        (_lt, _four, _five, _t, "lt"),
+        (_eq, _five, _five, _t, "eq"),
+        (_ne, _four, _five, _t, "ne"),
+        (_ge, _five, _four, _t, "ge"),
+        (_le, _four, _five, _t, "le"),
+        (_gt, _four, _five, _f, "gt-complement"),
+        (_lt, _five, _four, _f, "lt-complement"),
+        (_eq, _four, _five, _f, "eq-complement"),
+        (_ne, _five, _five, _f, "ne-complement"),
+        (_ge, _four, _five, _f, "ge-complement"),
+        (_le, _five, _four, _f, "le-complement"),
+        (_ge, _five, _five, _t, "ge-equality"),
+        (_le, _five, _five, _t, "le-equality")
     )
 )
 
