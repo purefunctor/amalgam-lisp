@@ -1,4 +1,5 @@
 from amalgam.amalgams import (
+    Atom,
     Environment,
     Function,
     Numeric,
@@ -17,6 +18,7 @@ from amalgam.primordials import (
     _setn,
     _fn,
     _mkfn,
+    _bool,
 )
 
 from pytest import fixture, mark, param
@@ -80,3 +82,25 @@ def test_mkfn(env):
 
     assert env.iget("name") == _mkfn_result
     assert _mkfn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
+
+
+bools = (
+    param(bool_expr, bool_rslt, id=bool_iden)
+    for bool_expr, bool_rslt, bool_iden in (
+        (String(""), Atom("FALSE"), "empty-string"),
+        (String("a"), Atom("TRUE"), "non-empty-string"),
+        (Numeric(0), Atom("FALSE"), "zero-value"),
+        (Numeric(42), Atom("TRUE"), "non-zero-value"),
+        (Vector(), Atom("FALSE"), "empty-vector"),
+        (Vector(Numeric(42)), Atom("TRUE"), "non-empty-vector"),
+        (Atom("FALSE"), Atom("FALSE"), "false-atom"),
+        (Atom("TRUE"), Atom("TRUE"), "true-atom"),
+        (Atom("NIL"), Atom("FALSE"), "nil-atom"),
+        (Atom("OTH"), Atom("TRUE"), "other-atom"),
+    )
+)
+
+
+@mark.parametrize(("bool_expr", "bool_rslt"), bools)
+def test_bool(env, bool_expr, bool_rslt):
+    assert _bool(env, bool_expr) == bool_rslt
