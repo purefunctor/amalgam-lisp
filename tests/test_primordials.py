@@ -25,6 +25,7 @@ from amalgam.primordials import (
     _ne,
     _ge,
     _le,
+    _not,
 )
 
 from pytest import fixture, mark, param
@@ -90,26 +91,42 @@ def test_mkfn(env):
     assert _mkfn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
 
 
+_t = Atom("TRUE")
+_f = Atom("FALSE")
+
+_truthy_falsy = (
+    (String(""), _f, _t, "empty-string",),
+    (String("a"), _t, _f, "non-empty-string"),
+    (Numeric(0), _f, _t, "zero-value"),
+    (Numeric(1), _t, _f, "non-zero-value"),
+    (Vector(), _f, _t, "empty-vector"),
+    (Vector(Numeric(1)), _t, _f, "non-empty-vector"),
+    (Atom("FALSE"), _f, _t, "false-atom"),
+    (Atom("TRUE"), _t, _f, "true-atom"),
+    (Atom("NIL"),  _f, _t, "nil-atom"),
+    (Atom("OTH"), _t, _f, "other-atom")
+)
+
 bools = (
     param(bool_expr, bool_rslt, id=bool_iden)
-    for bool_expr, bool_rslt, bool_iden in (
-        (String(""), Atom("FALSE"), "empty-string"),
-        (String("a"), Atom("TRUE"), "non-empty-string"),
-        (Numeric(0), Atom("FALSE"), "zero-value"),
-        (Numeric(42), Atom("TRUE"), "non-zero-value"),
-        (Vector(), Atom("FALSE"), "empty-vector"),
-        (Vector(Numeric(42)), Atom("TRUE"), "non-empty-vector"),
-        (Atom("FALSE"), Atom("FALSE"), "false-atom"),
-        (Atom("TRUE"), Atom("TRUE"), "true-atom"),
-        (Atom("NIL"), Atom("FALSE"), "nil-atom"),
-        (Atom("OTH"), Atom("TRUE"), "other-atom"),
-    )
+    for bool_expr, bool_rslt, _, bool_iden in _truthy_falsy
+)
+
+
+nots = (
+    param(not_expr, not_rlst, id=not_iden)
+    for not_expr, _, not_rlst, not_iden in _truthy_falsy
 )
 
 
 @mark.parametrize(("bool_expr", "bool_rslt"), bools)
 def test_bool(env, bool_expr, bool_rslt):
     assert _bool(env, bool_expr) == bool_rslt
+
+
+@mark.parametrize(("not_expr", "not_rslt"), nots)
+def test_not(env, not_expr, not_rslt):
+    return _not(env, not_expr) == not_rslt
 
 
 comps = (
