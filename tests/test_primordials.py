@@ -1,4 +1,4 @@
-from amalgam.amalgams import Numeric
+from amalgam.amalgams import Environment, Numeric
 from amalgam.primordials import (
     _add,
     _sub,
@@ -10,17 +10,6 @@ from amalgam.primordials import (
 )
 
 from pytest import mark, param
-
-from tests.utils import (
-    MockEnvironment,
-    MockFunction,
-    MockNumeric,
-    MockQuoted,
-    MockSExpression,
-    MockSymbol,
-    MockVector,
-)
-
 
 arithmetics = (
     param(
@@ -44,56 +33,4 @@ arithmetics = (
 
 @mark.parametrize(("arith_fn", "arith_nm", "arith_rs"), arithmetics)
 def test_arithmetic_function(arith_fn, arith_nm, arith_rs):
-    assert arith_fn(MockEnvironment(), *map(Numeric, arith_nm)).value == arith_rs
-
-
-def test_setn():
-    mock_env = MockEnvironment()
-    mock_name = MockQuoted(MockSymbol("setn-test"))
-    mock_amalgam = MockQuoted(MockNumeric(42))
-    mock_env.iget.return_value = mock_amalgam
-
-    _setn_result = _setn(mock_env, mock_name, mock_amalgam)
-
-    mock_env.iset.assert_called_once_with(mock_name.value.value, mock_amalgam.value)
-    mock_env.iget.assert_called_once_with(mock_name.value.value)
-    assert _setn_result == mock_amalgam
-
-
-def test_fn(mocker):
-    mock_env = MockEnvironment()
-    mock_args = MockQuoted(MockVector(MockSymbol("x")))
-    mock_body = MockQuoted(MockSymbol("x"))
-    mock_create_fn = mocker.Mock(return_value=MockFunction("~lambda~"))
-
-    mocker.patch("amalgam.primordials.create_fn", mock_create_fn)
-
-    _fn_result = _fn(mock_env, mock_args, mock_body)
-
-    mock_create_fn.assert_called_once_with(
-        "~lambda~",
-        [mock_arg.value for mock_arg in mock_args.value.vals],
-        mock_body.value,
-    )
-    assert _fn_result == mock_create_fn.return_value
-
-
-def test_mkfn(mocker):
-    mock_env = MockEnvironment()
-    mock_name = MockQuoted(MockSymbol("mkfn-test"))
-    mock_args = MockQuoted(MockVector(MockSymbol("x")))
-    mock_body = MockQuoted(MockSymbol("x"))
-    mock_Function = MockFunction()
-    mock_Function.with_name.return_value = mock_Function
-    mock_fn = mocker.Mock(return_value=mock_Function)
-    mock_setn = mocker.Mock(return_value=mock_Function)
-
-    mocker.patch("amalgam.primordials._fn", mock_fn)
-    mocker.patch("amalgam.primordials._setn", mock_setn)
-
-    _mkfn_result = _mkfn(mock_env, mock_name, mock_args, mock_body)
-
-    mock_fn.assert_called_once_with(mock_env, mock_args, mock_body)
-    mock_Function.with_name.assert_called_once_with(mock_name.value.value)
-    mock_setn.assert_called_once_with(mock_env, mock_name, mock_Function)
-    assert _mkfn_result == mock_Function
+    assert arith_fn(Environment(), *map(Numeric, arith_nm)).value == arith_rs
