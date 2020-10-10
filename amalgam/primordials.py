@@ -5,10 +5,12 @@ from typing import Callable, Dict, TypeVar, Union
 from amalgam.amalgams import (
     create_fn,
     Amalgam,
+    Atom,
     Environment,
     Function,
     Numeric,
     Quoted,
+    String,
     Symbol,
     Vector,
 )
@@ -90,3 +92,85 @@ def _mkfn(
     body: Quoted[Amalgam],
 ) -> Amalgam:
     return _setn(env, name, _fn(env, args, body).with_name(name.value.value))
+
+
+@_make_function("bool")
+def _bool(_env: Environment, expr: Amalgam) -> Atom:
+    if expr == String(""):
+        return Atom("FALSE")
+    elif expr == Numeric(0):
+        return Atom("FALSE")
+    elif expr == Vector():
+        return Atom("FALSE")
+    elif expr == Atom("FALSE"):
+        return Atom("FALSE")
+    elif expr == Atom("NIL"):
+        return Atom("FALSE")
+    return Atom("TRUE")
+
+
+@_make_function(">")
+def _gt(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x > y:  # type: ignore
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("<")
+def _lt(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x < y:  # type: ignore
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("=")
+def _eq(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x == y:
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("/=")
+def _ne(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x != y:
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function(">=")
+def _ge(env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x >= y:  # type: ignore
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("<=")
+def _le(env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+    if x <= y:  # type: ignore
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("not")
+def _not(_env: Environment, expr: Amalgam) -> Atom:
+    if _bool(_env, expr) == Atom("TRUE"):
+        return Atom("FALSE")
+    return Atom("TRUE")
+
+
+@_make_function("and", defer=True)
+def _and(env: Environment, *qexprs: Quoted[Amalgam]) -> Atom:
+    for qexpr in qexprs:
+        cond = _bool(env, qexpr.value.evaluate(env))
+        if cond == Atom("FALSE"):
+            return cond
+    return Atom("TRUE")
+
+
+@_make_function("or", defer=True)
+def _or(env: Environment, *qexprs: Quoted[Amalgam]) -> Atom:
+    for qexpr in qexprs:
+        cond = _bool(env, qexpr.value.evaluate(env))
+        if cond == Atom("TRUE"):
+            return cond
+    return Atom("FALSE")
