@@ -19,6 +19,12 @@ from amalgam.primordials import (
     _fn,
     _mkfn,
     _bool,
+    _gt,
+    _lt,
+    _eq,
+    _ne,
+    _ge,
+    _le,
 )
 
 from pytest import fixture, mark, param
@@ -104,3 +110,29 @@ bools = (
 @mark.parametrize(("bool_expr", "bool_rslt"), bools)
 def test_bool(env, bool_expr, bool_rslt):
     assert _bool(env, bool_expr) == bool_rslt
+
+
+comps = (
+    param(comp_func, comp_x, comp_y, comp_rslt, id=comp_iden)
+    for comp_func, comp_x, comp_y, comp_rslt, comp_iden in (
+        (_gt, Numeric(5), Numeric(4), Atom("TRUE"), "gt"),
+        (_gt, Numeric(4), Numeric(5), Atom("FALSE"), "gt-complement"),
+        (_lt, Numeric(4), Numeric(5), Atom("TRUE"), "lt"),
+        (_lt, Numeric(5), Numeric(4), Atom("FALSE"), "lt-complement"),
+        (_eq, Numeric(5), Numeric(5), Atom("TRUE"), "eq"),
+        (_eq, Numeric(4), Numeric(5), Atom("FALSE"), "eq-complement"),
+        (_ne, Numeric(4), Numeric(5), Atom("TRUE"), "ne"),
+        (_ne, Numeric(5), Numeric(5), Atom("FALSE"), "ne-complement"),
+        (_ge, Numeric(5), Numeric(4), Atom("TRUE"), "ge"),
+        (_ge, Numeric(4), Numeric(5), Atom("FALSE"), "ge-complement"),
+        (_le, Numeric(4), Numeric(5), Atom("TRUE"), "le"),
+        (_le, Numeric(5), Numeric(4), Atom("FALSE"), "le-complement"),
+        (_ge, Numeric(5), Numeric(5), Atom("TRUE"), "ge-equality"),
+        (_le, Numeric(5), Numeric(5), Atom("TRUE"), "le-equality")
+    )
+)
+
+
+@mark.parametrize(("comp_func", "comp_x", "comp_y", "comp_rslt"), comps)
+def test_comp(env, comp_func, comp_x, comp_y, comp_rslt):
+    assert comp_func(env, comp_x, comp_y) == comp_rslt
