@@ -28,6 +28,8 @@ from amalgam.primordials import (
     _not,
     _and,
     _or,
+    _if,
+    _cond,
 )
 
 from pytest import fixture, mark, param
@@ -195,3 +197,48 @@ def test_or(env):
 
 def test_or_default(env):
     assert _or(env, Quoted(Atom("FALSE"))) == Atom("FALSE")
+
+
+def test_if_then(env):
+    then_else = (
+        SExpression(Symbol("setn"), Symbol("x"), Atom("THEN")),
+        SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
+    )
+
+    _if_result_then = _if(env, Quoted(Atom("TRUE")), *map(Quoted, then_else))
+
+    assert _if_result_then == Atom("THEN")
+    assert env.ihas("x")
+    assert not env.ihas("y")
+
+
+def test_if_else(env):
+    then_else = (
+        SExpression(Symbol("setn"), Symbol("x"), Atom("THEN")),
+        SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
+    )
+
+    _if_result_else = _if(env, Quoted(Atom("FALSE")), *map(Quoted, then_else))
+
+    assert _if_result_else == Atom("ELSE")
+    assert not env.ihas("x")
+    assert env.ihas("y")
+
+
+def test_cond(env):
+    pairs = (
+        (Atom("FALSE"), SExpression(Symbol("setn"), Symbol("x"), Atom("FIRST"))),
+        (Atom("TRUE"), SExpression(Symbol("setn"), Symbol("y"), Atom("SECOND"))),
+        (Atom("FALSE"), SExpression(Symbol("setn"), Symbol("z"), Atom("THIRD"))),
+    )
+
+    _cond_result = _cond(env, *(Quoted(Vector(*pair)) for pair in pairs))
+
+    assert _cond_result == Atom("SECOND")
+    assert not env.ihas("x")
+    assert env.ihas("y")
+    assert not env.ihas("z")
+
+
+def test_cond_nil(env):
+    assert _cond(env, Quoted(Vector(Atom("FALSE"), Atom("FALSE")))) == Atom("NIL")
