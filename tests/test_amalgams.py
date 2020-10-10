@@ -1,5 +1,6 @@
 from amalgam.amalgams import (
     create_fn,
+    Atom,
     Function,
     Numeric,
     Quoted,
@@ -25,6 +26,11 @@ def mock_environment():
 @fixture
 def mock_fn(mocker):
     return mocker.MagicMock(return_value=mocker.MagicMock())
+
+
+def test_atom_evaluate(mock_environment):
+    atom = Atom("atom-test")
+    assert atom.evaluate(mock_environment) == atom
 
 
 def test_string_evaluate(mock_environment):
