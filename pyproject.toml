@@ -15,6 +15,7 @@ packages = [
 python = "^3.7"
 click = "^7.1.2"
 pyparsing = "^2.4.7"
+prompt-toolkit = "^3.0.7"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"
