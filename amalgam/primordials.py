@@ -183,7 +183,7 @@ def _if(
     qthen: Quoted[Amalgam],
     qelse: Quoted[Amalgam],
 ) -> Amalgam:
-    cond = _bool(env, qcond.value)
+    cond = _bool(env, qcond.value.evaluate(env))
     if cond == Atom("TRUE"):
         return qthen.value.evaluate(env)
     return qelse.value.evaluate(env)
