@@ -203,27 +203,31 @@ def test_or_default(env):
 
 
 def test_if_then(env):
+    cond = SExpression(Symbol("setn"), Symbol("w"), Atom("TRUE"))
     then_else = (
         SExpression(Symbol("setn"), Symbol("x"), Atom("THEN")),
         SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
     )
 
-    _if_result_then = _if(env, Quoted(Atom("TRUE")), *map(Quoted, then_else))
+    _if_result_then = _if(env, Quoted(cond), *map(Quoted, then_else))
 
     assert _if_result_then == Atom("THEN")
+    assert env.ihas("w")
     assert env.ihas("x")
     assert not env.ihas("y")
 
 
 def test_if_else(env):
+    cond = SExpression(Symbol("setn"), Symbol("w"), Atom("FALSE"))
     then_else = (
         SExpression(Symbol("setn"), Symbol("x"), Atom("THEN")),
         SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
     )
 
-    _if_result_else = _if(env, Quoted(Atom("FALSE")), *map(Quoted, then_else))
+    _if_result_else = _if(env, Quoted(cond), *map(Quoted, then_else))
 
     assert _if_result_else == Atom("ELSE")
+    assert env.ihas("w")
     assert not env.ihas("x")
     assert env.ihas("y")
 
