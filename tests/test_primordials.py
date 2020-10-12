@@ -233,15 +233,24 @@ def test_if_else(env):
 
 
 def test_cond(env):
-    pairs = (
-        (Atom("FALSE"), SExpression(Symbol("setn"), Symbol("x"), Atom("FIRST"))),
-        (Atom("TRUE"), SExpression(Symbol("setn"), Symbol("y"), Atom("SECOND"))),
-        (Atom("FALSE"), SExpression(Symbol("setn"), Symbol("z"), Atom("THIRD"))),
+    predicates = (
+        SExpression(Symbol("setn"), Symbol("u"), Atom("FALSE")),
+        SExpression(Symbol("setn"), Symbol("v"), Atom("TRUE")),
+        SExpression(Symbol("setn"), Symbol("w"), Atom("FALSE")),
     )
+    values = (
+        SExpression(Symbol("setn"), Symbol("x"), Atom("FIRST")),
+        SExpression(Symbol("setn"), Symbol("y"), Atom("SECOND")),
+        SExpression(Symbol("setn"), Symbol("z"), Atom("THIRD")),
+    )
+    pairs = (Quoted(Vector(*pair)) for pair in zip(predicates, values))
 
-    _cond_result = _cond(env, *(Quoted(Vector(*pair)) for pair in pairs))
+    _cond_result = _cond(env, *pairs)
 
     assert _cond_result == Atom("SECOND")
+    assert env.ihas("u")
+    assert env.ihas("v")
+    assert not env.ihas("w")
     assert not env.ihas("x")
     assert env.ihas("y")
     assert not env.ihas("z")
