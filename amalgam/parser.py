@@ -27,7 +27,7 @@ symbol_parser = pp.Regex(
     r"(?![+-]?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
 ).setParseAction(
     apply_splat(am.Symbol)
-)
+).setName("symbol")
 
 _escaped_characters = (
     pp.Literal("\\")
@@ -50,7 +50,7 @@ string_parser = (
     pp.Suppress("\"") + _string_contents + pp.Suppress("\"")
 ).setParseAction(
     apply_splat(am.String)
-)
+).setName("string")
 
 _string_integral_parser = pp.Regex(r"[+-]?(0|[1-9]\d*)")
 
@@ -76,7 +76,7 @@ numeric_parser = (
     _floating_parser | _fraction_parser | _integral_parser
 ).setParseAction(
     apply_splat(am.Numeric)
-)
+).setName("numeric")
 
 expression_parser = pp.Forward()
 
@@ -84,19 +84,19 @@ quoted_parser = (
     pp.Suppress("'") + expression_parser
 ).setParseAction(
     apply_splat(am.Quoted)
-)
+).setName("quoted")
 
 s_expression_parser = (
     LPAREN + expression_parser[...] + RPAREN
 ).setParseAction(
     apply_splat(am.SExpression)
-)
+).setName("s-expression")
 
 vector_parser = (
     LBRACE + expression_parser[...] + RBRACE
 ).setParseAction(
     apply_splat(am.Vector)
-)
+).setName("vector")
 
 expression_parser <<= (
     quoted_parser
