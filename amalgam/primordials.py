@@ -1,6 +1,8 @@
 from fractions import Fraction
 from functools import partial
+import sys
 from typing import Callable, Dict, TypeVar, Union
+
 
 from amalgam.amalgams import (
     create_fn,
@@ -196,3 +198,9 @@ def _cond(env: Environment, *qpairs: Quoted[Vector[Amalgam]]) -> Amalgam:
         if _bool(env, pred.evaluate(env)) == Atom("TRUE"):
             return expr.evaluate(env)
     return Atom("NIL")
+
+
+@_make_function("exit")
+def _exit(env: Environment, exit_code: Numeric = Numeric(0)) -> Amalgam:
+    print("Goodbye.")
+    sys.exit(int(exit_code.value))

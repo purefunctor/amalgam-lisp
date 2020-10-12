@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 from amalgam.amalgams import (
     Atom,
     Environment,
@@ -30,9 +32,10 @@ from amalgam.primordials import (
     _or,
     _if,
     _cond,
+    _exit,
 )
 
-from pytest import fixture, mark, param
+from pytest import fixture, mark, param, raises
 
 
 @fixture
@@ -242,3 +245,23 @@ def test_cond(env):
 
 def test_cond_nil(env):
     assert _cond(env, Quoted(Vector(Atom("FALSE"), Atom("FALSE")))) == Atom("NIL")
+
+
+exits = (
+    param(exit_status, id=exit_name)
+    for exit_status, exit_name in (
+        (0, "integer-zero"),
+        (1, "integer-non-zero"),
+        (0.0, "floating-zero"),
+        (1.0, "floating-non-zero"),
+        (Fraction(0, 1), "fraction-zero"),
+        (Fraction(1, 1), "fraction-non-zero"),
+    )
+)
+
+
+@mark.parametrize(("exit_status"), exits)
+def test_exit(capsys, env, exit_status):
+    with raises(SystemExit, match=f"{int(exit_status)}"):
+        _exit(env, Numeric(exit_status))
+    capsys.readouterr().out == "Goodbye.\n"
