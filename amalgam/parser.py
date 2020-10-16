@@ -1,5 +1,9 @@
 from fractions import Fraction
 from functools import wraps
+from io import StringIO
+import re
+from typing import Optional
+
 
 import pyparsing as pp
 
@@ -106,3 +110,58 @@ expression_parser <<= (
     | s_expression_parser
     | vector_parser
 )
+
+
+class AmalgamParser:
+    """
+    Class that serves as the parsing frontend.
+
+    The `parse` method allows for reentrant parsing of text by
+    utilizing a `StringIO` buffer; this enables the REPL to be
+    able to parse multi-line expressions by checking for the
+    return value of said method.
+    """
+
+    inst = None
+
+    def __new__(cls) -> "AmalgamParser":
+        if cls.inst is not None:
+            return cls.inst
+
+        self = super().__new__(cls)
+        cls.inst = self
+
+        return cls.inst
+
+    def __init__(self) -> None:
+        self.parse_buffer = StringIO()
+        self.expect_more = False
+
+        string_parser.setFailAction(self._expect_more)
+        s_expression_parser.setFailAction(self._expect_more)
+        vector_parser.setFailAction(self._expect_more)
+
+    def _expect_more(self, *arguments) -> None:
+        *_, err = arguments
+        if re.match(r"Expected \"[\)\]\"]\", found end of text", str(err)):
+            self.expect_more = True
+
+    def parse(self, text: str) -> Optional[am.Amalgam]:
+        self.parse_buffer.write(text)
+        self.parse_buffer.seek(0)
+        self.expect_more = False
+
+        text = self.parse_buffer.read()
+
+        try:
+            expr = expression_parser.parseString(text, parseAll=True)[0]
+
+        except pp.ParseException as p:
+            if not self.expect_more:
+                self.parse_buffer = StringIO()
+                raise p
+            return None
+
+        else:
+            self.parse_buffer = StringIO()
+            return expr
