@@ -35,6 +35,7 @@ from amalgam.primordials import (
     _exit,
     _print,
     _putstrln,
+    _do,
 )
 
 from pytest import fixture, mark, param, raises
@@ -305,3 +306,19 @@ def test_putstrln(capsys, env):
         _putstrln(env, qvector)
 
     assert capsys.readouterr().out == "hello, world\n"
+
+
+def test_do(capsys, env):
+    exprs = (
+        SExpression(Symbol("setn"), Symbol("x"), Numeric(21)),
+        SExpression(Symbol("setn"), Symbol("y"), Numeric(21)),
+        SExpression(
+            Symbol("print"),
+            SExpression(
+                Symbol("+"), Symbol("x"), Symbol("y"),
+            )
+        )
+    )
+
+    assert _do(env, *map(Quoted, exprs)) == Numeric(42)
+    assert capsys.readouterr().out == "42\n"

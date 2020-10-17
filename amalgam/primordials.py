@@ -218,3 +218,11 @@ def _putstrln(_env: Environment, string: String) -> String:
         raise TypeError("putstrln only accepts a string")
     print(string.value)
     return string
+
+
+@_make_function("do", defer=True)
+def _do(env: Environment, *qexprs: Quoted[Amalgam]) -> Amalgam:
+    accumulator = Atom("NIL")
+    for qexpr in qexprs:
+        accumulator = qexpr.value.evaluate(env)
+    return accumulator
