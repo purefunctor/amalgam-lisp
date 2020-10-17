@@ -149,3 +149,50 @@ vectors = [
 @mark.parametrize(("expr_s", "expr_r"), vectors)
 def test_vector(expr_s, expr_r):
     assert pr.vector_parser.parseString(expr_s)[0] == expr_r
+
+
+def test_AmalgamParser_raises_ParseException():
+    repl_parser = pr.AmalgamParser()
+
+    with raises(ParseException):
+        repl_parser.parse("1 . 0")
+
+
+def test_AmalgamParser_bracket_mismatch():
+    repl_parser = pr.AmalgamParser()
+
+    with raises(ParseException):
+        repl_parser.parse("(+ 1 2]")
+
+    with raises(ParseException):
+        repl_parser.parse("[1 2 3)")
+
+
+continuations = (
+    param(cont_first, cont_then, id=cont_iden)
+    for cont_first, cont_then, cont_iden in (
+        ("(+ 1", "\n1)", "s-expression"),
+        ("[1 2", "\n3]", "vector"),
+        ("\"fo", "\no\"", "string"),
+        ("(+ 1 [1 2", "\n3 4])", "s-expression-vector"),
+        ("[1 2 (+ 1", "\n3 4)]", "vector-s-expression"),
+        ("(+ 1 \"fo", "\no\")", "s-expression-string"),
+        ("[+ 1 \"fo", "\no\"]", "vector-string"),
+
+    )
+)
+
+
+@mark.parametrize(("cont_first", "cont_then"), continuations)
+def test_AmalgamParser_multiline_continuation(cont_first, cont_then):
+    repl_parser = pr.AmalgamParser()
+
+    cont_full = cont_first + cont_then
+
+    assert repl_parser.parse(cont_first) == None
+    assert repl_parser.expect_more == True
+    assert repl_parser.parse_buffer.tell() == len(cont_first)
+
+    assert repl_parser.parse(cont_then) == pr.expression_parser.parseString(cont_full)[0]
+    assert repl_parser.expect_more == False
+    assert repl_parser.parse_buffer.tell() == 0
