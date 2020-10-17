@@ -26,9 +26,12 @@ coverage = "^5.2.1"
 mypy = "^0.782"
 pytest-mock = "^3.3.1"
 
+[tool.poetry.scripts]
+amalgam = "amalgam.cli:amalgam_main"
+
 [tool.coverage.run]
 source = ["amalgam"]
-omit = ["*tests*"]
+omit = ["*tests*", "amalgam/__main__.py"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
