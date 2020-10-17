@@ -27,7 +27,7 @@ def test_invoke_file():
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open("plus.al", "w") as f:
-            f.write("(+ 42 42)")
+            f.write("(print (+ 42 42))")
 
         result = runner.invoke(amalgam_main, ["plus.al"])
 
