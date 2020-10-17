@@ -74,6 +74,9 @@ class Atom(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
+    def __str__(self) -> str:  # pragma: no cover
+        return str(self.value)
+
 
 @dataclass(repr=False, order=True)
 class Numeric(Amalgam):
@@ -86,6 +89,9 @@ class Numeric(Amalgam):
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
+
+    def __str__(self) -> str:  # pragma: no cover
+        return str(self.value)
 
 
 @dataclass(repr=False, order=True)
@@ -100,6 +106,9 @@ class String(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"\"{self.value}\"")
 
+    def __str__(self) -> str:  # pragma: no cover
+        return f"\"{self.value}\""
+
 
 @dataclass(repr=False)
 class Symbol(Amalgam):
@@ -112,6 +121,9 @@ class Symbol(Amalgam):
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
+
+    def __str__(self) -> str:  # pragma: no cover
+        return self.value
 
 
 @dataclass(repr=False)
@@ -150,6 +162,9 @@ class Function(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.name)
 
+    def __str__(self) -> str:  # pragma: no cover
+        return self.name
+
 
 @dataclass(init=False, repr=False)
 class SExpression(Amalgam):
@@ -174,6 +189,9 @@ class SExpression(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
 
+    def __str__(self) -> str:  # pragma: no cover
+        return f"({' '.join(map(str, self.vals))})"
+
 
 T = TypeVar("T", bound=Amalgam)
 
@@ -193,6 +211,9 @@ class Vector(Amalgam, Generic[T]):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(" ".join(map(repr, self.vals)))
 
+    def __str__(self) -> str:  # pragma: no cover
+        return f"[{' '.join(map(str, self.vals))}]"
+
 
 @dataclass(repr=False)
 class Quoted(Amalgam, Generic[T]):
@@ -205,6 +226,9 @@ class Quoted(Amalgam, Generic[T]):
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(repr(self.value))
+
+    def __str__(self) -> str:  # pragma: no cover
+        return f"'{self.value!s}"
 
 
 def create_fn(
