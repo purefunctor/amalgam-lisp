@@ -20,14 +20,15 @@ $ poetry run pre-commit install
 ```
 
 ## Running Tests / Coverage Reports
-The preferred way of running tests is through `tox`, which generates coverage data for Python 3.7 and 3.8 that can then be combined:
+`tox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8.
 ```bash
 $ poetry run tox
-$ poetry run coverage combine
 ```
 
-In order to view reports for the coverage data:
+Alternatively, tests and coverage reports can be generated manually.
 ```bash
-$ poetry run coverage html
+$ poetry run coverage run -m pytest
+$ poetry run coverage combine
 $ poetry run coverage report -m
+$ poetry run coverage html
 ```
