@@ -27,10 +27,11 @@ matrix:
     env: TOXENV=py38
 
 install:
-  - pip install tox coverage
+  - pip install coverage poetry
+  - poetry install
 
 script:
-  - tox
+  - poetry run tox
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
