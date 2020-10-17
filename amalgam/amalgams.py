@@ -75,7 +75,7 @@ class Atom(Amalgam):
         return self._make_repr(self.value)
 
     def __str__(self) -> str:
-        return str(self.value)
+        return f":{self.value}"
 
 
 @dataclass(repr=False, order=True)
