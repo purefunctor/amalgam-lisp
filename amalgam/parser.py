@@ -27,11 +27,19 @@ def apply_splat(func):
 
 LPAREN, RPAREN, LBRACE, RBRACE = map(pp.Suppress, "()[]")
 
-symbol_parser = pp.Regex(
+IDENTIFIER = pp.Regex(
     r"(?![+-]?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
-).setParseAction(
+)
+
+symbol_parser = IDENTIFIER.copy().setParseAction(
     apply_splat(am.Symbol)
 ).setName("symbol")
+
+atom_parser = (
+    pp.Suppress(":") + IDENTIFIER
+).setParseAction(
+    apply_splat(am.Atom)
+).setName("atom")
 
 _escaped_characters = (
     pp.Literal("\\")
@@ -104,6 +112,7 @@ vector_parser = (
 
 expression_parser <<= (
     quoted_parser
+    | atom_parser
     | numeric_parser
     | symbol_parser
     | string_parser

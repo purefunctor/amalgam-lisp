@@ -23,6 +23,28 @@ def test_symbol_parser_raises_ParseException_on_numerics():
         pr.symbol_parser.parseString("-1")
 
 
+def test_atom_parser_allowed_characters():
+    text = r":-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
+    assert pr.atom_parser.parseString(text)[0] == am.Atom(text[1:])
+
+
+def test_atom_raises_ParseException():
+    with raises(ParseException):
+        pr.atom_parser.parseString(":123")
+
+    with raises(ParseException):
+        pr.atom_parser.parseString("+123")
+
+    with raises(ParseException):
+        pr.atom_parser.parseString("-123")
+
+    with raises(ParseException):
+        pr.atom_parser.parseString("xyz")
+
+    with raises(ParseException):
+        pr.atom_parser.parseString("=+-")
+
+
 _string_contents = "Spam21 Eggs42 +-*/&<=>?!_="
 _escaped_characters = "".join(map("\\{}".format, _string_contents))
 
@@ -97,6 +119,8 @@ expressions_simple = (
     ("21/42", am.Numeric(Fraction(21, 42)), "numeric_fraction"),
     ("-+>", am.Symbol("-+>"), "symbol_glyph"),
     ("add", am.Symbol("add"), "symbol_names"),
+    (":-+>", am.Atom("-+>"), "atom_glyphs"),
+    (":TRUE", am.Atom("TRUE"), "atom_names"),
     ("\"hello, world\"", am.String("hello, world"), "string"),
     ("(+ 42 42)", am.SExpression(am.Symbol("+"), am.Numeric(42), am.Numeric(42)), "s_expression"),
     ("[add 42 42]", am.Vector(am.Symbol("add"), am.Numeric(42), am.Numeric(42)), "vector"),
