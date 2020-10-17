@@ -74,7 +74,7 @@ class Atom(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return str(self.value)
 
 
@@ -90,7 +90,7 @@ class Numeric(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return str(self.value)
 
 
@@ -106,7 +106,7 @@ class String(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"\"{self.value}\"")
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return f"\"{self.value}\""
 
 
@@ -122,7 +122,7 @@ class Symbol(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return self.value
 
 
@@ -189,7 +189,7 @@ class SExpression(Amalgam):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return f"({' '.join(map(str, self.vals))})"
 
 
@@ -211,7 +211,7 @@ class Vector(Amalgam, Generic[T]):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(" ".join(map(repr, self.vals)))
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return f"[{' '.join(map(str, self.vals))}]"
 
 
@@ -227,7 +227,7 @@ class Quoted(Amalgam, Generic[T]):
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(repr(self.value))
 
-    def __str__(self) -> str:  # pragma: no cover
+    def __str__(self) -> str:
         return f"'{self.value!s}"
 
 
