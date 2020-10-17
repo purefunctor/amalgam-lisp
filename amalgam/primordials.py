@@ -204,3 +204,17 @@ def _cond(env: Environment, *qpairs: Quoted[Vector[Amalgam]]) -> Amalgam:
 def _exit(env: Environment, exit_code: Numeric = Numeric(0)) -> Amalgam:
     print("Goodbye.")
     sys.exit(int(exit_code.value))
+
+
+@_make_function("print")
+def _print(_env: Environment, amalgam: Amalgam) -> Amalgam:
+    print(amalgam)
+    return amalgam
+
+
+@_make_function("putstrln")
+def _putstrln(_env: Environment, string: String) -> String:
+    if not isinstance(string, String):
+        raise TypeError("putstrln only accepts a string")
+    print(string.value)
+    return string

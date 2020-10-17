@@ -33,6 +33,8 @@ from amalgam.primordials import (
     _if,
     _cond,
     _exit,
+    _print,
+    _putstrln,
 )
 
 from pytest import fixture, mark, param, raises
@@ -278,3 +280,28 @@ def test_exit(capsys, env, exit_status):
     with raises(SystemExit, match=f"{int(exit_status)}"):
         _exit(env, Numeric(exit_status))
     capsys.readouterr().out == "Goodbye.\n"
+
+
+def test_print(capsys, env):
+    string = String("hello, world")
+    qvector = Quoted(Vector(Symbol("x"), Symbol("y")))
+
+    assert _print(env, string) == string
+    assert _print(env, qvector) == qvector
+
+    assert capsys.readouterr().out == (
+        f"\"hello, world\"\n"
+        f"'[x y]\n"
+    )
+
+
+def test_putstrln(capsys, env):
+    string = String("hello, world")
+    qvector = Quoted(Vector(Symbol("x"), Symbol("y")))
+
+    assert _putstrln(env, string) == string
+
+    with raises(TypeError):
+        _putstrln(env, qvector)
+
+    assert capsys.readouterr().out == "hello, world\n"
