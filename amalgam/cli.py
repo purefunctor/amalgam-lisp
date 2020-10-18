@@ -25,7 +25,7 @@ def amalgam_main(file, expr):
     else:
         raise click.BadParameter("Cannot use FILE and --expr together")
 
-    env = Environment(None, FUNCTIONS.copy())
+    env = Environment(FUNCTIONS)
     result = AmalgamParser().parse(text).evaluate(env)
 
     if not has_file and has_expr:

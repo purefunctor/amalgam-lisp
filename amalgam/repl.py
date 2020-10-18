@@ -17,7 +17,7 @@ class AmalgamREPL:
         self.repl_parser = AmalgamParser()
         self.session = PromptSession()
 
-        self.environment = Environment(None, FUNCTIONS.copy())
+        self.environment = Environment(FUNCTIONS)
 
     def repl(self) -> None:
         cont = False

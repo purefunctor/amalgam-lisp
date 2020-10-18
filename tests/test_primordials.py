@@ -43,7 +43,7 @@ from pytest import fixture, mark, param, raises
 
 @fixture
 def env():
-    return Environment(None, FUNCTIONS.copy())
+    return Environment(FUNCTIONS)
 
 
 arithmetics = (
