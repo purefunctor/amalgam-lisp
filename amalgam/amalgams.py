@@ -4,13 +4,10 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass
 from fractions import Fraction
-from itertools import chain
 from typing import (
     cast,
     Any,
     Callable,
-    Dict,
-    Iterator,
     Generic,
     Mapping,
     MutableMapping,
@@ -258,110 +255,8 @@ def create_fn(
     return Function(fname, closure_fn, defer)
 
 
-Bindings = Dict[str, Amalgam]
-
-
-class Environment(MutableMapping[str, Amalgam]):
-    """Class that represents nested execution environments."""
-
-    def __init__(
-        self,
-        parent: Optional[Environment] = None,
-        bindings: Optional[Bindings] = None,
-    ) -> None:
-
-        self.parent: Optional[Environment] = parent
-
-        self.level: int = parent.level + 1 if parent else 0
-
-        self.bindings: Bindings = bindings if bindings else {}
-
-    def __getitem__(self, item: str) -> Amalgam:
-        """Performs `__getitem__` on nested environments."""
-        if self.ihas(item) or self.parent is None:
-            return self.iget(item)
-
-        else:
-            return self.parent[item]
-
-    def __setitem__(self, item: str, value: Amalgam) -> None:
-        """Performs `__setitem__` on nested environments."""
-        if self.ihas(item) or self.parent is None:
-            self.iset(item, value)
-
-        else:
-            self.parent[item] = value
-
-    def __delitem__(self, item: str) -> None:
-        """Performs `__deltitem__` on nested environments."""
-        if self.ihas(item) or self.parent is None:
-            self.idel(item)
-
-        else:
-            del self.parent[item]
-
-    def __contains__(self, item: object) -> bool:
-        """Performs `__contains__` on nested environments."""
-        if self.ihas(item) or self.parent is None:
-            return self.ihas(item)
-
-        else:
-            return item in self.parent
-
-    def __iter__(self) -> Iterator[str]:
-        """Performs `__iter__` on nested environments."""
-        if self.parent is None:
-            return self.iiter()
-
-        else:
-            return chain(self.parent, self.iiter())
-
-    def __len__(self) -> int:
-        """Performs `__len__` on nested environments."""
-        if self.parent is None:
-            return self.ilen()
-
-        else:
-            return len(self.parent) + self.ilen()
-
-    def iget(self, item: str) -> Amalgam:
-        """Performs `__getitem__` on the immediate environment."""
-        return self.bindings[item]
-
-    def iset(self, item: str, value: Amalgam) -> None:
-        """Performs `__setitem__` on the immediate environment."""
-        self.bindings[item] = value
-
-    def idel(self, item: str) -> None:
-        """Performs `__delitem__` on the immediate environment."""
-        del self.bindings[item]
-
-    def ihas(self, item: object) -> bool:
-        """Performs `__contains__` on the immediate environment."""
-        return item in self.bindings
-
-    def iiter(self) -> Iterator[str]:
-        """Performs `__iter__` on the immediate environment."""
-        return iter(self.bindings)
-
-    def ilen(self) -> int:
-        """Performs `__len__` on the immediate environment."""
-        return len(self.bindings)
-
-    def env_push(self, bindings: Optional[Bindings] = None) -> Environment:
-        """Creates a new child environment."""
-        return Environment(self, bindings)
-
-    def env_pop(self) -> Environment:
-        """Discards the current environment."""
-        if self.parent is not None:
-            return self.parent
-        else:
-            raise Exception("Cannot discard top-level `Environment`")
-
-
-_Bindings = Mapping[str, Amalgam]
-_MutBindings = MutableMapping[str, Amalgam]
+Bindings = Mapping[str, Amalgam]
+MutBindings = MutableMapping[str, Amalgam]
 
 
 class SymbolNotFound(Exception):
@@ -369,21 +264,21 @@ class SymbolNotFound(Exception):
 
 
 class TopLevelPop(Exception):
-    """Raised at `_Environment.env_pop`"""
+    """Raised at `Environment.env_pop`"""
 
 
-class _Environment:
+class Environment:
     """
     Class that manages and represents nested execution environments.
     """
 
     def __init__(
         self,
-        bindings: _Bindings = None,
-        parent: _Environment = None,
+        bindings: Bindings = None,
+        parent: Environment = None,
     ) -> None:
-        self.bindings: _MutBindings = {**bindings} if bindings else {}
-        self.parent: Optional[_Environment] = parent
+        self.bindings: MutBindings = {**bindings} if bindings else {}
+        self.parent: Optional[Environment] = parent
         self.level: int = parent.level + 1 if parent else 0
         self.search_depth: int = 0
 
@@ -392,7 +287,7 @@ class _Environment:
         Attempts to recursively obtain the provided `item`.
 
         Searches with respect to the current `search_depth` attribute
-        of the calling `_Environment` instance. If an existing `item`
+        of the calling `Environment` instance. If an existing `item`
         if encountered at a certain depth less than the target depth,
         returns that `item`, otherwise, raises `SymbolNotFound`.
         """
@@ -409,7 +304,7 @@ class _Environment:
             try:
                 return _self.bindings[item]
             except KeyError:
-                _self = cast(_Environment, _self.parent)
+                _self = cast(Environment, _self.parent)
         else:
             raise SymbolNotFound(item)
 
@@ -418,7 +313,7 @@ class _Environment:
         Attempts to recursively set the provided `value` to an `item`.
 
         Searches with respect to the current `search_depth` attribute
-        of the calling `_Environment` instance. If an existing `item`
+        of the calling `Environment` instance. If an existing `item`
         is encountered at a certain depth less than the target depth,
         overrides that `item` instead.
         """
@@ -436,7 +331,7 @@ class _Environment:
                 _self.bindings[item] = value
                 break
             else:
-                _self = cast(_Environment, _self.parent)
+                _self = cast(Environment, _self.parent)
         else:
             _self.bindings[item] = value
 
@@ -445,7 +340,7 @@ class _Environment:
         Attempts to recursively delete the provided `item`.
 
         Searches with respect to the current `search_depth` attribute
-        of the calling `_Environment` instance. If an existing `item`
+        of the calling `Environment` instance. If an existing `item`
         is encountered at a certain depth less than the target depth,
         deletes that `item` instead.
         """
@@ -463,7 +358,7 @@ class _Environment:
                 del _self.bindings[item]
                 break
             except KeyError:
-                _self = cast(_Environment, _self.parent)
+                _self = cast(Environment, _self.parent)
         else:
             raise SymbolNotFound(item)
 
@@ -499,10 +394,10 @@ class _Environment:
         Context manager for temporarily setting the lookup depth.
 
         The provided `depth` argument must not exceed the `level`
-        attribute of the calling `_Environment` instance, and will
+        attribute of the calling `Environment` instance, and will
         raise a `ValueError` if done so.
 
-        >>> env = _Environment(FUNCTIONS)
+        >>> env = Environment(FUNCTIONS)
         >>>
         >>> with env.search_at(depth=42):
         ...     env["+"]  # Raises ValueError
@@ -510,7 +405,7 @@ class _Environment:
         Any negative integer can be passed as a `depth` to signify
         an infinite lookup until the top-most environment.
 
-        >>> env = _Environment(FUNCTIONS)
+        >>> env = Environment(FUNCTIONS)
         >>> cl_env = env.env_push({...})
         >>>
         >>> with cl_env.search_at(depth=-1):
@@ -529,14 +424,14 @@ class _Environment:
         finally:
             self.search_depth = 0
 
-    def env_push(self, bindings: _Bindings = None) -> _Environment:
+    def env_push(self, bindings: Bindings = None) -> Environment:
         """
-        Creates a new `_Environment` and binds the calling instance
+        Creates a new `Environment` and binds the calling instance
         as its parent environment.
         """
-        return _Environment(bindings, self)
+        return Environment(bindings, self)
 
-    def env_pop(self) -> _Environment:
+    def env_pop(self) -> Environment:
         """
         Discards the current environment and returns the parent
         environment.
@@ -544,4 +439,4 @@ class _Environment:
         if self.parent is not None:
             return self.parent
         else:
-            raise TopLevelPop("cannot discard top-level _Environment")
+            raise TopLevelPop("cannot discard top-level Environment")
