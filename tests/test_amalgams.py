@@ -55,6 +55,7 @@ def test_symbol_evaluate(mocker, mock_environment):
 
     symbol_evaluate_result = Symbol(mock_value).evaluate(mock_environment)
 
+    mock_environment.search_at.assert_called_once_with(depth=-1)
     mock_environment.__getitem__.assert_called_once_with(mock_value)
     assert symbol_evaluate_result == mock_amalgam_result
 
