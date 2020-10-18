@@ -116,7 +116,8 @@ class Symbol(Amalgam):
     value: str
 
     def evaluate(self, environment: Environment) -> Amalgam:
-        return environment[self.value]
+        with environment.search_at(depth=-1):
+            return environment[self.value]
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
