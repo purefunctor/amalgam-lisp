@@ -77,7 +77,7 @@ def test_setn(env):
 
     _setn_result = _setn(env, Quoted(name), Quoted(amalgam))
 
-    assert env.iget("name") == amalgam
+    assert env["name"] == amalgam
     assert _setn_result == amalgam
 
 
@@ -97,7 +97,7 @@ def test_mkfn(env):
 
     _mkfn_result = _mkfn(env, Quoted(name), Quoted(args), Quoted(body))
 
-    assert env.iget("name") == _mkfn_result
+    assert env["name"] == _mkfn_result
     assert _mkfn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
 
 
@@ -179,8 +179,8 @@ def test_and(env):
     _and_result = _and(env, *map(Quoted, exprs))
 
     assert _and_result == Atom("FALSE")
-    assert env.ihas("x")
-    assert not env.ihas("y")
+    assert "x" in env
+    assert "y" not in env
 
 
 def test_and_default(env):
@@ -197,8 +197,8 @@ def test_or(env):
     _or_result = _or(env, *map(Quoted, exprs))
 
     assert _or_result == Atom("TRUE")
-    assert env.ihas("x")
-    assert not env.ihas("y")
+    assert "x" in env
+    assert "y" not in env
 
 
 def test_or_default(env):
@@ -215,9 +215,9 @@ def test_if_then(env):
     _if_result_then = _if(env, Quoted(cond), *map(Quoted, then_else))
 
     assert _if_result_then == Atom("THEN")
-    assert env.ihas("w")
-    assert env.ihas("x")
-    assert not env.ihas("y")
+    assert "w" in env
+    assert "x" in env
+    assert "y" not in env
 
 
 def test_if_else(env):
@@ -230,9 +230,9 @@ def test_if_else(env):
     _if_result_else = _if(env, Quoted(cond), *map(Quoted, then_else))
 
     assert _if_result_else == Atom("ELSE")
-    assert env.ihas("w")
-    assert not env.ihas("x")
-    assert env.ihas("y")
+    assert "w" in env
+    assert "x" not in env
+    assert "y" in env
 
 
 def test_cond(env):
@@ -251,12 +251,12 @@ def test_cond(env):
     _cond_result = _cond(env, *pairs)
 
     assert _cond_result == Atom("SECOND")
-    assert env.ihas("u")
-    assert env.ihas("v")
-    assert not env.ihas("w")
-    assert not env.ihas("x")
-    assert env.ihas("y")
-    assert not env.ihas("z")
+    assert "u" in env
+    assert "v" in env
+    assert "w" not in env
+    assert "x" not in env
+    assert "y" in env
+    assert "z" not in env
 
 
 def test_cond_nil(env):
