@@ -1,4 +1,4 @@
-from amalgam.repl import AmalgamREPL
+from amalgam.engine import AmalgamREPL
 
 from pytest import raises
 
@@ -29,7 +29,7 @@ def test_repl(mocker, capsys):
         "(exit 0)",
     )
 
-    mocker.patch("amalgam.repl.PromptSession", MockClassPromptSession)
+    mocker.patch("amalgam.engine.PromptSession", MockClassPromptSession)
 
     with raises(SystemExit):
         AmalgamREPL().repl()

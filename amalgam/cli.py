@@ -3,7 +3,7 @@ import click
 from amalgam.amalgams import Environment
 from amalgam.parser import AmalgamParser
 from amalgam.primordials import FUNCTIONS
-from amalgam.repl import AmalgamREPL
+from amalgam.engine import AmalgamREPL
 
 
 @click.command()
