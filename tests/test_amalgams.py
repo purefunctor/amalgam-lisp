@@ -1,6 +1,7 @@
 from amalgam.amalgams import (
     create_fn,
     Atom,
+    Environment,
     Function,
     Numeric,
     Quoted,
@@ -10,7 +11,9 @@ from amalgam.amalgams import (
     Vector,
 )
 
-from pytest import fixture
+from amalgam.primordials import FUNCTIONS
+
+from pytest import fixture, mark, param
 
 from tests.utils import (
     MockAmalgam,
@@ -28,75 +31,55 @@ def mock_fn(mocker):
     return mocker.MagicMock(return_value=mocker.MagicMock())
 
 
-def test_atom_evaluate(mock_environment):
-    atom = Atom("atom-test")
-    assert atom.evaluate(mock_environment) == atom
+@fixture
+def env():
+    return Environment(FUNCTIONS)
 
 
-def test_string_evaluate(mock_environment):
-    string = String("string-test")
-    assert string.evaluate(mock_environment) == string
+amalgams = (
+    param(amalgam, id=amalgam.__class__.__name__)
+    for amalgam in (
+        Atom("self-eval"),
+        String("self-eval"),
+        Numeric(42),
+        Quoted(Numeric(42)),
+        Function("self-eval", lambda *_: None),
+    )
+)
 
 
-def test_numeric_evaluate(mock_environment):
-    numeric = Numeric(42)
-    assert numeric.evaluate(mock_environment) == numeric
+@mark.parametrize(("amalgam",), amalgams)
+def test_amalgam_evaluates_to_self(env, amalgam):
+    assert amalgam.evaluate(env) == amalgam
 
 
-def test_quoted_evaluate(mock_environment):
-    quoted = Quoted(Symbol("quoted-test"))
-    assert quoted.evaluate(mock_environment) == quoted
+def test_symbol_evaluate(env):
+    env_ = env.env_push()
+
+    s = Symbol("+").evaluate(env_)
+    with env_.search_at(depth=-1):
+        e = env["+"]
+
+    assert s == e
 
 
-def test_symbol_evaluate(mocker, mock_environment):
-    mock_amalgam_result = mocker.MagicMock()
-    mock_environment.__getitem__.return_value = mock_amalgam_result
-    mock_value = mocker.MagicMock()
-
-    symbol_evaluate_result = Symbol(mock_value).evaluate(mock_environment)
-
-    mock_environment.search_at.assert_called_once_with(depth=-1)
-    mock_environment.__getitem__.assert_called_once_with(mock_value)
-    assert symbol_evaluate_result == mock_amalgam_result
+def test_vector_evaluate(env):
+    vector = Vector(Symbol("+"), Numeric(42))
+    assert vector.evaluate(env) == Vector(env["+"], Numeric(42))
 
 
-def test_vector_evaluate(mocker, mock_environment):
-    mock_v0 = MockAmalgam()
-    mock_v1 = MockAmalgam()
-
-    vector_evaluate_result = Vector(mock_v0, mock_v1).evaluate(mock_environment)
-
-    mock_v0.evaluate.assert_called_once_with(mock_environment)
-    mock_v1.evaluate.assert_called_once_with(mock_environment)
-    assert vector_evaluate_result == Vector(mock_v0, mock_v1)
+def test_s_expression_evaluate(env):
+    sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
+    assert sexpr.evaluate(env) == Numeric(42)
 
 
-def test_s_expression_evaluate(mocker, mock_environment):
-    mock_func = mocker.MagicMock()
-    mock_func.evaluate.return_value = mock_func
-    mock_func_result = mocker.MagicMock()
-    mock_func.call.return_value = mock_func_result
-    mock_args = (mocker.MagicMock(), mocker.MagicMock())
-
-    sexpr_evaluate_result = SExpression(mock_func, *mock_args).evaluate(mock_environment)
-
-    mock_func.evaluate.assert_called_once_with(mock_environment)
-    mock_func.call.assert_called_once_with(mock_environment, *mock_args)
-    assert sexpr_evaluate_result == mock_func_result
-
-
-def test_function_bind(mock_environment):
+def test_function_bind(env):
     function = Function("function-bind-test", lambda _e, *_a: Vector(*_a), False)
 
-    function_bind_result = function.bind(mock_environment)
+    function_bind_result = function.bind(env)
 
     assert function_bind_result == function
-    assert function.env == mock_environment
-
-
-def test_function_evalulate(mock_environment):
-    function = Function("function-evaluate-test", lambda _e, *_a: Vector(*_a), False)
-    assert function.evaluate(mock_environment) == function
+    assert function.env == env
 
 
 def test_function_with_name():
@@ -109,9 +92,9 @@ def test_function_with_name():
     assert function.name == new_name
 
 
-def test_function_call_return(mock_environment, mock_fn):
-    function = Function("call-return-test", mock_fn)
-    assert function.call(mock_environment, MockAmalgam()) == mock_fn.return_value
+def test_function_call_return(env):
+    function = Function("call-return-test", lambda *_: Numeric(42), False)
+    assert function.call(env) == Numeric(42)
 
 
 def test_function_call_naive(mock_environment, mock_fn):
