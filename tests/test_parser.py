@@ -146,13 +146,14 @@ def test_AmalgamParser_multiline_continuation(cont_first, cont_then):
 
     cont_full = cont_first + cont_then
 
-    assert repl_parser.parse(cont_first) == None
-    assert repl_parser.expect_more == True
-    assert repl_parser.parse_buffer.tell() == len(cont_first)
+    with repl_parser.as_repl_parser():
+        assert repl_parser.parse(cont_first) == None
+        assert repl_parser.expect_more == True
+        assert repl_parser.parse_buffer.tell() == len(cont_first)
 
-    assert repl_parser.parse(cont_then) == repl_parser.parse(cont_full)
-    assert repl_parser.expect_more == False
-    assert repl_parser.parse_buffer.tell() == 0
+        assert repl_parser.parse(cont_then) == repl_parser.parse(cont_full)
+        assert repl_parser.expect_more == False
+        assert repl_parser.parse_buffer.tell() == 0
 
 
 def test_symbol_parser_raises_ParseException_on_numerics():
