@@ -1,6 +1,6 @@
 from prompt_toolkit import PromptSession
 
-from amalgam.amalgams import Environment
+from amalgam.amalgams import Amalgam, Environment
 from amalgam.primordials import FUNCTIONS
 from amalgam.parser import AmalgamParser
 
@@ -46,3 +46,6 @@ class Engine:
                 if cont:
                     cont = False
                 print(f"{e.__class__.__qualname__}: {e}")
+
+    def parse_and_run(self, text: str) -> Amalgam:
+        return self.parser.parse(text).evaluate(self.environment)

@@ -1,8 +1,5 @@
 import click
 
-from amalgam.amalgams import Environment
-from amalgam.parser import AmalgamParser
-from amalgam.primordials import FUNCTIONS
 from amalgam.engine import Engine
 
 
@@ -25,8 +22,7 @@ def amalgam_main(file, expr):
     else:
         raise click.BadParameter("Cannot use FILE and --expr together")
 
-    env = Environment(FUNCTIONS)
-    result = AmalgamParser().parse(text).evaluate(env)
+    result = Engine().parse_and_run(text)
 
     if not has_file and has_expr:
         print(result)
