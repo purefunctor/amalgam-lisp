@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from fractions import Fraction
 from functools import wraps
 from io import StringIO
@@ -131,24 +132,25 @@ class AmalgamParser:
     return value of said method.
     """
 
-    inst = None
-
-    def __new__(cls) -> "AmalgamParser":
-        if cls.inst is not None:
-            return cls.inst
-
-        self = super().__new__(cls)
-        cls.inst = self
-
-        return cls.inst
-
     def __init__(self) -> None:
         self.parse_buffer = StringIO()
         self.expect_more = False
+        self.repl_mode = False
 
+    @contextmanager
+    def as_repl_parser(self):
         string_parser.setFailAction(self._expect_more)
         s_expression_parser.setFailAction(self._expect_more)
         vector_parser.setFailAction(self._expect_more)
+        self.repl_mode = True
+
+        try:
+            yield self
+        finally:
+            string_parser.setFailAction(None)
+            s_expression_parser.setFailAction(None)
+            vector_parser.setFailAction(None)
+            self.repl_mode = False
 
     def _expect_more(self, *arguments) -> None:
         *_, err = arguments
@@ -156,11 +158,11 @@ class AmalgamParser:
             self.expect_more = True
 
     def parse(self, text: str) -> Optional[am.Amalgam]:
-        self.parse_buffer.write(text)
-        self.parse_buffer.seek(0)
-        self.expect_more = False
-
-        text = self.parse_buffer.read()
+        if self.repl_mode:
+            self.expect_more = False
+            self.parse_buffer.write(text)
+            self.parse_buffer.seek(0)
+            text = self.parse_buffer.read()
 
         try:
             expr = expression_parser.parseString(text, parseAll=True)[0]
