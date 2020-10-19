@@ -39,6 +39,9 @@ class AmalgamREPL:
                 else:
                     cont = True
 
+            except EOFError:
+                self.repl_parser.parse("(exit)").evaluate(self.environment)
+
             except Exception as e:
                 if cont:
                     cont = False

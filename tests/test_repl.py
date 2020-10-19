@@ -43,3 +43,10 @@ def test_repl(mocker, capsys):
         "ZeroDivisionError: division by zero\n"
         "Goodbye.\n"
     )
+
+    MockSelfPromptSession.prompt.side_effect = EOFError
+
+    with raises(SystemExit):
+        AmalgamREPL().repl()
+
+    assert capsys.readouterr().out == "Goodbye.\n"
