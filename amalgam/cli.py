@@ -3,7 +3,7 @@ import click
 from amalgam.amalgams import Environment
 from amalgam.parser import AmalgamParser
 from amalgam.primordials import FUNCTIONS
-from amalgam.engine import AmalgamREPL
+from amalgam.engine import Engine
 
 
 @click.command()
@@ -14,7 +14,7 @@ def amalgam_main(file, expr):
     has_expr = expr is not None
 
     if not has_file and not has_expr:
-        AmalgamREPL().repl()  # Guarantees SystemExit
+        Engine().repl()  # Guarantees SystemExit
 
     elif has_file and not has_expr:
         text = file.read()

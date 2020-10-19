@@ -4,17 +4,17 @@ from click.testing import CliRunner
 
 
 def test_invoke_repl(mocker):
-    MockClassAmalgamREPL = mocker.Mock()
-    MockSelfAmalgamREPL = mocker.Mock()
+    MockClassEngine = mocker.Mock()
+    MockSelfEngine = mocker.Mock()
 
-    MockClassAmalgamREPL.return_value = MockSelfAmalgamREPL
+    MockClassEngine.return_value = MockSelfEngine
 
-    mocker.patch("amalgam.cli.AmalgamREPL", MockClassAmalgamREPL)
+    mocker.patch("amalgam.cli.Engine", MockClassEngine)
 
     CliRunner().invoke(amalgam_main)
 
-    MockClassAmalgamREPL.assert_called_once()
-    MockSelfAmalgamREPL.repl.assert_called_once()
+    MockClassEngine.assert_called_once()
+    MockSelfEngine.repl.assert_called_once()
 
 
 def test_invoke_expr():

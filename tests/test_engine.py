@@ -1,9 +1,9 @@
-from amalgam.engine import AmalgamREPL
+from amalgam.engine import Engine
 
 from pytest import raises
 
 
-def test_repl(mocker, capsys):
+def test_engine_repl(mocker, capsys):
     MockClassPromptSession = mocker.Mock()
     MockSelfPromptSession = mocker.Mock()
 
@@ -32,7 +32,7 @@ def test_repl(mocker, capsys):
     mocker.patch("amalgam.engine.PromptSession", MockClassPromptSession)
 
     with raises(SystemExit):
-        AmalgamREPL().repl()
+        Engine().repl()
 
     assert capsys.readouterr().out == (
         "84\n"
@@ -47,6 +47,6 @@ def test_repl(mocker, capsys):
     MockSelfPromptSession.prompt.side_effect = EOFError
 
     with raises(SystemExit):
-        AmalgamREPL().repl()
+        Engine().repl()
 
     assert capsys.readouterr().out == "Goodbye.\n"
