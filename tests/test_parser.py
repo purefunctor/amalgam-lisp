@@ -141,19 +141,17 @@ continuations = (
 
 
 @mark.parametrize(("cont_first", "cont_then"), continuations)
-def test_AmalgamParser_multiline_continuation(cont_first, cont_then):
-    repl_parser = pr.AmalgamParser()
-
+def test_AmalgamParser_multiline_continuation(amalgam_parser, cont_first, cont_then):
     cont_full = cont_first + cont_then
 
-    with repl_parser.as_repl_parser():
-        assert repl_parser.parse(cont_first) == None
-        assert repl_parser.expect_more == True
-        assert repl_parser.parse_buffer.tell() == len(cont_first)
+    with amalgam_parser.as_repl_parser():
+        assert amalgam_parser.parse(cont_first) == None
+        assert amalgam_parser.expect_more == True
+        assert amalgam_parser.parse_buffer.tell() == len(cont_first)
 
-        assert repl_parser.parse(cont_then) == repl_parser.parse(cont_full)
-        assert repl_parser.expect_more == False
-        assert repl_parser.parse_buffer.tell() == 0
+        assert amalgam_parser.parse(cont_then) == amalgam_parser.parse(cont_full)
+        assert amalgam_parser.expect_more == False
+        assert amalgam_parser.parse_buffer.tell() == 0
 
 
 def test_symbol_parser_raises_ParseException_on_numerics():
@@ -208,18 +206,14 @@ def test_numeric_parser_raises_ParseException_on(expr_s):
         pr.numeric_parser.parseString(expr_s, parseAll=True)
 
 
-def test_AmalgamParser_raises_ParseException():
-    repl_parser = pr.AmalgamParser()
+def test_AmalgamParser_raises_ParseException(amalgam_parser):
+    with raises(ParseException):
+        amalgam_parser.parse("1 . 0")
+
+
+def test_AmalgamParser_bracket_mismatch(amalgam_parser):
+    with raises(ParseException):
+        amalgam_parser.parse("(+ 1 2]")
 
     with raises(ParseException):
-        repl_parser.parse("1 . 0")
-
-
-def test_AmalgamParser_bracket_mismatch():
-    repl_parser = pr.AmalgamParser()
-
-    with raises(ParseException):
-        repl_parser.parse("(+ 1 2]")
-
-    with raises(ParseException):
-        repl_parser.parse("[1 2 3)")
+        amalgam_parser.parse("[1 2 3)")
