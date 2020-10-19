@@ -92,48 +92,40 @@ def test_function_with_name():
     assert function.name == new_name
 
 
-def test_function_call_return(env):
-    function = Function("call-return-test", lambda *_: Numeric(42), False)
-    assert function.call(env) == Numeric(42)
+def test_function_call(env, mocker):
+    fn = mocker.Mock(return_value=mocker.Mock())
+    function = Function("function-call-test", fn, False)
+
+    sym = Symbol("x")
+    num = Numeric(21)
+
+    env["x"] = Numeric(21)
+
+    assert function.call(env, sym, num) == fn.return_value
+    fn.assert_called_once_with(env, num, num)
 
 
-def test_function_call_naive(mock_environment, mock_fn):
-    mock_ev = MockAmalgam()
-    mock_a0 = MockAmalgam(evaluate=mock_ev)
-    mock_a1 = MockAmalgam()
+def test_function_call_defer(env, mocker):
+    fn = mocker.Mock(return_value=mocker.Mock())
+    function = Function("function-call-defer-test", fn, True)
 
-    function = Function("naive-call-test", mock_fn)
-    function.call(mock_environment, mock_a0, mock_a1)
+    sym = Symbol("x")
+    num = Numeric(42)
 
-    mock_a0.evaluate.assert_called_once_with(mock_environment)
-    mock_a1.evaluate.assert_called_once_with(mock_environment)
-    mock_fn.assert_called_once_with(mock_environment, mock_ev, mock_a1)
+    function.call(env, sym, num)
+    fn.assert_called_once_with(env, Quoted(sym), Quoted(num))
 
 
-def test_function_call_defer(mocker, mock_environment, mock_fn):
-    mock_a0 = MockAmalgam()
-    mock_a1 = MockAmalgam()
-    mock_q0 = MockAmalgam()
-    mock_q1 = MockAmalgam()
+def test_function_call_env_override(env, mocker):
+    fn = mocker.Mock(return_value=mocker.Mock())
 
-    mock_Quoted = mocker.Mock(side_effect=(mock_q0, mock_q1))
-    mocker.patch("amalgam.amalgams.Quoted", mock_Quoted)
+    function = Function("function-call-env-override", fn, False)
+    function.env = env
 
-    function = Function("defer-call-test", mock_fn, defer=True)
-    function.call(mock_environment, mock_a0, mock_a1)
+    sym = Numeric(42)
 
-    assert mock_Quoted.mock_calls == [mocker.call(mock_a0), mocker.call(mock_a1)]
-    mock_fn.assert_called_once_with(mock_environment, mock_q0, mock_q1)
-
-
-def test_function_call_env_override(mock_environment, mock_fn):
-    mock_ag = MockAmalgam()
-
-    function = Function("env-override-test", mock_fn)
-    function.env = mock_environment
-    function.call(MockEnvironment(), mock_ag)
-
-    mock_fn.assert_called_once_with(mock_environment, mock_ag)
+    function.call(Environment(), sym)
+    fn.assert_called_once_with(env, sym)
 
 
 def test_create_fn(mocker, mock_fn):
