@@ -8,6 +8,7 @@ def test_invoke_repl(mocker):
     MockSelfEngine = mocker.Mock()
 
     MockClassEngine.return_value = MockSelfEngine
+    MockSelfEngine.repl.side_effect = SystemExit
 
     mocker.patch("amalgam.cli.Engine", MockClassEngine)
 
