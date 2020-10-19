@@ -31,7 +31,8 @@ class AmalgamREPL:
                 if cont:
                     text = "\n" + text
 
-                expr = self.repl_parser.parse(text)
+                with self.repl_parser.as_repl_parser():
+                    expr = self.repl_parser.parse(text)
 
                 if expr is not None:
                     print(expr.evaluate(self.environment))
