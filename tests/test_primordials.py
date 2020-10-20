@@ -11,6 +11,7 @@ from amalgam.amalgams import (
     Symbol,
     Vector,
 )
+from amalgam.engine import Engine
 from amalgam.primordials import (
     FUNCTIONS,
     _add,
@@ -36,6 +37,7 @@ from amalgam.primordials import (
     _print,
     _putstrln,
     _do,
+    _require,
 )
 
 from pytest import fixture, mark, param, raises
@@ -43,7 +45,7 @@ from pytest import fixture, mark, param, raises
 
 @fixture
 def env():
-    return Environment(FUNCTIONS)
+    return Engine().environment
 
 
 arithmetics = (
@@ -322,3 +324,14 @@ def test_do(capsys, env):
 
     assert _do(env, *map(Quoted, exprs)) == Numeric(42)
     assert capsys.readouterr().out == "42\n"
+
+
+def test_require(env, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    fact_file = tmp_path / "factorial.am"
+    with fact_file.open("w", encoding="UTF-8") as f:
+        f.write("(mkfn factorial [x] (if (= x 1) 1 (* x (factorial (- x 1)))))")
+
+    assert _require(env, String("factorial.am")) == Atom("NIL")
+    assert SExpression(Symbol("factorial"), Numeric(5)).evaluate(env) == Numeric(120)

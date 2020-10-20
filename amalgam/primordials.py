@@ -1,8 +1,8 @@
 from fractions import Fraction
 from functools import partial
+from pathlib import Path
 import sys
 from typing import Callable, Dict, TypeVar, Union
-
 
 from amalgam.amalgams import (
     create_fn,
@@ -226,3 +226,11 @@ def _do(env: Environment, *qexprs: Quoted[Amalgam]) -> Amalgam:
     for qexpr in qexprs:
         accumulator = qexpr.value.evaluate(env)
     return accumulator
+
+
+@_make_function("require")
+def _require(env: Environment, module_name: String) -> Atom:
+    module_path = Path(module_name.value).absolute()
+    with module_path.open("r", encoding="UTF-8") as f:
+        env["~engine~"].parse_and_run(f.read())
+    return Atom("NIL")

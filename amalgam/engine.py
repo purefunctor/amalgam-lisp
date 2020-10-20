@@ -15,7 +15,9 @@ class Engine:
         self.prompt_cont = prompt_cont
 
         self.parser = AmalgamParser()
-        self.environment = Environment(FUNCTIONS)
+        self.environment = Environment(
+            {**FUNCTIONS, "~engine~": self}
+        )
 
     def repl(self) -> None:
         cont = False
