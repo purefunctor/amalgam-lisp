@@ -122,7 +122,7 @@ expression_parser <<= (
 )
 
 
-class AmalgamParser:
+class Parser:
     """
     Class that serves as the parsing frontend.
 
@@ -135,14 +135,12 @@ class AmalgamParser:
     def __init__(self) -> None:
         self.parse_buffer = StringIO()
         self.expect_more = False
-        self.repl_mode = False
 
     @contextmanager
-    def as_repl_parser(self):
+    def _as_repl_parser(self):
         string_parser.setFailAction(self._expect_more)
         s_expression_parser.setFailAction(self._expect_more)
         vector_parser.setFailAction(self._expect_more)
-        self.repl_mode = True
 
         try:
             yield self
@@ -150,29 +148,31 @@ class AmalgamParser:
             string_parser.setFailAction(None)
             s_expression_parser.setFailAction(None)
             vector_parser.setFailAction(None)
-            self.repl_mode = False
 
     def _expect_more(self, *arguments) -> None:
         *_, err = arguments
         if re.match(r"Expected \"[\)\]\"]\", found end of text", str(err)):
             self.expect_more = True
 
-    def parse(self, text: str) -> Optional[am.Amalgam]:
-        if self.repl_mode:
+    def repl_parse(self, text: str) -> Optional[am.Amalgam]:
+        with self._as_repl_parser():
             self.expect_more = False
             self.parse_buffer.write(text)
             self.parse_buffer.seek(0)
             text = self.parse_buffer.read()
 
-        try:
-            expr = expression_parser.parseString(text, parseAll=True)[0]
+            try:
+                expr = expression_parser.parseString(text, parseAll=True)[0]
 
-        except pp.ParseException as p:
-            if not self.expect_more:
+            except pp.ParseException as p:
+                if not self.expect_more:
+                    self.parse_buffer = StringIO()
+                    raise p
+                return None
+
+            else:
                 self.parse_buffer = StringIO()
-                raise p
-            return None
+                return expr
 
-        else:
-            self.parse_buffer = StringIO()
-            return expr
+    def parse(self, text: str) -> am.Amalgam:
+        return expression_parser.parseString(text, parseAll=True)[0]
