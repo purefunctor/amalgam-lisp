@@ -1,7 +1,7 @@
 from prompt_toolkit import PromptSession
 
 from amalgam.amalgams import Amalgam, Environment
-from amalgam.primordials import FUNCTIONS
+from amalgam.primordials import FUNCTIONS, _exit
 from amalgam.parser import AmalgamParser
 
 
@@ -42,7 +42,7 @@ class Engine:
                     cont = True
 
             except EOFError:
-                self.parser.parse("(exit)").evaluate(self.environment)
+                _exit(self.environment)
 
             except Exception as e:
                 if cont:
