@@ -10,7 +10,6 @@ from amalgam.amalgams import (
     Vector,
 )
 from amalgam.environment import Environment
-
 from amalgam.primordials import FUNCTIONS
 
 from pytest import fixture, mark, param

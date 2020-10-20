@@ -5,7 +5,6 @@ from io import StringIO
 import re
 from typing import Optional
 
-
 import pyparsing as pp
 
 import amalgam.amalgams as am
