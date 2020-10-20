@@ -1,7 +1,6 @@
 from amalgam.amalgams import (
     create_fn,
     Atom,
-    Environment,
     Function,
     Numeric,
     Quoted,
@@ -10,6 +9,7 @@ from amalgam.amalgams import (
     Symbol,
     Vector,
 )
+from amalgam.environment import Environment
 
 from amalgam.primordials import FUNCTIONS
 

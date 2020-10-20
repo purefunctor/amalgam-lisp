@@ -1,8 +1,8 @@
 from typing import Any
 from itertools import chain
 
-from amalgam.amalgams import (
-    Amalgam,
+from amalgam.amalgams import Amalgam
+from amalgam.environment import (
     Environment,
     SymbolNotFound,
     TopLevelPop,

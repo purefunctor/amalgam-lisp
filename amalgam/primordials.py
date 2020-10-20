@@ -9,7 +9,6 @@ from amalgam.amalgams import (
     create_fn,
     Amalgam,
     Atom,
-    Environment,
     Function,
     Numeric,
     Quoted,
@@ -17,6 +16,7 @@ from amalgam.amalgams import (
     Symbol,
     Vector,
 )
+from amalgam.environment import Environment
 
 
 FUNCTIONS: Dict[str, Function] = {}

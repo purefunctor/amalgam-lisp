@@ -2,7 +2,6 @@ from fractions import Fraction
 
 from amalgam.amalgams import (
     Atom,
-    Environment,
     Function,
     Numeric,
     Quoted,
@@ -12,6 +11,7 @@ from amalgam.amalgams import (
     Vector,
 )
 from amalgam.engine import Engine
+from amalgam.environment import Environment
 from amalgam.primordials import (
     FUNCTIONS,
     _add,

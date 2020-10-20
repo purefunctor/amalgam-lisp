@@ -1,6 +1,7 @@
 from prompt_toolkit import PromptSession
 
-from amalgam.amalgams import Amalgam, Environment
+from amalgam.amalgams import Amalgam
+from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS, _exit
 from amalgam.parser import Parser
 
