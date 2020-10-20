@@ -1,5 +1,6 @@
 from fractions import Fraction
 from functools import partial
+from itertools import chain
 from pathlib import Path
 import sys
 from typing import Callable, Dict, TypeVar, Union
@@ -234,3 +235,42 @@ def _require(env: Environment, module_name: String) -> Atom:
     with module_path.open("r", encoding="UTF-8") as f:
         env["~engine~"].parse_and_run(f.read())
     return Atom("NIL")
+
+
+@_make_function("concat")
+def _concat(_env: Environment, *strings: String) -> String:
+    return String("".join(string.value for string in strings))
+
+
+@_make_function("merge")
+def _merge(_env: Environment, *vectors: Vector) -> Vector:
+    return Vector(*chain.from_iterable(vector.vals for vector in vectors))
+
+
+@_make_function("slice")
+def _slice(
+    _env: Environment,
+    vector: Vector,
+    start: Numeric,
+    stop: Numeric,
+    step: Numeric = Numeric(1),
+) -> Vector:
+    return Vector(*vector.vals[start.value:stop.value:step.value])
+
+
+@_make_function("sliceup")
+def _sliceup(
+    _env: Environment,
+    vector: Vector,
+    start: Numeric,
+    stop: Numeric,
+    update: Vector,
+) -> Vector:
+    vals = list(vector.vals)
+    vals[start.value:stop.value] = update.vals
+    return Vector(*vals)
+
+
+@_make_function("at")
+def _at(_env: Environment, vector: Vector, index: Numeric) -> Amalgam:
+    return vector.vals[index.value]

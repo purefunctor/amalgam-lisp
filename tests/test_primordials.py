@@ -38,6 +38,11 @@ from amalgam.primordials import (
     _putstrln,
     _do,
     _require,
+    _concat,
+    _merge,
+    _slice,
+    _sliceup,
+    _at,
 )
 
 from pytest import fixture, mark, param, raises
@@ -335,3 +340,36 @@ def test_require(env, tmp_path, monkeypatch):
 
     assert _require(env, String("factorial.am")) == Atom("NIL")
     assert SExpression(Symbol("factorial"), Numeric(5)).evaluate(env) == Numeric(120)
+
+
+def test_concat(env):
+    s0 = String("hello")
+    s1 = String("world")
+    assert _concat(env, s0, s1) == String(s0.value + s1.value)
+
+
+def test_merge(env):
+    v0 = Vector(Numeric(21), Numeric(42))
+    v1 = Vector(Numeric(63), Numeric(84))
+    assert _merge(env, v0, v1) == Vector(*(v0.vals + v1.vals))
+
+
+def test_slice(env):
+    vector = Vector(*map(Numeric, range(10)))
+    sliced = _slice(env, vector, Numeric(2), Numeric(10), Numeric(2))
+
+    assert sliced == Vector(*map(Numeric, range(2, 10, 2)))
+
+
+def test_sliceup(env):
+    vector = Vector(*map(Numeric, range(10)))
+    update = Vector(*map(Numeric, range(5)))
+
+    updated = _sliceup(env, vector, Numeric(5), Numeric(10), update)
+
+    assert updated == Vector(*map(Numeric, range(5)), *map(Numeric, range(5)))
+
+
+def test_at(env):
+    vector = Vector(Numeric(21), Numeric(42))
+    assert _at(env, vector, Numeric(1)) == Numeric(42)
