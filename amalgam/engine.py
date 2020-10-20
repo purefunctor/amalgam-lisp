@@ -2,7 +2,7 @@ from prompt_toolkit import PromptSession
 
 from amalgam.amalgams import Amalgam, Environment
 from amalgam.primordials import FUNCTIONS, _exit
-from amalgam.parser import AmalgamParser
+from amalgam.parser import Parser
 
 
 class Engine:
@@ -14,7 +14,7 @@ class Engine:
         self.prompt = prompt
         self.prompt_cont = prompt_cont
 
-        self.parser = AmalgamParser()
+        self.parser = Parser()
         self.environment = Environment(
             {**FUNCTIONS, "~engine~": self}
         )
@@ -32,8 +32,7 @@ class Engine:
                 if cont:
                     text = "\n" + text
 
-                with self.parser.as_repl_parser():
-                    expr = self.parser.parse(text)
+                expr = self.parser.repl_parse(text)
 
                 if expr is not None:
                     print(expr.evaluate(self.environment))

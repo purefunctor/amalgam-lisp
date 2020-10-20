@@ -5,18 +5,18 @@ from pytest import fixture, mark, param, raises
 
 
 @fixture
-def amalgam_parser():
-    return pr.AmalgamParser()
+def parser():
+    return pr.Parser()
 
 
-def test_symbol_parser_allowed_characters(amalgam_parser):
+def test_symbol_parser_allowed_characters(parser):
     text = r"-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
-    assert text == str(amalgam_parser.parse(text))
+    assert text == str(parser.parse(text))
 
 
-def test_atom_parser_allowed_characters(amalgam_parser):
+def test_atom_parser_allowed_characters(parser):
     text = r":-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
-    assert text == str(amalgam_parser.parse(text))
+    assert text == str(parser.parse(text))
 
 
 _string_contents = "Spam21 Eggs42 +-*/&<=>?!_="
@@ -36,8 +36,8 @@ strings = (
 
 
 @mark.parametrize(("string",), strings)
-def test_string_parser(amalgam_parser, string):
-    parsed = amalgam_parser.parse(string)
+def test_string_parser(parser, string):
+    parsed = parser.parse(string)
     assert _as_string(parsed.value) == str(parsed)
 
 
@@ -62,8 +62,8 @@ numerics = (
 
 
 @mark.parametrize(("numeric",), numerics)
-def test_numeric_parser(amalgam_parser, numeric):
-    parsed = amalgam_parser.parse(numeric)
+def test_numeric_parser(parser, numeric):
+    parsed = parser.parse(numeric)
     assert str(parsed.value) == str(parsed)
 
 
@@ -93,8 +93,8 @@ quoted_multi = (
 
 
 @mark.parametrize(("quoted",), (*quoted_single, *quoted_multi))
-def test_quoted(amalgam_parser, quoted):
-    assert quoted == str(amalgam_parser.parse(quoted))
+def test_quoted(parser, quoted):
+    assert quoted == str(parser.parse(quoted))
 
 
 s_expressions = (
@@ -107,8 +107,8 @@ s_expressions = (
 
 
 @mark.parametrize(("s_expression"), s_expressions)
-def test_s_expression(amalgam_parser, s_expression):
-    assert s_expression == str(amalgam_parser.parse(s_expression))
+def test_s_expression(parser, s_expression):
+    assert s_expression == str(parser.parse(s_expression))
 
 
 vectors = [
@@ -121,8 +121,8 @@ vectors = [
 
 
 @mark.parametrize(("vector",), vectors)
-def test_vector(amalgam_parser, vector):
-    assert vector == str(amalgam_parser.parse(vector))
+def test_vector(parser, vector):
+    assert vector == str(parser.parse(vector))
 
 
 continuations = (
@@ -141,17 +141,16 @@ continuations = (
 
 
 @mark.parametrize(("cont_first", "cont_then"), continuations)
-def test_AmalgamParser_multiline_continuation(amalgam_parser, cont_first, cont_then):
+def test_Parser_multiline_continuation(parser, cont_first, cont_then):
     cont_full = cont_first + cont_then
 
-    with amalgam_parser.as_repl_parser():
-        assert amalgam_parser.parse(cont_first) == None
-        assert amalgam_parser.expect_more == True
-        assert amalgam_parser.parse_buffer.tell() == len(cont_first)
+    assert parser.repl_parse(cont_first) == None
+    assert parser.expect_more == True
+    assert parser.parse_buffer.tell() == len(cont_first)
 
-        assert amalgam_parser.parse(cont_then) == amalgam_parser.parse(cont_full)
-        assert amalgam_parser.expect_more == False
-        assert amalgam_parser.parse_buffer.tell() == 0
+    assert parser.repl_parse(cont_then) == parser.parse(cont_full)
+    assert parser.expect_more == False
+    assert parser.parse_buffer.tell() == 0
 
 
 def test_symbol_parser_raises_ParseException_on_numerics():
@@ -206,14 +205,14 @@ def test_numeric_parser_raises_ParseException_on(expr_s):
         pr.numeric_parser.parseString(expr_s, parseAll=True)
 
 
-def test_AmalgamParser_raises_ParseException(amalgam_parser):
+def test_Parser_repl_parse_raises_ParseException(parser):
     with raises(ParseException):
-        amalgam_parser.parse("1 . 0")
+        parser.repl_parse("1 . 0")
 
 
-def test_AmalgamParser_bracket_mismatch(amalgam_parser):
+def test_Parser_repl_parse_bracket_mismatch(parser):
     with raises(ParseException):
-        amalgam_parser.parse("(+ 1 2]")
+        parser.repl_parse("(+ 1 2]")
 
     with raises(ParseException):
-        amalgam_parser.parse("[1 2 3)")
+        parser.repl_parse("[1 2 3)")
