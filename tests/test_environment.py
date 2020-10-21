@@ -13,12 +13,12 @@ from pytest import fixture, raises
 
 @fixture
 def flat_environment():
-    return Environment({"foo": 21, "bar": 42})
+    return Environment(None, {"foo": 21, "bar": 42})
 
 
 @fixture
 def nested_environment():
-    return Environment(
+    return Environment(None,
         {"foo": 21, "bar": 42}
     ).env_push(
         {"baz": 63, "nil": 84}
@@ -29,12 +29,12 @@ def nested_environment():
 
 def test_environment_copies_bindings():
     bindings = {"x": 21, "y": 42}
-    assert Environment(bindings).bindings is not bindings
+    assert Environment(None, bindings).bindings is not bindings
 
 
 def test_environment_increments_level(flat_environment):
     assert flat_environment.level == 0
-    assert Environment(parent=flat_environment).level == 1
+    assert Environment(None, {}, parent=flat_environment).level == 1
 
 
 def test_environment_env_push(flat_environment):
@@ -47,7 +47,7 @@ def test_environment_env_push(flat_environment):
 
 
 def test_environment_env_pop(flat_environment):
-    assert flat_environment.env_push().env_pop() is flat_environment
+    assert flat_environment.env_push({}).env_pop() is flat_environment
 
     with raises(TopLevelPop):
         flat_environment.env_pop()

@@ -16,9 +16,7 @@ class Engine:
         self.prompt_cont = prompt_cont
 
         self.parser = Parser()
-        self.environment = Environment(
-            {**FUNCTIONS, "~engine~": self}
-        )
+        self.environment = Environment(self, FUNCTIONS)
 
     def repl(self) -> None:
         cont = False

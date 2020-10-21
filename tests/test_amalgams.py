@@ -17,7 +17,7 @@ from pytest import fixture, mark, param
 
 @fixture
 def env():
-    return Environment(FUNCTIONS)
+    return Environment(None, FUNCTIONS)
 
 
 amalgams = (
@@ -38,7 +38,7 @@ def test_amalgam_evaluates_to_self(env, amalgam):
 
 
 def test_symbol_evaluate(env):
-    env_ = env.env_push()
+    env_ = env.env_push({})
 
     s = Symbol("+").evaluate(env_)
     with env_.search_at(depth=-1):
@@ -108,7 +108,7 @@ def test_function_call_env_override(env, mocker):
 
     sym = Numeric(42)
 
-    function.call(Environment(), sym)
+    function.call(Environment(None, {}), sym)
     fn.assert_called_once_with(env, sym)
 
 
