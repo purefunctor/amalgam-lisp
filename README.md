@@ -1,6 +1,15 @@
-# amalgam-lisp [![Travis CI](https://img.shields.io/travis/com/purefunctor/amalgam-lisp?label=build&logo=travis&style=flat-square)](https://travis-ci.com/github/PureFunctor/amalgam-lisp) [![Codecov](https://img.shields.io/codecov/c/gh/purefunctor/amalgam-lisp?label=codecov&logo=codecov&style=flat-square)](https://codecov.io/gh/PureFunctor/amalgam-lisp/)
+<p align="center">
+  <img src="./docs/logo.png"></img>
+</p>
 
-Lisp-like interpreted language implemented in Python.
+<p align="center">
+  LISP-like interpreted language implemented in Python.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/travis/com/purefunctor/amalgam-lisp?label=build&logo=travis&style=flat-square" href="https://travis-ci.com/github/PureFunctor/amalgam-lisp"></img>
+  <img src="https://img.shields.io/codecov/c/gh/purefunctor/amalgam-lisp?label=codecov&logo=codecov&style=flat-square" href="https://codecov.io/gh/PureFunctor/amalgam-lisp/">
+</p>
 
 # Development Setup
 Install the following dependencies:
@@ -32,3 +41,4 @@ $ poetry run coverage combine
 $ poetry run coverage report -m
 $ poetry run coverage html
 ```
+
