@@ -43,6 +43,7 @@ from amalgam.primordials import (
     _slice,
     _sliceup,
     _at,
+    _remove,
     _is_map,
     _map_in,
     _map_at,
@@ -406,6 +407,19 @@ def test_sliceup(env):
 def test_at(env):
     vector = Vector(Numeric(21), Numeric(42))
     assert _at(env, vector, Numeric(1)) == Numeric(42)
+
+
+def test_remove(env):
+    v0 = Vector(Atom("foo"), Numeric(21), Atom("bar"), Numeric(42))
+
+    r0 = _remove(env, v0, Numeric(0))
+    r1 = _remove(env, r0, Numeric(0))
+
+    assert r0.vals == v0.vals[1:]
+    assert r0.mapping == {}
+
+    assert r1.vals == v0.vals[2:]
+    assert r1.mapping == {"bar": Numeric(42)}
 
 
 @fixture

@@ -276,6 +276,13 @@ def _at(_env: Environment, vector: Vector, index: Numeric) -> Amalgam:
     return vector.vals[index.value]
 
 
+@_make_function("remove")
+def _remove(_env: Environment, vector: Vector, index: Numeric) -> Vector:
+    vals = list(vector.vals)
+    del vals[index.value]
+    return Vector(*vals)
+
+
 @_make_function("is-map")
 def _is_map(_env: Environment, vector: Vector) -> Atom:
     if vector.mapping:
