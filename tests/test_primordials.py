@@ -353,25 +353,54 @@ def test_concat(env):
 
 
 def test_merge(env):
-    v0 = Vector(Numeric(21), Numeric(42))
-    v1 = Vector(Numeric(63), Numeric(84))
-    assert _merge(env, v0, v1) == Vector(*(v0.vals + v1.vals))
+    v0 = Vector(Atom("foo"), Numeric(21))
+    v1 = Vector(Atom("bar"), Numeric(42))
+    v2 = Vector(Numeric(63), Numeric(84))
+
+    m0 = _merge(env, v0, v1)
+    m1 = _merge(env, v0, v2)
+
+    assert m0.vals == v0.vals + v1.vals
+    assert m0.mapping == {**v0.mapping, **v1.mapping}
+
+    assert m1.vals == v0.vals + v2.vals
+    assert m1.mapping == {}
 
 
 def test_slice(env):
-    vector = Vector(*map(Numeric, range(10)))
-    sliced = _slice(env, vector, Numeric(2), Numeric(10), Numeric(2))
+    v0 = Vector(
+        Atom("foo"), Numeric(21),
+        Atom("bar"), Numeric(42),
+        Atom("baz"), Numeric(63),
+    )
 
-    assert sliced == Vector(*map(Numeric, range(2, 10, 2)))
+    s0 = _slice(env, v0, Numeric(0), Numeric(4), Numeric(1))
+    s1 = _slice(env, v0, Numeric(1), Numeric(5), Numeric(1))
+
+    assert s0.vals == v0.vals[0:4:1]
+    assert s0.mapping == {"foo": Numeric(21), "bar": Numeric(42)}
+
+    assert s1.vals == v0.vals[1:5:1]
+    assert s1.mapping == {}
 
 
 def test_sliceup(env):
-    vector = Vector(*map(Numeric, range(10)))
-    update = Vector(*map(Numeric, range(5)))
+    v0 = Vector(
+        Atom("foo"), Numeric(21),
+        Atom("bar"), Numeric(42),
+    )
+    v1 = Vector(
+        Atom("baz"), Numeric(63),
+    )
 
-    updated = _sliceup(env, vector, Numeric(5), Numeric(10), update)
+    s0 = _sliceup(env, v0, Numeric(2), Numeric(4), v1)
+    s1 = _sliceup(env, v0, Numeric(1), Numeric(3), v1)
 
-    assert updated == Vector(*map(Numeric, range(5)), *map(Numeric, range(5)))
+    assert s0.vals == (Atom("foo"), Numeric(21), Atom("baz"), Numeric(63))
+    assert s0.mapping == {"foo": Numeric(21), "baz": Numeric(63)}
+
+    assert s1.vals == (Atom("foo"), Atom("baz"), Numeric(63), Numeric(42))
+    assert s1.mapping == {}
 
 
 def test_at(env):
