@@ -85,7 +85,7 @@ _fraction_parser = (
 )
 
 numeric_parser = (
-    _floating_parser | _fraction_parser | _integral_parser
+    _integral_parser ^ _floating_parser ^ _fraction_parser
 ).setParseAction(
     apply_splat(am.Numeric)
 ).setName("numeric")
