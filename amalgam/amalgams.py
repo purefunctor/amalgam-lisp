@@ -11,7 +11,6 @@ from typing import (
     Tuple,
     TypeVar,
     Sequence,
-    Union,
 )
 
 from amalgam.environment import Environment
@@ -75,11 +74,14 @@ class Atom(Amalgam):
         return f":{self.value}"
 
 
+N = TypeVar("N", int, float, Fraction)
+
+
 @dataclass(repr=False, order=True)
-class Numeric(Amalgam):
+class Numeric(Amalgam, Generic[N]):
     """An `Amalgam` that wraps around numeric types."""
 
-    value: Union[int, float, Fraction]
+    value: N
 
     def evaluate(self, _environment: Environment) -> Numeric:
         return self
