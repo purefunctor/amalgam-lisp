@@ -274,3 +274,46 @@ def _sliceup(
 @_make_function("at")
 def _at(_env: Environment, vector: Vector, index: Numeric) -> Amalgam:
     return vector.vals[index.value]
+
+
+@_make_function("is-map")
+def _is_map(_env: Environment, vector: Vector) -> Atom:
+    if vector.mapping:
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("map-in")
+def _map_in(_env: Environment, vector: Vector, atom: Atom) -> Atom:
+    if not vector.mapping:
+        raise ValueError("the given vector is not a mapping")
+    if atom.value in vector.mapping:
+        return Atom("TRUE")
+    return Atom("FALSE")
+
+
+@_make_function("map-at")
+def _map_at(_env: Environment, vector: Vector, atom: Atom) -> Amalgam:
+    if not vector.mapping:
+        raise ValueError("the given vector is not a mapping")
+    return vector.mapping[atom.value]
+
+
+@_make_function("map-up")
+def _map_up(_env: Environment, vector: Vector, atom: Atom, amalgam: Amalgam) -> Vector:
+    if not vector.mapping:
+        raise ValueError("the given vector is not a mapping")
+
+    new_vector = Vector()
+
+    mapping = {**vector.mapping}
+    mapping[atom.value] = amalgam
+
+    vals = []
+    for atom, amalgam in mapping.items():
+        vals += (Atom(atom), amalgam)
+
+    new_vector.vals = tuple(vals)
+    new_vector.mapping = mapping
+
+    return new_vector

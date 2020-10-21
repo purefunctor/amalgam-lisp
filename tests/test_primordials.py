@@ -43,6 +43,10 @@ from amalgam.primordials import (
     _slice,
     _sliceup,
     _at,
+    _is_map,
+    _map_in,
+    _map_at,
+    _map_up,
 )
 
 from pytest import fixture, mark, param, raises
@@ -373,3 +377,47 @@ def test_sliceup(env):
 def test_at(env):
     vector = Vector(Numeric(21), Numeric(42))
     assert _at(env, vector, Numeric(1)) == Numeric(42)
+
+
+@fixture
+def vector_mapping():
+    return Vector(Atom("foo"), Numeric(42))
+
+
+@fixture
+def vector_sequence():
+    return Vector(Symbol("foo"), Numeric(42))
+
+
+def test_is_map(env, vector_mapping, vector_sequence):
+    assert _is_map(env, vector_mapping) == Atom("TRUE")
+    assert _is_map(env, vector_sequence) == Atom("FALSE")
+
+
+def test_map_in(env, vector_mapping, vector_sequence):
+    assert _map_in(env, vector_mapping, Atom("foo")) == Atom("TRUE")
+    assert _map_in(env, vector_mapping, Atom("bar")) == Atom("FALSE")
+
+    with raises(ValueError):
+        _map_in(env, vector_sequence, Atom("foo"))
+
+
+def test_map_at(env, vector_mapping, vector_sequence):
+    assert _map_at(env, vector_mapping, Atom("foo")) == Numeric(42)
+
+    with raises(KeyError):
+        _map_at(env, vector_mapping, Atom("bar"))
+
+    with raises(ValueError):
+        _map_at(env, vector_sequence, Atom("foo"))
+
+
+def test_map_up(env, vector_mapping, vector_sequence):
+    v0 = _map_up(env, vector_mapping, Atom("foo"), Numeric(21))
+    v1 = _map_up(env, v0, Atom("bar"), Numeric(42))
+
+    assert v1.vals == (Atom("foo"), Numeric(21), Atom("bar"), Numeric(42))
+    assert v1.mapping == {"foo": Numeric(21), "bar": Numeric(42)}
+
+    with raises(ValueError):
+        _map_up(env, vector_sequence, Atom("baz"), Numeric(63))
