@@ -52,6 +52,23 @@ def test_vector_evaluate(env):
     assert vector.evaluate(env) == Vector(env["+"], Numeric(42))
 
 
+def test_vector_mapping(env):
+    v0 = Vector()
+    assert v0.mapping == {}
+
+    v1 = Vector(Numeric(42))
+    assert v1.mapping == {}
+
+    v2 = Vector(Symbol("+"), Numeric(42))
+    assert v2.mapping == {}
+
+    v3 = Vector(Atom("FOO"), Numeric(42))
+    assert v3.mapping == {"FOO": Numeric(42)}
+
+    v4 = Vector(Atom("FOO"), Numeric(42), Atom("BAR"), Numeric(42))
+    assert v4.mapping == {"FOO": Numeric(42), "BAR": Numeric(42)}
+
+
 def test_s_expression_evaluate(env):
     sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
     assert sexpr.evaluate(env) == Numeric(42)

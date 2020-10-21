@@ -7,6 +7,7 @@ from typing import (
     cast,
     Any,
     Callable,
+    Dict,
     Generic,
     Tuple,
     TypeVar,
@@ -204,9 +205,26 @@ class Vector(Amalgam, Generic[T]):
 
     def __init__(self, *vals: T) -> None:
         self.vals = vals
+        self.mapping = self._as_mapping()
 
     def evaluate(self, environment: Environment) -> Vector:
         return Vector(*(val.evaluate(environment) for val in self.vals))
+
+    def _as_mapping(self) -> Dict[str, Amalgam]:
+        if len(self.vals) % 2 != 0 or len(self.vals) == 0:
+            return {}
+
+        mapping = {}
+
+        atoms = self.vals[::2]
+        amalgams = self.vals[1::2]
+
+        for atom, amalgam in zip(atoms, amalgams):
+            if not isinstance(atom, Atom):
+                return {}
+            mapping[atom.value] = amalgam
+
+        return mapping
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(" ".join(map(repr, self.vals)))
