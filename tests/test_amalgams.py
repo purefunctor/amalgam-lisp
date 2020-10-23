@@ -2,6 +2,7 @@ from amalgam.amalgams import (
     create_fn,
     Atom,
     Function,
+    Internal,
     Numeric,
     Quoted,
     SExpression,
@@ -28,6 +29,7 @@ amalgams = (
         Numeric(42),
         Quoted(Numeric(42)),
         Function("self-eval", lambda *_: None),
+        Internal(42),
     )
 )
 

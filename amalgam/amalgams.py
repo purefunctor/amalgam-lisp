@@ -249,6 +249,25 @@ class Quoted(Amalgam, Generic[T]):
         return f"'{self.value!s}"
 
 
+P = TypeVar("P", bound=object)
+
+
+@dataclass(repr=False)
+class Internal(Amalgam, Generic[P]):
+    """An `Amalgam` that holds Python objects."""
+
+    value: P
+
+    def evaluate(self, _environment: Environment) -> Internal:
+        return self
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return self._make_repr(repr(self.value))
+
+    def __str__(self) -> str:  # pragma: no cover
+        return f"~{self.value!s}~"
+
+
 def create_fn(
     fname: str, fargs: Sequence[str], fbody: Amalgam, defer: bool = False
 ) -> Function:
