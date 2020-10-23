@@ -12,7 +12,6 @@ from typing import (
 
 if TYPE_CHECKING:  # pragma: no cover
     from amalgam.amalgams import Amalgam
-    from amalgam.engine import Engine
 
     Bindings = Mapping[str, Amalgam]
     MutBindings = MutableMapping[str, Amalgam]
@@ -33,12 +32,10 @@ class Environment:
 
     def __init__(
         self,
-        engine: Engine,
-        bindings: Bindings,
+        bindings: Bindings = None,
         parent: Environment = None,
     ) -> None:
-        self.engine: Engine = engine
-        self.bindings: MutBindings = {**bindings}
+        self.bindings: MutBindings = {**bindings} if bindings else {}
         self.parent: Optional[Environment] = parent
         self.level: int = parent.level + 1 if parent else 0
         self.search_depth: int = 0
@@ -185,12 +182,12 @@ class Environment:
         finally:
             self.search_depth = 0
 
-    def env_push(self, bindings: Bindings) -> Environment:
+    def env_push(self, bindings: Bindings = None) -> Environment:
         """
         Creates a new `Environment` and binds the calling instance
         as its parent environment.
         """
-        return Environment(self.engine, bindings, self)
+        return Environment(bindings, self)
 
     def env_pop(self) -> Environment:
         """

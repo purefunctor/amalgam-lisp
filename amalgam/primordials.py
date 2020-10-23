@@ -233,7 +233,7 @@ def _do(env: Environment, *qexprs: Quoted[Amalgam]) -> Amalgam:
 def _require(env: Environment, module_name: String) -> Atom:
     module_path = Path(module_name.value).absolute()
     with module_path.open("r", encoding="UTF-8") as f:
-        env.engine.parse_and_run(f.read())
+        env["~engine~"].parse_and_run(f.read())
     return Atom("NIL")
 
 

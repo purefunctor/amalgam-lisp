@@ -79,8 +79,8 @@ arithmetics = (
 
 
 @mark.parametrize(("arith_fn", "arith_nm", "arith_rs"), arithmetics)
-def test_arithmetic_function(env, arith_fn, arith_nm, arith_rs):
-    assert arith_fn(env, *map(Numeric, arith_nm)).value == arith_rs
+def test_arithmetic_function(arith_fn, arith_nm, arith_rs):
+    assert arith_fn(Environment(), *map(Numeric, arith_nm)).value == arith_rs
 
 
 def test_setn(env):
