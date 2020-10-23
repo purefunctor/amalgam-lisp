@@ -1,6 +1,6 @@
 from prompt_toolkit import PromptSession
 
-from amalgam.amalgams import Amalgam
+from amalgam.amalgams import Amalgam, Internal
 from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS, _exit
 from amalgam.parser import Parser
@@ -17,7 +17,7 @@ class Engine:
 
         self.parser = Parser()
         self.environment = Environment(
-            {**FUNCTIONS, "~engine~": self}
+            {**FUNCTIONS, "~engine~": Internal(self)}
         )
 
     def repl(self) -> None:
