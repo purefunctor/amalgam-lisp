@@ -38,6 +38,7 @@ from amalgam.primordials import (
     _putstrln,
     _do,
     _require,
+    _provide,
     _concat,
     _merge,
     _slice,
@@ -345,6 +346,28 @@ def test_require(env, tmp_path, monkeypatch):
 
     assert _require(env, String("factorial.am")) == Atom("NIL")
     assert SExpression(Symbol("factorial"), Numeric(5)).evaluate(env) == Numeric(120)
+
+
+def test_provide(env):
+    assert _provide(env, Quoted(Symbol("x")), Quoted(Symbol("y"))) == Atom("NIL")
+    assert env["~provides~"] == Vector(Symbol("x"), Symbol("y"))
+
+
+def test_require_with_provide(env, monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    fact_file = tmp_path / "provider.am"
+    with fact_file.open("w", encoding="UTF-8") as f:
+        f.write("(do (provide x y) (setn x 21) (setn y 42) (setn z 63))")
+
+    env["x"] = String("HELLO")
+    env["y"] = String("WORLD")
+    env["z"] = String("FUBAR")
+
+    assert _require(env, String("provider.am")) == Atom("NIL")
+    assert env["x"] == Numeric(21)
+    assert env["y"] == Numeric(42)
+    assert env["z"] == String("FUBAR")
 
 
 def test_concat(env):

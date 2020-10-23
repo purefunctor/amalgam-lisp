@@ -233,7 +233,29 @@ def _do(env: Environment, *qexprs: Quoted[Amalgam]) -> Amalgam:
 def _require(env: Environment, module_name: String) -> Atom:
     module_path = Path(module_name.value).absolute()
     with module_path.open("r", encoding="UTF-8") as f:
-        env["~engine~"].value.parse_and_run(f.read())
+        text = f.read()
+
+    snapshot = env.bindings.copy()
+
+    env["~engine~"].value.parse_and_run(text)  # type: ignore
+
+    if "~provides~" in env:
+        provided = {
+            symbol.value for symbol in env["~provides~"].vals  # type: ignore
+        }
+        changes = {
+            name: env[name]
+            for name in provided.intersection(env.bindings)
+        }
+        snapshot.update(changes)
+        env.bindings = snapshot
+
+    return Atom("NIL")
+
+
+@_make_function("provide", defer=True)
+def _provide(env: Environment, *qsymbols: Quoted[Symbol]) -> Atom:
+    env["~provides~"] = Vector(*(qsymbol.value for qsymbol in qsymbols))
     return Atom("NIL")
 
 
