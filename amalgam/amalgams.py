@@ -7,11 +7,11 @@ from typing import (
     cast,
     Any,
     Callable,
-    Dict,
     Generic,
+    Mapping,
+    Sequence,
     Tuple,
     TypeVar,
-    Sequence,
 )
 
 from amalgam.environment import Environment
@@ -210,7 +210,7 @@ class Vector(Amalgam, Generic[T]):
     def evaluate(self, environment: Environment) -> Vector:
         return Vector(*(val.evaluate(environment) for val in self.vals))
 
-    def _as_mapping(self) -> Dict[str, Amalgam]:
+    def _as_mapping(self) -> Mapping[str, Amalgam]:
         if len(self.vals) % 2 != 0 or len(self.vals) == 0:
             return {}
 
