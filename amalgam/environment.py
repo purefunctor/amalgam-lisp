@@ -3,8 +3,8 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import (
     cast,
+    Dict,
     Mapping,
-    MutableMapping,
     Optional,
     TYPE_CHECKING,
 )
@@ -14,7 +14,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from amalgam.amalgams import Amalgam
 
     Bindings = Mapping[str, Amalgam]
-    MutBindings = MutableMapping[str, Amalgam]
 
 
 class SymbolNotFound(Exception):
@@ -35,7 +34,7 @@ class Environment:
         bindings: Bindings = None,
         parent: Environment = None,
     ) -> None:
-        self.bindings: MutBindings = {**bindings} if bindings else {}
+        self.bindings: Dict[str, Amalgam] = {**bindings} if bindings else {}
         self.parent: Optional[Environment] = parent
         self.level: int = parent.level + 1 if parent else 0
         self.search_depth: int = 0
