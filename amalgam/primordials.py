@@ -3,7 +3,7 @@ from functools import partial
 from itertools import chain
 from pathlib import Path
 import sys
-from typing import cast, Callable, Dict, TypeVar, Union
+from typing import cast, Callable, Dict, List, TypeVar, Union
 
 import amalgam.amalgams as am
 import amalgam.engine as en
@@ -337,14 +337,14 @@ def _map_up(
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
 
-    new_vector = am.Vector()
+    new_vector: am.Vector[am.Amalgam] = am.Vector()
 
     mapping = {**vector.mapping}
     mapping[atom.value] = amalgam
 
-    vals = []
-    for atom, amalgam in mapping.items():
-        vals += (am.Atom(atom), amalgam)
+    vals: List[am.Amalgam] = []
+    for name, value in mapping.items():
+        vals += (am.Atom(name), value)
 
     new_vector.vals = tuple(vals)
     new_vector.mapping = mapping
