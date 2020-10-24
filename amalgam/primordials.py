@@ -3,7 +3,9 @@ from functools import partial
 from itertools import chain
 from pathlib import Path
 import sys
-from typing import cast, Callable, Dict, List, TypeVar, Union
+from typing import (
+    cast, Callable, Dict, List, NamedTuple, Optional, TypeVar, Union
+)
 
 import amalgam.amalgams as am
 import amalgam.engine as en
@@ -374,3 +376,35 @@ def _map_up(
     new_vector.mapping = mapping
 
     return new_vector
+
+
+@_make_function("loop", defer=True)
+def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+
+    class Action(NamedTuple):
+        value: Optional[am.Amalgam] = None
+
+    def _return(_env: ev.Environment, amalgam: am.Amalgam) -> am.Internal:
+        return am.Internal(Action(amalgam))
+
+    def _break(_env: ev.Environment) -> am.Internal:
+        return am.Internal(Action(am.Atom("NIL")))
+
+    env["return"] = am.Function("return", _return)
+    env["break"] = am.Function("break", _break)
+
+    return_value = None
+
+    while return_value is None:
+        for qexpr in qexprs:
+            result = qexpr.value.evaluate(env)
+            if isinstance(result, am.Internal):
+                if not isinstance(result.value, Action):
+                    continue
+                return_value = result.value.value
+                break
+
+    del env["return"]
+    del env["break"]
+
+    return return_value

@@ -3,6 +3,7 @@ from fractions import Fraction
 from amalgam.amalgams import (
     Atom,
     Function,
+    Internal,
     Numeric,
     Quoted,
     SExpression,
@@ -50,6 +51,7 @@ from amalgam.primordials import (
     _map_in,
     _map_at,
     _map_up,
+    _loop,
 )
 
 from pytest import fixture, mark, param, raises
@@ -518,3 +520,56 @@ def test_map_up(env, vector_mapping, vector_sequence):
 
     with raises(ValueError):
         _map_up(env, vector_sequence, Atom("baz"), Numeric(63))
+
+
+def test_loop_return(env):
+    env["x"] = Numeric(0)
+    looped = SExpression(
+        Symbol("loop"),
+        SExpression(
+            Symbol("if"),
+            SExpression(
+                Symbol("="),
+                Symbol("x"),
+                Numeric(10),
+            ),
+            SExpression(
+                Symbol("return"),
+                Numeric(42),
+            ),
+            Atom("NIL"),
+        ),
+        SExpression(
+            Symbol("setn"),
+            Symbol("x"),
+            SExpression(
+                Symbol("+"),
+                Symbol("x"),
+                Numeric(1),
+            ),
+        ),
+    )
+
+    assert looped.evaluate(env) == Numeric(42)
+    assert env["x"] == Numeric(10)
+
+
+def test_loop_break(env):
+    broken = SExpression(
+        Symbol("loop"),
+        SExpression(Symbol("break")),
+        SExpression(Symbol("setn"), Symbol("x"), Numeric(42)),
+    )
+
+    assert broken.evaluate(env) == Atom("NIL")
+    assert "x" not in env
+
+
+def test_loop_non_action_internal(env):
+    looped = SExpression(
+        Symbol("loop"),
+        SExpression(Function("~id~", lambda e, *_: Internal(42))),
+        SExpression(Symbol("break")),
+    )
+
+    assert looped.evaluate(env) == Atom("NIL")
