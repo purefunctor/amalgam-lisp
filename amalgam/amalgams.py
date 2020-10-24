@@ -14,14 +14,14 @@ from typing import (
     TypeVar,
 )
 
-from amalgam.environment import Environment
+import amalgam.environment as ev
 
 
 class Amalgam(ABC):
     """The abstract base class for language constructs."""
 
     @abstractmethod
-    def evaluate(self, environment: Environment) -> Any:
+    def evaluate(self, environment: ev.Environment) -> Any:
         """
         Protocol for evaluating or unwrapping `Amalgam` objects.
 
@@ -31,7 +31,7 @@ class Amalgam(ABC):
         as an instance attribute `env`.
         """
 
-    def bind(self, environment: Environment) -> Amalgam:  # pragma: no cover
+    def bind(self, environment: ev.Environment) -> Amalgam:  # pragma: no cover
         """
         Protocol for implementing environment binding for `Function`.
 
@@ -42,7 +42,7 @@ class Amalgam(ABC):
         return self
 
     def call(
-        self, environment: Environment, *arguments: Amalgam
+        self, environment: ev.Environment, *arguments: Amalgam
     ) -> Amalgam:  # pragma: no cover
         """
         Protocol for implementing function calls for `Function`.
@@ -65,7 +65,7 @@ class Atom(Amalgam):
 
     value: str
 
-    def evaluate(self, _environment: Environment) -> Atom:
+    def evaluate(self, _environment: ev.Environment) -> Atom:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -84,7 +84,7 @@ class Numeric(Amalgam, Generic[N]):
 
     value: N
 
-    def evaluate(self, _environment: Environment) -> Numeric:
+    def evaluate(self, _environment: ev.Environment) -> Numeric:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -100,7 +100,7 @@ class String(Amalgam):
 
     value: str
 
-    def evaluate(self, _environment: Environment) -> String:
+    def evaluate(self, _environment: ev.Environment) -> String:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -116,7 +116,7 @@ class Symbol(Amalgam):
 
     value: str
 
-    def evaluate(self, environment: Environment) -> Amalgam:
+    def evaluate(self, environment: ev.Environment) -> Amalgam:
         with environment.search_at(depth=-1):
             return environment[self.value]
 
@@ -136,16 +136,16 @@ class Function(Amalgam):
     defer: bool = False
 
     def __post_init__(self):
-        self.env = cast(Environment, None)
+        self.env = cast(ev.Environment, None)
 
-    def evaluate(self, _environment: Environment) -> Function:
+    def evaluate(self, _environment: ev.Environment) -> Function:
         return self
 
-    def bind(self, environment: Environment) -> Function:
+    def bind(self, environment: ev.Environment) -> Function:
         self.env = environment
         return self
 
-    def call(self, environment: Environment, *arguments: Amalgam) -> Amalgam:
+    def call(self, environment: ev.Environment, *arguments: Amalgam) -> Amalgam:
         if self.env is not None:
             environment = self.env
 
@@ -184,7 +184,7 @@ class SExpression(Amalgam):
     def args(self) -> Tuple[Amalgam, ...]:
         return self.vals[1:]
 
-    def evaluate(self, environment: Environment) -> Amalgam:
+    def evaluate(self, environment: ev.Environment) -> Amalgam:
         return self.func.evaluate(environment).call(environment, *self.args)
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -207,7 +207,7 @@ class Vector(Amalgam, Generic[T]):
         self.vals = vals
         self.mapping = self._as_mapping()
 
-    def evaluate(self, environment: Environment) -> Vector:
+    def evaluate(self, environment: ev.Environment) -> Vector:
         return Vector(*(val.evaluate(environment) for val in self.vals))
 
     def _as_mapping(self) -> Mapping[str, Amalgam]:
@@ -239,7 +239,7 @@ class Quoted(Amalgam, Generic[T]):
 
     value: T
 
-    def evaluate(self, _environment: Environment) -> Quoted:
+    def evaluate(self, _environment: ev.Environment) -> Quoted:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -258,7 +258,7 @@ class Internal(Amalgam, Generic[P]):
 
     value: P
 
-    def evaluate(self, _environment: Environment) -> Internal:
+    def evaluate(self, _environment: ev.Environment) -> Internal:
         return self
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -278,7 +278,7 @@ def create_fn(
     creates a new `closure_fn` to be wrapped by a `Function`.
     """
 
-    def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
+    def closure_fn(environment: ev.Environment, *arguments: Amalgam) -> Amalgam:
         """Callable responsible for evaluating `fbody`."""
 
         # Create a child environment and bind args to their names.

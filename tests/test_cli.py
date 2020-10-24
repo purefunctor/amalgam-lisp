@@ -10,7 +10,7 @@ def test_invoke_repl(mocker):
     MockClassEngine.return_value = MockSelfEngine
     MockSelfEngine.repl.side_effect = SystemExit
 
-    mocker.patch("amalgam.cli.Engine", MockClassEngine)
+    mocker.patch("amalgam.engine.Engine", MockClassEngine)
 
     CliRunner().invoke(amalgam_main)
 

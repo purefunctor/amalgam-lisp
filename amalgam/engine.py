@@ -1,9 +1,9 @@
 from prompt_toolkit import PromptSession
 
-from amalgam.amalgams import Amalgam, Internal
-from amalgam.environment import Environment
-from amalgam.primordials import FUNCTIONS, _exit
-from amalgam.parser import Parser
+import amalgam.amalgams as am
+import amalgam.environment as ev
+import amalgam.primordials as pd
+import amalgam.parser as pr
 
 
 class Engine:
@@ -15,9 +15,9 @@ class Engine:
         self.prompt = prompt
         self.prompt_cont = prompt_cont
 
-        self.parser = Parser()
-        self.environment = Environment(
-            {**FUNCTIONS, "~engine~": Internal(self)}
+        self.parser = pr.Parser()
+        self.environment = ev.Environment(
+            {**pd.FUNCTIONS, "~engine~": am.Internal(self)}
         )
 
     def repl(self) -> None:
@@ -42,12 +42,12 @@ class Engine:
                     cont = True
 
             except EOFError:
-                _exit(self.environment)
+                pd._exit(self.environment)
 
             except Exception as e:
                 if cont:
                     cont = False
                 print(f"{e.__class__.__qualname__}: {e}")
 
-    def parse_and_run(self, text: str) -> Amalgam:
+    def parse_and_run(self, text: str) -> am.Amalgam:
         return self.parser.parse(text).evaluate(self.environment)

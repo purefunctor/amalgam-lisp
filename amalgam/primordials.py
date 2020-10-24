@@ -5,24 +5,14 @@ from pathlib import Path
 import sys
 from typing import Callable, Dict, TypeVar, Union
 
-from amalgam.amalgams import (
-    create_fn,
-    Amalgam,
-    Atom,
-    Function,
-    Numeric,
-    Quoted,
-    String,
-    Symbol,
-    Vector,
-)
-from amalgam.environment import Environment
+import amalgam.amalgams as am
+import amalgam.environment as ev
 
 
-FUNCTIONS: Dict[str, Function] = {}
+FUNCTIONS: Dict[str, am.Function] = {}
 
 
-T = TypeVar("T", bound=Amalgam)
+T = TypeVar("T", bound=am.Amalgam)
 
 
 def _make_function(
@@ -38,199 +28,205 @@ def _make_function(
     if func is None:
         return partial(_make_function, name, defer=defer)
 
-    FUNCTIONS[name] = Function(name, func, defer)
+    FUNCTIONS[name] = am.Function(name, func, defer)
 
     return func
 
 
 @_make_function("+")
-def _add(_env: Environment, *nums: Numeric) -> Numeric:
-    return Numeric(sum(num.value for num in nums))
+def _add(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
+    return am.Numeric(sum(num.value for num in nums))
 
 
 @_make_function("-")
-def _sub(_env: Environment, *nums: Numeric) -> Numeric:
+def _sub(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
     x, *ns = (num.value for num in nums)
     y: Union[float, Fraction] = 0
     for n in ns:
         y += n
-    return Numeric(x - y)
+    return am.Numeric(x - y)
 
 
 @_make_function("*")
-def _mul(_env: Environment, *nums: Numeric) -> Numeric:
+def _mul(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
     prod: Union[float, Fraction] = 1
     for num in nums:
         prod *= num.value
-    return Numeric(prod)
+    return am.Numeric(prod)
 
 
 @_make_function("/")
-def _div(_env: Environment, *nums: Numeric) -> Numeric:
+def _div(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
     x, *ns = (num.value for num in nums)
     y: Union[float, Fraction] = 1
     for n in ns:
         y *= n
-    return Numeric(x / y)
+    return am.Numeric(x / y)
 
 
 @_make_function("setn", defer=True)
-def _setn(env: Environment, name: Quoted[Symbol], amalgam: Quoted[Amalgam]) -> Amalgam:
+def _setn(
+    env: ev.Environment,
+    name: am.Quoted[am.Symbol],
+    amalgam: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
     env[name.value.value] = amalgam.value.evaluate(env)
     return env[name.value.value]
 
 
 @_make_function("fn", defer=True)
 def _fn(
-    _env: Environment, args: Quoted[Vector[Symbol]], body: Quoted[Amalgam],
-) -> Function:
-    return create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
+    _env: ev.Environment,
+    args: am.Quoted[am.Vector[am.Symbol]],
+    body: am.Quoted[am.Amalgam],
+) -> am.Function:
+    return am.create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
 
 
 @_make_function("mkfn", defer=True)
 def _mkfn(
-    env: Environment,
-    name: Quoted[Symbol],
-    args: Quoted[Vector[Symbol]],
-    body: Quoted[Amalgam],
-) -> Amalgam:
-    return _setn(env, name, Quoted(_fn(env, args, body).with_name(name.value.value)))
+    env: ev.Environment,
+    name: am.Quoted[am.Symbol],
+    args: am.Quoted[am.Vector[am.Symbol]],
+    body: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
+    return _setn(env, name, am.Quoted(_fn(env, args, body).with_name(name.value.value)))
 
 
 @_make_function("bool")
-def _bool(_env: Environment, expr: Amalgam) -> Atom:
-    if expr == String(""):
-        return Atom("FALSE")
-    elif expr == Numeric(0):
-        return Atom("FALSE")
-    elif expr == Vector():
-        return Atom("FALSE")
-    elif expr == Atom("FALSE"):
-        return Atom("FALSE")
-    elif expr == Atom("NIL"):
-        return Atom("FALSE")
-    return Atom("TRUE")
+def _bool(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
+    if expr == am.String(""):
+        return am.Atom("FALSE")
+    elif expr == am.Numeric(0):
+        return am.Atom("FALSE")
+    elif expr == am.Vector():
+        return am.Atom("FALSE")
+    elif expr == am.Atom("FALSE"):
+        return am.Atom("FALSE")
+    elif expr == am.Atom("NIL"):
+        return am.Atom("FALSE")
+    return am.Atom("TRUE")
 
 
 @_make_function(">")
-def _gt(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _gt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x > y:  # type: ignore
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("<")
-def _lt(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _lt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x < y:  # type: ignore
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("=")
-def _eq(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _eq(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x == y:
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("/=")
-def _ne(_env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _ne(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x != y:
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function(">=")
-def _ge(env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _ge(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x >= y:  # type: ignore
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("<=")
-def _le(env: Environment, x: Amalgam, y: Amalgam) -> Atom:
+def _le(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
     if x <= y:  # type: ignore
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("not")
-def _not(_env: Environment, expr: Amalgam) -> Atom:
-    if _bool(_env, expr) == Atom("TRUE"):
-        return Atom("FALSE")
-    return Atom("TRUE")
+def _not(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
+    if _bool(_env, expr) == am.Atom("TRUE"):
+        return am.Atom("FALSE")
+    return am.Atom("TRUE")
 
 
 @_make_function("and", defer=True)
-def _and(env: Environment, *qexprs: Quoted[Amalgam]) -> Atom:
+def _and(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
     for qexpr in qexprs:
         cond = _bool(env, qexpr.value.evaluate(env))
-        if cond == Atom("FALSE"):
+        if cond == am.Atom("FALSE"):
             return cond
-    return Atom("TRUE")
+    return am.Atom("TRUE")
 
 
 @_make_function("or", defer=True)
-def _or(env: Environment, *qexprs: Quoted[Amalgam]) -> Atom:
+def _or(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
     for qexpr in qexprs:
         cond = _bool(env, qexpr.value.evaluate(env))
-        if cond == Atom("TRUE"):
+        if cond == am.Atom("TRUE"):
             return cond
-    return Atom("FALSE")
+    return am.Atom("FALSE")
 
 
 @_make_function("if", defer=True)
 def _if(
-    env: Environment,
-    qcond: Quoted[Amalgam],
-    qthen: Quoted[Amalgam],
-    qelse: Quoted[Amalgam],
-) -> Amalgam:
+    env: ev.Environment,
+    qcond: am.Quoted[am.Amalgam],
+    qthen: am.Quoted[am.Amalgam],
+    qelse: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
     cond = _bool(env, qcond.value.evaluate(env))
-    if cond == Atom("TRUE"):
+    if cond == am.Atom("TRUE"):
         return qthen.value.evaluate(env)
     return qelse.value.evaluate(env)
 
 
 @_make_function("cond", defer=True)
-def _cond(env: Environment, *qpairs: Quoted[Vector[Amalgam]]) -> Amalgam:
+def _cond(env: ev.Environment, *qpairs: am.Quoted[am.Vector[am.Amalgam]]) -> am.Amalgam:
     for qpair in qpairs:
         pred, expr = qpair.value.vals
-        if _bool(env, pred.evaluate(env)) == Atom("TRUE"):
+        if _bool(env, pred.evaluate(env)) == am.Atom("TRUE"):
             return expr.evaluate(env)
-    return Atom("NIL")
+    return am.Atom("NIL")
 
 
 @_make_function("exit")
-def _exit(env: Environment, exit_code: Numeric = Numeric(0)) -> Amalgam:
+def _exit(env: ev.Environment, exit_code: am.Numeric = am.Numeric(0)) -> am.Amalgam:
     print("Goodbye.")
     sys.exit(int(exit_code.value))
 
 
 @_make_function("print")
-def _print(_env: Environment, amalgam: Amalgam) -> Amalgam:
+def _print(_env: ev.Environment, amalgam: am.Amalgam) -> am.Amalgam:
     print(amalgam)
     return amalgam
 
 
 @_make_function("putstrln")
-def _putstrln(_env: Environment, string: String) -> String:
-    if not isinstance(string, String):
+def _putstrln(_env: ev.Environment, string: am.String) -> am.String:
+    if not isinstance(string, am.String):
         raise TypeError("putstrln only accepts a string")
     print(string.value)
     return string
 
 
 @_make_function("do", defer=True)
-def _do(env: Environment, *qexprs: Quoted[Amalgam]) -> Amalgam:
-    accumulator = Atom("NIL")
+def _do(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+    accumulator = am.Atom("NIL")
     for qexpr in qexprs:
         accumulator = qexpr.value.evaluate(env)
     return accumulator
 
 
 @_make_function("require")
-def _require(env: Environment, module_name: String) -> Atom:
+def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
     module_path = Path(module_name.value).absolute()
     with module_path.open("r", encoding="UTF-8") as f:
         text = f.read()
@@ -250,97 +246,102 @@ def _require(env: Environment, module_name: String) -> Atom:
         snapshot.update(changes)
         env.bindings = snapshot
 
-    return Atom("NIL")
+    return am.Atom("NIL")
 
 
 @_make_function("provide", defer=True)
-def _provide(env: Environment, *qsymbols: Quoted[Symbol]) -> Atom:
-    env["~provides~"] = Vector(*(qsymbol.value for qsymbol in qsymbols))
-    return Atom("NIL")
+def _provide(env: ev.Environment, *qsymbols: am.Quoted[am.Symbol]) -> am.Atom:
+    env["~provides~"] = am.Vector(*(qsymbol.value for qsymbol in qsymbols))
+    return am.Atom("NIL")
 
 
 @_make_function("concat")
-def _concat(_env: Environment, *strings: String) -> String:
-    return String("".join(string.value for string in strings))
+def _concat(_env: ev.Environment, *strings: am.String) -> am.String:
+    return am.String("".join(string.value for string in strings))
 
 
 @_make_function("merge")
-def _merge(_env: Environment, *vectors: Vector) -> Vector:
-    return Vector(*chain.from_iterable(vector.vals for vector in vectors))
+def _merge(_env: ev.Environment, *vectors: am.Vector) -> am.Vector:
+    return am.Vector(*chain.from_iterable(vector.vals for vector in vectors))
 
 
 @_make_function("slice")
 def _slice(
-    _env: Environment,
-    vector: Vector,
-    start: Numeric,
-    stop: Numeric,
-    step: Numeric = Numeric(1),
-) -> Vector:
-    return Vector(*vector.vals[start.value:stop.value:step.value])
+    _env: ev.Environment,
+    vector: am.Vector,
+    start: am.Numeric,
+    stop: am.Numeric,
+    step: am.Numeric = am.Numeric(1),
+) -> am.Vector:
+    return am.Vector(*vector.vals[start.value:stop.value:step.value])
 
 
 @_make_function("sliceup")
 def _sliceup(
-    _env: Environment,
-    vector: Vector,
-    start: Numeric,
-    stop: Numeric,
-    update: Vector,
-) -> Vector:
+    _env: ev.Environment,
+    vector: am.Vector,
+    start: am.Numeric,
+    stop: am.Numeric,
+    update: am.Vector,
+) -> am.Vector:
     vals = list(vector.vals)
     vals[start.value:stop.value] = update.vals
-    return Vector(*vals)
+    return am.Vector(*vals)
 
 
 @_make_function("at")
-def _at(_env: Environment, vector: Vector, index: Numeric) -> Amalgam:
+def _at(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Amalgam:
     return vector.vals[index.value]
 
 
 @_make_function("remove")
-def _remove(_env: Environment, vector: Vector, index: Numeric) -> Vector:
+def _remove(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Vector:
     vals = list(vector.vals)
     del vals[index.value]
-    return Vector(*vals)
+    return am.Vector(*vals)
 
 
 @_make_function("is-map")
-def _is_map(_env: Environment, vector: Vector) -> Atom:
+def _is_map(_env: ev.Environment, vector: am.Vector) -> am.Atom:
     if vector.mapping:
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("map-in")
-def _map_in(_env: Environment, vector: Vector, atom: Atom) -> Atom:
+def _map_in(_env: ev.Environment, vector: am.Vector, atom: am.Atom) -> am.Atom:
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
     if atom.value in vector.mapping:
-        return Atom("TRUE")
-    return Atom("FALSE")
+        return am.Atom("TRUE")
+    return am.Atom("FALSE")
 
 
 @_make_function("map-at")
-def _map_at(_env: Environment, vector: Vector, atom: Atom) -> Amalgam:
+def _map_at(_env: ev.Environment, vector: am.Vector, atom: am.Atom) -> am.Amalgam:
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
     return vector.mapping[atom.value]
 
 
 @_make_function("map-up")
-def _map_up(_env: Environment, vector: Vector, atom: Atom, amalgam: Amalgam) -> Vector:
+def _map_up(
+    _env: ev.Environment,
+    vector: am.Vector,
+    atom: am.Atom,
+    amalgam: am.Amalgam,
+) -> am.Vector:
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
 
-    new_vector = Vector()
+    new_vector = am.Vector()
 
     mapping = {**vector.mapping}
     mapping[atom.value] = amalgam
 
     vals = []
     for atom, amalgam in mapping.items():
-        vals += (Atom(atom), amalgam)
+        vals += (am.Atom(atom), amalgam)
 
     new_vector.vals = tuple(vals)
     new_vector.mapping = mapping
