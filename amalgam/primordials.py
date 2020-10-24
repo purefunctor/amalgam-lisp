@@ -3,9 +3,10 @@ from functools import partial
 from itertools import chain
 from pathlib import Path
 import sys
-from typing import Callable, Dict, TypeVar, Union
+from typing import cast, Callable, Dict, TypeVar, Union
 
 import amalgam.amalgams as am
+import amalgam.engine as en
 import amalgam.environment as ev
 
 
@@ -233,16 +234,18 @@ def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
 
     snapshot = env.bindings.copy()
 
-    env["~engine~"].value.parse_and_run(text)  # type: ignore
+    internal_engine = cast(am.Internal[en.Engine], env["~engine~"])
+    internal_engine.value.parse_and_run(text)
 
     if "~provides~" in env:
-        provided = {
-            symbol.value for symbol in env["~provides~"].vals  # type: ignore
-        }
+        symbols = cast(am.Vector[am.Symbol], env["~provides~"])
+        exports = {symbol.value for symbol in symbols.vals}
+
         changes = {
             name: env[name]
-            for name in provided.intersection(env.bindings)
+            for name in exports.intersection(env.bindings)
         }
+
         snapshot.update(changes)
         env.bindings = snapshot
 
