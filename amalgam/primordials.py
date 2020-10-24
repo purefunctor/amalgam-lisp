@@ -94,6 +94,30 @@ def _mkfn(
     return _setn(env, name, am.Quoted(_fn(env, args, body).with_name(name.value.value)))
 
 
+@_make_function("let", defer=True)
+def _let(
+    env: ev.Environment,
+    qpairs: am.Quoted[am.Vector[am.Vector]],
+    body: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
+    names = []
+    values = []
+
+    for pos, pair in enumerate(qpairs.value.vals):
+        if not isinstance(pair, am.Vector) or len(pair.vals) != 2:
+            raise ValueError(f"{pair} at {pos} is not a pair")
+
+        name, value = pair.vals
+
+        if not isinstance(name, am.Symbol):
+            raise TypeError(f"{name} at {pos} is not a symbol")
+
+        names.append(name)
+        values.append(value)
+
+    return _fn(env, am.Quoted(am.Vector(*names)), body).call(env, *values)
+
+
 @_make_function("bool")
 def _bool(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
     if expr == am.String(""):

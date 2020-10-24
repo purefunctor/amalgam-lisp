@@ -21,6 +21,7 @@ from amalgam.primordials import (
     _setn,
     _fn,
     _mkfn,
+    _let,
     _bool,
     _gt,
     _lt,
@@ -112,6 +113,36 @@ def test_mkfn(env):
 
     assert env["name"] == _mkfn_result
     assert _mkfn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
+
+
+def test_let(env):
+    env["z"] = Numeric(21)
+
+    bindings = Vector(Vector(Symbol("x"), Numeric(21)), Vector(Symbol("y"), Symbol("z")))
+    body = SExpression(Symbol("+"), Symbol("x"), Symbol("y"))
+
+    _let_result = _let(env, Quoted(bindings), Quoted(body))
+
+    assert _let_result == Numeric(42)
+    assert "x" not in env
+    assert "y" not in env
+
+
+_let_failures = (
+    param(Quoted(_let_bindings), _let_exception, id=_let_name)
+    for _let_bindings, _let_exception, _let_name in (
+        (Vector(Symbol("x")), ValueError, "not-a-vector"),
+        (Vector(Vector(Numeric(42), Symbol("x"))), TypeError, "not-a-symbol"),
+        (Vector(Vector(Symbol("x"))), ValueError, "too-short"),
+        (Vector(Vector(Symbol("x"), Symbol("y"), Symbol("z"))), ValueError, "too-long"),
+    )
+)
+
+
+@mark.parametrize(("bindings", "exception"), _let_failures)
+def test_let_fails(env, bindings, exception):
+    with raises(exception):
+        _let(env, bindings, SExpression())
 
 
 _t = Atom("TRUE")
