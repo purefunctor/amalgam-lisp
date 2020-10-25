@@ -563,13 +563,3 @@ def test_loop_break(env):
 
     assert broken.evaluate(env) == Atom("NIL")
     assert "x" not in env
-
-
-def test_loop_non_action_internal(env):
-    looped = SExpression(
-        Symbol("loop"),
-        SExpression(Function("~id~", lambda e, *_: Internal(42))),
-        SExpression(Symbol("break")),
-    )
-
-    assert looped.evaluate(env) == Atom("NIL")
