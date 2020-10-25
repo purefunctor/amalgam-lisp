@@ -127,6 +127,10 @@ class Symbol(Amalgam):
         return self.value
 
 
+class DisallowedContextError(Exception):
+    """Raised on functions outside of their intended contexts."""
+
+
 @dataclass(repr=False)
 class Function(Amalgam):
     """An `Amalgam` that wraps around functions."""
@@ -134,9 +138,11 @@ class Function(Amalgam):
     name: str
     fn: Callable[..., Amalgam]
     defer: bool = False
+    contextual: bool = False
 
     def __post_init__(self):
         self.env = cast(ev.Environment, None)
+        self.in_context = False
 
     def evaluate(self, _environment: ev.Environment) -> Function:
         return self
@@ -146,6 +152,9 @@ class Function(Amalgam):
         return self
 
     def call(self, environment: ev.Environment, *arguments: Amalgam) -> Amalgam:
+        if self.contextual and not self.in_context:
+            raise DisallowedContextError(f"invalid context for {self.name}")
+
         if self.env is not None:
             environment = self.env
 
@@ -269,7 +278,11 @@ class Internal(Amalgam, Generic[P]):
 
 
 def create_fn(
-    fname: str, fargs: Sequence[str], fbody: Amalgam, defer: bool = False
+    fname: str,
+    fargs: Sequence[str],
+    fbody: Amalgam,
+    defer: bool = False,
+    contextual: bool = False,
 ) -> Function:
     """Helper function for creating `Function` objects.
 
@@ -290,4 +303,4 @@ def create_fn(
         # same environment.
         return fbody.evaluate(cl_env).bind(cl_env)
 
-    return Function(fname, closure_fn, defer)
+    return Function(fname, closure_fn, defer, contextual)

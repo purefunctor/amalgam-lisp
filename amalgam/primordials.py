@@ -21,7 +21,8 @@ T = TypeVar("T", bound=am.Amalgam)
 def _make_function(
     name: str,
     func: Callable[..., T] = None,
-    defer: bool = False
+    defer: bool = False,
+    contextual: bool = False,
 ) -> Union[partial, Callable[..., T]]:
     """
     Transforms a given function `func` into a `Function`
@@ -29,9 +30,9 @@ def _make_function(
     """
 
     if func is None:
-        return partial(_make_function, name, defer=defer)
+        return partial(_make_function, name, defer=defer, contextual=contextual)
 
-    FUNCTIONS[name] = am.Function(name, func, defer)
+    FUNCTIONS[name] = am.Function(name, func, defer, contextual)
 
     return func
 

@@ -1,6 +1,7 @@
 from amalgam.amalgams import (
     create_fn,
     Atom,
+    DisallowedContextError,
     Function,
     Internal,
     Numeric,
@@ -13,7 +14,7 @@ from amalgam.amalgams import (
 from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS
 
-from pytest import fixture, mark, param
+from pytest import fixture, mark, param, raises
 
 
 @fixture
@@ -117,6 +118,19 @@ def test_function_call_defer(env, mocker):
 
     function.call(env, sym, num)
     fn.assert_called_once_with(env, Quoted(sym), Quoted(num))
+
+
+def test_function_call_contextual(env, mocker):
+    fn = mocker.Mock()
+    function = Function("function-call-contextual-test", fn, False, True)
+
+    with raises(DisallowedContextError):
+        assert function.call(env)
+
+    function.in_context = True
+
+    function.call(env)
+    fn.assert_called_once_with(env)
 
 
 def test_function_call_env_override(env, mocker):
