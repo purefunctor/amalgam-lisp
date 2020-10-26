@@ -4,7 +4,7 @@ from itertools import chain
 from pathlib import Path
 import sys
 from typing import (
-    cast, Callable, Dict, List, NamedTuple, TypeVar, Union
+    cast, Callable, Dict, List, NamedTuple, Sequence, TypeVar, Union
 )
 
 import amalgam.amalgams as am
@@ -23,6 +23,7 @@ def _make_function(
     func: Callable[..., T] = None,
     defer: bool = False,
     contextual: bool = False,
+    allows: Sequence[str] = None,
 ) -> Union[partial, Callable[..., T]]:
     """
     Transforms a given function `func` into a `Function`
@@ -30,11 +31,34 @@ def _make_function(
     """
 
     if func is None:
-        return partial(_make_function, name, defer=defer, contextual=contextual)
+        return partial(
+            _make_function,
+            name,
+            defer=defer,
+            contextual=contextual,
+            allows=allows,
+        )
 
-    FUNCTIONS[name] = am.Function(name, func, defer, contextual)
+    if allows is None:
+        allows = []
 
-    return func
+    def _func(env, *arguments, **keywords):
+        with env.search_at(depth=-1):
+            fns = [env[allow] for allow in allows]
+
+        for fn in fns:
+            cast(am.Function, fn).in_context = True
+
+        result = func(env, *arguments, **keywords)
+
+        for fn in fns:
+            cast(am.Function, fn).in_context = False
+
+        return result
+
+    FUNCTIONS[name] = am.Function(name, _func, defer, contextual)
+
+    return _func
 
 
 @_make_function("+")
@@ -393,11 +417,8 @@ def _break(env: ev.Environment) -> am.Internal:
     return am.Internal(_Return(am.Atom("NIL")))
 
 
-@_make_function("loop", defer=True)
+@_make_function("loop", defer=True, allows=("break", "return"))
 def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
-    env["return"].in_context = True
-    env["break"].in_context = True
-
     return_value = None
 
     while return_value is None:
@@ -407,8 +428,5 @@ def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
                 if isinstance(result.value, _Return):  # pragma: no branch
                     return_value = result.value.return_value
                 break
-
-    env["break"].in_context = False
-    env["return"].in_context = False
 
     return return_value
