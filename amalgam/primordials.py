@@ -430,3 +430,13 @@ def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
                 break
 
     return return_value
+
+
+@_make_function("when", defer=True)
+def _when(
+    env: ev.Environment, qcond: am.Quoted[am.Amalgam], qbody: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
+    cond = _bool(env, qcond.value.evaluate(env))
+    if cond == am.Atom("TRUE"):
+        return qbody.value.evaluate(env)
+    return am.Atom("NIL")

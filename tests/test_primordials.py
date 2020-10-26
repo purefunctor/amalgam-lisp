@@ -52,6 +52,7 @@ from amalgam.primordials import (
     _map_at,
     _map_up,
     _loop,
+    _when,
 )
 
 from pytest import fixture, mark, param, raises
@@ -563,3 +564,20 @@ def test_loop_break(env):
 
     assert broken.evaluate(env) == Atom("NIL")
     assert "x" not in env
+
+
+def test_when(env):
+    cond = SExpression(
+        Symbol("setn"), Symbol("x"), Atom("TRUE")
+    )
+    body = SExpression(
+        Symbol("setn"), Symbol("y"), Numeric(42)
+    )
+
+    assert _when(env, Quoted(cond), Quoted(body)) == Numeric(42)
+    assert "x" in env
+    assert "y" in env
+
+
+def test_when_nil(env):
+    assert _when(env, Quoted(Atom("NIL")), Numeric(42)) == Atom("NIL")
