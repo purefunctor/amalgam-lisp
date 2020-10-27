@@ -5,7 +5,6 @@ description = "Lisp-like interpreted language implemented in Python"
 authors = ["PureFunctor <purefunctor@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-include = ["CHANGELOG.md"]
 repository = "https://github.com/PureFunctor/amalgam-lisp"
 packages = [
     { include = "amalgam" }
