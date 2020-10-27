@@ -1,6 +1,5 @@
 import amalgam.parser as pr
 
-from pyparsing import ParseException
 from pytest import fixture, mark, param, raises
 
 
@@ -139,68 +138,3 @@ def test_parser_repl_mode(parser, first, then):
 
     assert parser.repl_parse(then) == parser.parse(full)
     assert parser.parse_buffer.tell() == 0
-
-
-def test_symbol_parser_raises_ParseException_on_numerics():
-    with raises(ParseException):
-        pr.symbol_parser.parseString("1")
-
-    with raises(ParseException):
-        pr.symbol_parser.parseString("+1")
-
-    with raises(ParseException):
-        pr.symbol_parser.parseString("-1")
-
-
-def test_atom_raises_ParseException():
-    with raises(ParseException):
-        pr.atom_parser.parseString(":123")
-
-    with raises(ParseException):
-        pr.atom_parser.parseString("+123")
-
-    with raises(ParseException):
-        pr.atom_parser.parseString("-123")
-
-    with raises(ParseException):
-        pr.atom_parser.parseString("xyz")
-
-    with raises(ParseException):
-        pr.atom_parser.parseString("=+-")
-
-
-def test_string_parser_raises_ParseException_on_unescaped_quote():
-    with raises(ParseException):
-        pr.string_parser.parseString("\" \" \"", parseAll=True)
-
-
-numerics_invalid = (
-    param(expr_st, id=expr_id)
-    for expr_st, expr_id in (
-        ("21. 42", "floating-space-after-period"),
-        ("21 .42", "floating-space-before-period"),
-        ("21 . 42", "floating-space-after-and-before-period"),
-        ("21/ 42", "fraction-space-after-slash"),
-        ("21 /42", "fraction-space-before-slash"),
-        ("21 / 42", "fraction-space-after-and-before-slash"),
-    )
-)
-
-
-@mark.parametrize("expr_s", numerics_invalid)
-def test_numeric_parser_raises_ParseException_on(expr_s):
-    with raises(ParseException):
-        pr.numeric_parser.parseString(expr_s, parseAll=True)
-
-
-def test_Parser_repl_parse_raises_ParseException(parser):
-    with raises(ParseException):
-        parser.repl_parse("1 . 0")
-
-
-def test_Parser_repl_parse_bracket_mismatch(parser):
-    with raises(ParseException):
-        parser.repl_parse("(+ 1 2]")
-
-    with raises(ParseException):
-        parser.repl_parse("[1 2 3)")
