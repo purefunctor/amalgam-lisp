@@ -138,3 +138,35 @@ def test_parser_repl_mode(parser, first, then):
 
     assert parser.repl_parse(then) == parser.parse(full)
     assert parser.parse_buffer.tell() == 0
+
+
+repl_failures = (
+    param(text, error, id=f"'{text}'-{error.__name__}")
+    for text, error in (
+        ("42 42", pr.ExpectedEOF),
+        ("", pr.ExpectedExpression),
+        ("[1 2 3)", pr.MissingOpening),
+        ("(+ 1 2]", pr.MissingOpening),
+        ("42 . 42", pr.UnexpectedInput),
+    )
+)
+
+norm_failures = (
+    param(text, error, id=f"'{text}'-{error.__name__}")
+    for text, error in (
+        ("(+ 1 2", pr.MissingClosing),
+        ("[1 2 3", pr.MissingClosing),
+    )
+)
+
+
+@mark.parametrize(("text", "error"), norm_failures)
+def test_parser_parse_raises(parser, text, error):
+    with raises(error):
+        parser.parse(text)
+
+
+@mark.parametrize(("text", "error"), repl_failures)
+def test_parser_repl_parser_raises(parser, text, error):
+    with raises(error):
+        parser.repl_parse(text)

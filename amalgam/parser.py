@@ -114,7 +114,7 @@ class Parser:
         except MissingClosing:
             return None
 
-        except ParsingError:
+        except (UnexpectedInput, ParsingError):
             self.parse_buffer = StringIO()
             raise
 
