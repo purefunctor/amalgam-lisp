@@ -83,7 +83,9 @@ EXPR_PARSER = Lark(GRAMMAR, parser="lalr", transformer=Expression())
 
 
 class Parser:
-    """Serves as the parsing frontend."""
+    """
+    Class that serves as the frontend for parsing text.
+    """
 
     def __init__(self) -> None:
         self.parse_buffer = StringIO()
