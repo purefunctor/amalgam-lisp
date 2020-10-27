@@ -7,6 +7,9 @@ import amalgam.parser as pr
 
 
 class Engine:
+    """
+    Class that serves as the frontend for parsing and running programs.
+    """
 
     def __init__(
         self, *, prompt: str = "> ", prompt_cont: str = "| ",
@@ -21,6 +24,7 @@ class Engine:
         )
 
     def repl(self) -> None:
+        """Runs a REPL session that supports multi-line input."""
         cont = False
         session = PromptSession()
 
@@ -50,4 +54,5 @@ class Engine:
                 print(f"{e.__class__.__qualname__}: {e}")
 
     def parse_and_run(self, text: str) -> am.Amalgam:
+        """Parses and runs the given `text` string."""
         return self.parser.parse(text).evaluate(self.environment)
