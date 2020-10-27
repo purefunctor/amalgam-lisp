@@ -118,31 +118,26 @@ def test_vector(parser, vector):
     assert vector == str(parser.parse(vector))
 
 
-continuations = (
-    param(cont_first, cont_then, id=cont_iden)
-    for cont_first, cont_then, cont_iden in (
+chunked = (
+    param(first, then, id=iden)
+    for first, then, iden in (
         ("(+ 1", "\n1)", "s-expression"),
         ("[1 2", "\n3]", "vector"),
-        ("\"fo", "\no\"", "string"),
         ("(+ 1 [1 2", "\n3 4])", "s-expression-vector"),
         ("[1 2 (+ 1", "\n3 4)]", "vector-s-expression"),
-        ("(+ 1 \"fo", "\no\")", "s-expression-string"),
-        ("[+ 1 \"fo", "\no\"]", "vector-string"),
 
     )
 )
 
 
-@mark.parametrize(("cont_first", "cont_then"), continuations)
-def test_Parser_multiline_continuation(parser, cont_first, cont_then):
-    cont_full = cont_first + cont_then
+@mark.parametrize(("first", "then"), chunked)
+def test_parser_repl_mode(parser, first, then):
+    full = first + then
 
-    assert parser.repl_parse(cont_first) == None
-    assert parser.expect_more == True
-    assert parser.parse_buffer.tell() == len(cont_first)
+    assert parser.repl_parse(first) == None
+    assert parser.parse_buffer.tell() == len(first)
 
-    assert parser.repl_parse(cont_then) == parser.parse(cont_full)
-    assert parser.expect_more == False
+    assert parser.repl_parse(then) == parser.parse(full)
     assert parser.parse_buffer.tell() == 0
 
 
