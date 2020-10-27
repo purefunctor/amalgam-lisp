@@ -14,7 +14,6 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.7"
 click = "^7.1.2"
-pyparsing = "^2.4.7"
 prompt-toolkit = "^3.0.7"
 lark-parser = "^0.10.1"
 
