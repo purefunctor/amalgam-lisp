@@ -8,7 +8,6 @@ cache:
   - $HOME/.cache/pre-commit
   - .hypothesis
   - .pytest_cache
-  - .tox
 
 branches:
   only:
@@ -20,18 +19,18 @@ matrix:
   include:
   - stage: Lint and Test
     python: 3.8
-    env: TOXENV=lint
+    env: NOXSESSION=lint
   - python: 3.7
-    env: TOXENV=py37
+    env: NOXSESSION=test-3.7
   - python: 3.8
-    env: TOXENV=py38
+    env: NOXSESSION=test-3.8
 
 install:
   - pip install coverage poetry
   - poetry install
 
 script:
-  - poetry run tox
+  - poetry run nox
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
