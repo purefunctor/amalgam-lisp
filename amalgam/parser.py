@@ -1,177 +1,135 @@
-from contextlib import contextmanager
 from fractions import Fraction
-from functools import wraps
+import importlib.resources as resources
 from io import StringIO
+import json
 import re
-from typing import Optional
+from typing import cast, Optional
 
-import pyparsing as pp
+from lark import v_args, Lark, Transformer, UnexpectedInput
 
 import amalgam.amalgams as am
 
 
-def apply_splat(func):
-    """
-    Helper function for splatting args to callbacks.
-
-    Takes a callable `func` and return a function of one
-    argument `tokens` and splats `tokens` into `func`.
-    """
-
-    @wraps(func)
-    def _(tokens):
-        return func(*tokens)
-
-    return _
+GRAMMAR = resources.read_text(__package__, "grammar.lark")
 
 
-LPAREN, RPAREN, LBRACE, RBRACE = map(pp.Suppress, "()[]")
+@v_args(inline=True)
+class Expression(Transformer):
+    def symbol(self, identifier):
+        return am.Symbol(identifier)
 
-IDENTIFIER = pp.Regex(
-    r"(?![+-]?[0-9])[\+\-\*/\\&<=>?!_a-zA-Z0-9]+"
-)
+    def atom(self, identifier):
+        return am.Atom(identifier)
 
-symbol_parser = IDENTIFIER.copy().setParseAction(
-    apply_splat(am.Symbol)
-).setName("symbol")
+    def integral(self, number):
+        return am.Numeric(int(number))
 
-atom_parser = (
-    pp.Suppress(":") + IDENTIFIER
-).setParseAction(
-    apply_splat(am.Atom)
-).setName("atom")
+    def floating(self, number):
+        return am.Numeric(float(number))
 
-_escaped_characters = (
-    pp.Literal("\\")
-    + (
-        pp.Literal("\\")
-        | pp.Literal("\"")
-        | pp.CharsNotIn("\\\"").setResultsName("character")
-    )
-).setParseAction(
-    lambda tokens: tokens.character if tokens.character else tokens
-)
+    def fraction(self, number):
+        return am.Numeric(Fraction(number))
 
-_regular_characters = pp.CharsNotIn("\\\"")
+    def string(self, value):
+        value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
+        return am.String(json.loads(value))
 
-_string_contents = pp.Combine(
-    (_escaped_characters | _regular_characters)[...]
-).leaveWhitespace()
+    def s_expression(self, *expressions):
+        return am.SExpression(*expressions)
 
-string_parser = (
-    pp.Suppress("\"") + _string_contents + pp.Suppress("\"")
-).setParseAction(
-    apply_splat(am.String)
-).setName("string")
+    def vector(self, *expressions):
+        return am.Vector(*expressions)
 
-_string_integral_parser = pp.Regex(r"[+-]?(0|[1-9]\d*)")
+    def quoted(self, expression):
+        return am.Quoted(expression)
 
-_integral_parser = _string_integral_parser.copy().setParseAction(
-    apply_splat(int)
-)
 
-_floating_parser = pp.Combine(
-    _string_integral_parser + pp.Literal(".") + pp.Regex(r"\d+")
-).setParseAction(
-    apply_splat(float)
-)
+class ParsingError(Exception):
+    """Base exception for errors during parsing."""
 
-_fraction_parser = (
-    _integral_parser
-    + pp.Suppress("/").leaveWhitespace()
-    + _integral_parser.copy().leaveWhitespace()
-).setParseAction(
-    apply_splat(Fraction)
-)
+    def __init__(self, line, column):
+        self.line = line
+        self.column = column
 
-numeric_parser = (
-    _integral_parser ^ _floating_parser ^ _fraction_parser
-).setParseAction(
-    apply_splat(am.Numeric)
-).setName("numeric")
+    def __str__(self):  # pragma: no cover
+        return f"near line {self.line}, column {self.column}"
 
-expression_parser = pp.Forward()
 
-quoted_parser = (
-    pp.Suppress("'") + expression_parser
-).setParseAction(
-    apply_splat(am.Quoted)
-).setName("quoted")
+class ExpectedEOF(ParsingError):
+    """Raised when multiple expressions are found."""
 
-s_expression_parser = (
-    LPAREN + expression_parser[...] + RPAREN
-).setParseAction(
-    apply_splat(am.SExpression)
-).setName("s-expression")
 
-vector_parser = (
-    LBRACE + expression_parser[...] + RBRACE
-).setParseAction(
-    apply_splat(am.Vector)
-).setName("vector")
+class ExpectedExpression(ParsingError):
+    """Raised when no expressions are found."""
 
-expression_parser <<= (
-    quoted_parser
-    | atom_parser
-    | numeric_parser
-    | symbol_parser
-    | string_parser
-    | s_expression_parser
-    | vector_parser
-)
+
+class MissingClosing(ParsingError):
+    """Raised on missing closing parentheses or brackets."""
+
+
+class MissingOpening(ParsingError):
+    """Raised on missing opening parentheses or brackets."""
+
+
+ERROR_EXAMPLES = {
+    ExpectedEOF: ("foo bar",),
+    ExpectedExpression: ("",),
+    MissingClosing: ("(", "[", "(foo", "[foo", "(foo bar", "[foo bar"),
+    MissingOpening: (")", "]", "[foo bar)", "(foo bar]"),
+}
+
+
+EXPR_PARSER = Lark(GRAMMAR, parser="lalr", transformer=Expression())
 
 
 class Parser:
-    """
-    Class that serves as the parsing frontend.
-
-    The `parse` method allows for reentrant parsing of text by
-    utilizing a `StringIO` buffer; this enables the REPL to be
-    able to parse multi-line expressions by checking for the
-    return value of said method.
-    """
+    """Serves as the parsing frontend."""
 
     def __init__(self) -> None:
         self.parse_buffer = StringIO()
-        self.expect_more = False
-
-    @contextmanager
-    def _as_repl_parser(self):
-        string_parser.setFailAction(self._expect_more)
-        s_expression_parser.setFailAction(self._expect_more)
-        vector_parser.setFailAction(self._expect_more)
-
-        try:
-            yield self
-        finally:
-            string_parser.setFailAction(None)
-            s_expression_parser.setFailAction(None)
-            vector_parser.setFailAction(None)
-
-    def _expect_more(self, *arguments) -> None:
-        *_, err = arguments
-        if re.match(r"Expected \"[\)\]\"]\", found end of text", str(err)):
-            self.expect_more = True
 
     def repl_parse(self, text: str) -> Optional[am.Amalgam]:
-        with self._as_repl_parser():
-            self.expect_more = False
-            self.parse_buffer.write(text)
-            self.parse_buffer.seek(0)
-            text = self.parse_buffer.read()
+        """
+        Facilitates multi-line parsing for the REPL.
 
-            try:
-                expr = expression_parser.parseString(text, parseAll=True)[0]
+        Writes the given `text` string to the `parse_buffer` attribute
+        and attempts to parse `text`.
 
-            except pp.ParseException as p:
-                if not self.expect_more:
-                    self.parse_buffer = StringIO()
-                    raise p
-                return None
+        If `MissingClosing` is raised, returns `None` to allow for
+        parsing to continue.
 
-            else:
-                self.parse_buffer = StringIO()
-                return expr
+        If another subclass of `ParsingError` is raised, clears the
+        `parse_buffer` and re-raises the exception.
+
+        Otherwise, if parsing succeeds, clears the `parse_buffer`
+        and returns the parsed expression.
+        """
+        self.parse_buffer.write(text)
+        self.parse_buffer.seek(0)
+        text = self.parse_buffer.read()
+
+        try:
+            expr = self.parse(text)
+
+        except MissingClosing:
+            return None
+
+        except ParsingError:
+            self.parse_buffer = StringIO()
+            raise
+
+        else:
+            self.parse_buffer = StringIO()
+            return expr
 
     def parse(self, text: str) -> am.Amalgam:
-        return expression_parser.parseString(text, parseAll=True)[0]
+        """Facilitates regular parsing that can fail."""
+        try:
+            return cast(am.Amalgam, EXPR_PARSER.parse(text))
+        except UnexpectedInput as u:
+            exc_cls = u.match_examples(
+                EXPR_PARSER.parse, ERROR_EXAMPLES.items(),
+            )
+            if exc_cls is None:
+                raise
+            raise exc_cls(u.line, u.column) from None
