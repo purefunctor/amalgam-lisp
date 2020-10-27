@@ -28,17 +28,17 @@ $ poetry install
 $ poetry run pre-commit install
 ```
 
-## Running Tests / Coverage Reports
-`tox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8.
+## Running Tests / Coverage Reports / Building Documentation
+`tox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8, as well as building documentation for the project.
 ```bash
 $ poetry run tox
 ```
 
-Alternatively, tests and coverage reports can be generated manually.
+Alternatively, tests, coverage reports, and the documentation can be generated manually.
 ```bash
 $ poetry run coverage run -m pytest
 $ poetry run coverage combine
 $ poetry run coverage report -m
 $ poetry run coverage html
+$ poetry run sphinx-build docs docs/build
 ```
-
