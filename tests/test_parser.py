@@ -45,18 +45,11 @@ numerics = (
     param(numeric, id=expr_id)
     for numeric, expr_id in (
         ("42", "unsigned-integral"),
-        ("+42", "positive-integral"),
         ("-42", "negative-integral"),
         ("21.42", "unsigned-floating"),
-        ("+21.42","positive-floating"),
         ("-21.42", "negative-floating"),
         ("21/42", "unsigned-fraction"),
-        ("+21/42", "positive-fraction-numerator"),
-        ("-21/42", "negative-fraction-numerator"),
-        ("21/+42", "positive-fraction-denominator"),
-        ("21/-42", "negative-fraction-denominator"),
-        ("+21/+42", "positive-fraction"),
-        ("-21/-42", "negative-fraction"),
+        ("-21/42", "negative-fraction"),
     )
 )
 
