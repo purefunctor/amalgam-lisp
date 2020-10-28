@@ -11,28 +11,20 @@ class Engine:
     Class that serves as the frontend for parsing and running programs.
     """
 
-    def __init__(
-        self, *, prompt: str = "> ", prompt_cont: str = "| ",
-    ) -> None:
-
-        self.prompt = prompt
-        self.prompt_cont = prompt_cont
-
+    def __init__(self) -> None:
         self.parser = pr.Parser()
         self.environment = ev.Environment(
             {**pd.FUNCTIONS, "~engine~": am.Internal(self)}
         )
 
-    def repl(self) -> None:
+    def repl(self, *, prompt: str = "> ", prompt_cont: str = "| ") -> None:
         """Runs a REPL session that supports multi-line input."""
         cont = False
         session = PromptSession()
 
         while True:
             try:
-                prompt = self.prompt if not cont else self.prompt_cont
-
-                text = session.prompt(prompt)
+                text = session.prompt(prompt if not cont else prompt_cont)
 
                 if cont:
                     text = "\n" + text
