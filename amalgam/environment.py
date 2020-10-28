@@ -17,16 +17,36 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class SymbolNotFound(Exception):
-    """Synonym for `KeyError`."""
+    """Synonym for :class:`KeyError`."""
 
 
 class TopLevelPop(Exception):
-    """Raised at `Environment.env_pop`"""
+    """Raised at :meth:`Environment.env_pop`."""
 
 
 class Environment:
     """
     Class that manages and represents nested execution environments.
+
+    Attributes:
+      bindings (:class:`Dict[str, Amalgam]`): A mapping of
+        :class:`str` keys to :class:`.amalgams.Amalgam` values.
+
+      parent (:class:`Optional[Environment]`): The parent
+        :class:`Environment` instance to search into, forming a
+        linked list.
+
+      level (:class:`int`): The current length of the
+        :class:`Environment` linked list. If a
+        :attr:`~.Environment.parent` is provided, sets the current
+        value to the parent's :attr:`~.Environment.level` + 1.
+
+      search_depth (:class:`int`): The search depth when traversing
+        the :class:`Environment` linked list in the
+        :meth:`~.Environment.__contains__`,
+        :meth:`~.Environment.__delitem__`,
+        :meth:`~.Environment.__getitem__`, and
+        :meth:`~.Environment.__setitem__` methods.
     """
 
     def __init__(
@@ -43,10 +63,10 @@ class Environment:
         """
         Attempts to recursively obtain the provided `item`.
 
-        Searches with respect to the current `search_depth` attribute
-        of the calling `Environment` instance. If an existing `item`
-        if encountered at a certain depth less than the target depth,
-        returns that `item`, otherwise, raises `SymbolNotFound`.
+        Searches with respect to the current :attr:`search_depth` of the
+        calling :class:`Environment` instance. If an existing `item`
+        is encountered at a certain depth less than the target depth,
+        returns that `item`, otherwise, raises :class:`SymbolNotFound`.
         """
         _self = self
 
@@ -69,9 +89,9 @@ class Environment:
         """
         Attempts to recursively set the provided `value` to an `item`.
 
-        Searches with respect to the current `search_depth` attribute
-        of the calling `Environment` instance. If an existing `item`
-        is encountered at a certain depth less than the target depth,
+        Searches with respect to the current :attr:`search_depth` of the
+        calling :class:`Environment` instance. If an existing `item` is
+        encountered at a certain depth less than the target depth,
         overrides that `item` instead.
         """
         _self = self
@@ -96,9 +116,9 @@ class Environment:
         """
         Attempts to recursively delete the provided `item`.
 
-        Searches with respect to the current `search_depth` attribute
-        of the calling `Environment` instance. If an existing `item`
-        is encountered at a certain depth less than the target depth,
+        Searches with respect to the current :attr:`search_depth` of the
+        calling :class:`Environment` instance. If an existing `item` is
+        encountered at a certain depth less than the target depth,
         deletes that `item` instead.
         """
         _self = self
@@ -123,10 +143,10 @@ class Environment:
         """
         Recursively checks whether an `item` exists.
 
-        Searches with respect to the current `search_depth` attribute
-        of the calling `Environment` instance. If the target `item` is
+        Searches with respect to the current :attr:`search_depth` of the
+        calling :class:`Environment` instance. If the target `item` is
         encountered at a certain depth less than the target depth,
-        immediately returns True, otherwise, returns False.
+        immediately returns `True`, otherwise, returns `False`.
         """
         _self = self
 
@@ -150,9 +170,9 @@ class Environment:
         """
         Context manager for temporarily setting the lookup depth.
 
-        The provided `depth` argument must not exceed the `level`
-        attribute of the calling `Environment` instance, and will
-        raise a `ValueError` if done so.
+        The provided `depth` argument must not exceed the :attr:`level`
+        of the calling :class:`Environment` instance, and will raise a
+        :class:`ValueError` if done so.
 
         >>> env = Environment(FUNCTIONS)
         >>>
@@ -183,15 +203,15 @@ class Environment:
 
     def env_push(self, bindings: Bindings = None) -> Environment:
         """
-        Creates a new `Environment` and binds the calling instance
-        as its parent environment.
+        Creates a new :class:`Environment` and binds the calling
+        instance as its parent environment.
         """
         return Environment(bindings, self)
 
     def env_pop(self) -> Environment:
         """
-        Discards the current environment and returns the parent
-        environment.
+        Discards the current :class:`Environment` and returns the parent
+        :class:`Environment`.
         """
         if self.parent is not None:
             return self.parent

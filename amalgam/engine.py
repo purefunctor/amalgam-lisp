@@ -9,6 +9,17 @@ import amalgam.parser as pr
 class Engine:
     """
     Class that serves as the frontend for parsing and running programs.
+
+    Attributes:
+      parser (:class:`.parser.Parser`): A :class:`.parser.Parser`
+        instance.
+
+      environment (:class:`.environment.Environment`): An
+        :class:`.environment.Environment` instance containing the
+        built-in functions and a reference to the
+        :class:`.engine.Engine` instance wrapped within a
+        :class:`.amalgams.Internal`, accessible through the
+        `~engine~` key.
     """
 
     def __init__(self) -> None:
@@ -18,7 +29,16 @@ class Engine:
         )
 
     def repl(self, *, prompt: str = "> ", prompt_cont: str = "| ") -> None:
-        """Runs a REPL session that supports multi-line input."""
+        """
+        Runs a REPL session that supports multi-line input.
+
+        Parameters:
+          prompt (:class:`str`): The style of the prompt on
+            regular lines.
+
+          prompt_cont (:class:`str`): The style of the prompt on
+            continued lines.
+        """
         cont = False
         session = PromptSession()
 

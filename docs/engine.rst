@@ -1,5 +1,9 @@
 Engine
 ======
 
-.. automodule:: amalgam.engine
+.. currentmodule: amalgam
+
+Internal documentation for the :mod:`amalgam.engine` module.
+
+.. autoclass:: amalgam.engine.Engine
     :members:

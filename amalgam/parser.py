@@ -14,40 +14,51 @@ GRAMMAR = resources.read_text(__package__, "grammar.lark")
 
 @v_args(inline=True)
 class Expression(Transformer):
-    def symbol(self, identifier):
+    """
+    Transforms expressions in text into their respective
+    :class:`.amalgams.Amalgam` representations.
+    """
+
+    def symbol(self, identifier: str) -> am.Symbol:
         return am.Symbol(identifier)
 
-    def atom(self, identifier):
+    def atom(self, identifier: str) -> am.Atom:
         return am.Atom(identifier)
 
-    def integral(self, number):
+    def integral(self, number: str) -> am.Numeric:
         return am.Numeric(int(number))
 
-    def floating(self, number):
+    def floating(self, number: str) -> am.Numeric:
         return am.Numeric(float(number))
 
-    def fraction(self, number):
+    def fraction(self, number: str) -> am.Numeric:
         return am.Numeric(Fraction(number))
 
-    def string(self, *values):
+    def string(self, *values: str) -> am.String:
         value = "".join(values)
         value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
         return am.String(value.strip("\""))
 
-    def s_expression(self, *expressions):
+    def s_expression(self, *expressions: am.Amalgam) -> am.SExpression:
         return am.SExpression(*expressions)
 
-    def vector(self, *expressions):
+    def vector(self, *expressions: am.Amalgam) -> am.SExpression:
         return am.Vector(*expressions)
 
-    def quoted(self, expression):
+    def quoted(self, expression: am.Amalgam) -> am.Quoted:
         return am.Quoted(expression)
 
 
 class ParsingError(Exception):
-    """Base exception for errors during parsing."""
+    """
+    Base exception for errors during parsing.
 
-    def __init__(self, line, column):
+    Attributes:
+      line (:class:`int`): the line number nearest to the error
+      column (:class:`int`): the column number nearest to the error
+    """
+
+    def __init__(self, line: int, column: int):
         self.line = line
         self.column = column
 
@@ -87,6 +98,10 @@ EXPR_PARSER = Lark(GRAMMAR, parser="lalr", transformer=Expression())
 class Parser:
     """
     Class that serves as the frontend for parsing text.
+
+    Attributes:
+      parse_buffer (:class:`StringIO`): The text buffer used within
+        :meth:`.Parser.repl_parse`.
     """
 
     def __init__(self) -> None:
@@ -96,16 +111,16 @@ class Parser:
         """
         Facilitates multi-line parsing for the REPL.
 
-        Writes the given `text` string to the `parse_buffer` attribute
-        and attempts to parse `text`.
+        Writes the given `text` string to the :attr:`parse_buffer` and
+        attempts to parse `text`.
 
-        If `MissingClosing` is raised, returns `None` to allow for
-        parsing to continue.
+        If :class:`MissingClosing` is raised, returns `None` to allow
+        for parsing to continue.
 
-        If another subclass of `ParsingError` is raised, clears the
-        `parse_buffer` and re-raises the exception.
+        If another subclass of :class:`ParsingError` is raised, clears
+        the :attr:`parse_buffer` and re-raises the exception.
 
-        Otherwise, if parsing succeeds, clears the `parse_buffer`
+        Otherwise, if parsing succeeds, clears the :attr:`parse_buffer`
         and returns the parsed expression.
         """
         self.parse_buffer.write(text)
