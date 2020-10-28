@@ -1,7 +1,6 @@
 from fractions import Fraction
 import importlib.resources as resources
 from io import StringIO
-import json
 import re
 from typing import cast, Optional
 
@@ -30,9 +29,10 @@ class Expression(Transformer):
     def fraction(self, number):
         return am.Numeric(Fraction(number))
 
-    def string(self, value):
+    def string(self, *values):
+        value = "".join(values)
         value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
-        return am.String(json.loads(value))
+        return am.String(value.strip("\""))
 
     def s_expression(self, *expressions):
         return am.SExpression(*expressions)
@@ -74,7 +74,9 @@ class MissingOpening(ParsingError):
 ERROR_EXAMPLES = {
     ExpectedEOF: ("foo bar",),
     ExpectedExpression: ("",),
-    MissingClosing: ("(", "[", "(foo", "[foo", "(foo bar", "[foo bar"),
+    MissingClosing: (
+        "(", "[", "(foo", "[foo", "(foo bar", "[foo bar", "\"foo", "\"foo bar",
+    ),
     MissingOpening: (")", "]", "[foo bar)", "(foo bar]"),
 }
 

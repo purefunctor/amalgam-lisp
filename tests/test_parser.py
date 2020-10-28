@@ -120,11 +120,13 @@ def test_vector(parser, vector):
 chunked = (
     param(first, then, id=iden)
     for first, then, iden in (
-        ("(+ 1", "\n1)", "s-expression"),
         ("[1 2", "\n3]", "vector"),
+        ("(+ 1", "\n1)", "s-expression"),
+        ("\"42", "\n\"", "string"),
         ("(+ 1 [1 2", "\n3 4])", "s-expression-vector"),
         ("[1 2 (+ 1", "\n3 4)]", "vector-s-expression"),
-
+        ("(+ 1 \"42", "\n\")", "s-expression-string"),
+        ("[+ 1 \"42", "\n\"]", "vector-string"),
     )
 )
 
