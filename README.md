@@ -29,9 +29,9 @@ $ poetry run pre-commit install
 ```
 
 ## Running Tests / Coverage Reports / Building Documentation
-`tox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8, as well as building documentation for the project.
+`nox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8, as well as building documentation for the project.
 ```bash
-$ poetry run tox
+$ poetry run nox
 ```
 
 Alternatively, tests, coverage reports, and the documentation can be generated manually.
