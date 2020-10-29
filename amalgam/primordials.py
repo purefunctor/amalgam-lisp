@@ -64,11 +64,15 @@ def _make_function(
 
 @_make_function("+")
 def _add(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
+    """Returns the sum of :data:`nums`."""
     return am.Numeric(sum(num.value for num in nums))
 
 
 @_make_function("-")
 def _sub(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
+    """
+    Subtracts :data:`nums[0]` and the summation of :data:`nums[1:]`.
+    """
     x, *ns = (num.value for num in nums)
     y: Union[float, Fraction] = 0
     for n in ns:
@@ -78,6 +82,7 @@ def _sub(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
 
 @_make_function("*")
 def _mul(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
+    """Returns the product of :data:`nums`."""
     prod: Union[float, Fraction] = 1
     for num in nums:
         prod *= num.value
@@ -86,6 +91,9 @@ def _mul(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
 
 @_make_function("/")
 def _div(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
+    """
+    Divides :data:`nums[0]` and the product of :data:`nums[1:]`
+    """
     x, *ns = (num.value for num in nums)
     y: Union[float, Fraction] = 1
     for n in ns:
@@ -99,6 +107,10 @@ def _setn(
     name: am.Quoted[am.Symbol],
     amalgam: am.Quoted[am.Amalgam],
 ) -> am.Amalgam:
+    """
+    Binds :data:`name` to the evaluated :data:`amalgam` value in the
+    immediate :data:`env` and returns that value.
+    """
     env[name.value.value] = amalgam.value.evaluate(env)
     return env[name.value.value]
 
@@ -109,6 +121,9 @@ def _fn(
     args: am.Quoted[am.Vector[am.Symbol]],
     body: am.Quoted[am.Amalgam],
 ) -> am.Function:
+    """
+    Creates an anonymous function using the provided arguments.
+    """
     return am.create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
 
 
@@ -119,6 +134,11 @@ def _mkfn(
     args: am.Quoted[am.Vector[am.Symbol]],
     body: am.Quoted[am.Amalgam],
 ) -> am.Amalgam:
+    """
+    Creates a named function using the provided arguments.
+
+    Composes :func:`._fn` and :func:`._setn`.
+    """
     return _setn(env, name, am.Quoted(_fn(env, args, body).with_name(name.value.value)))
 
 
@@ -128,6 +148,10 @@ def _let(
     qpairs: am.Quoted[am.Vector[am.Vector]],
     body: am.Quoted[am.Amalgam],
 ) -> am.Amalgam:
+    """
+    Creates temporary bindings of names to values specified in
+    :data:`qpairs` before evaluating :data:`body`.
+    """
     names = []
     values = []
 
@@ -148,6 +172,7 @@ def _let(
 
 @_make_function("bool")
 def _bool(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
+    """Checks for the truthiness of an :data:`expr`."""
     if expr == am.String(""):
         return am.Atom("FALSE")
     elif expr == am.Numeric(0):
@@ -163,6 +188,7 @@ def _bool(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
 
 @_make_function(">")
 def _gt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs a `greater than` comparison."""
     if x > y:  # type: ignore
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -170,6 +196,7 @@ def _gt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function("<")
 def _lt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs a `less than` comparison."""
     if x < y:  # type: ignore
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -177,6 +204,7 @@ def _lt(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function("=")
 def _eq(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs an `equals` comparison."""
     if x == y:
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -184,6 +212,7 @@ def _eq(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function("/=")
 def _ne(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs a `not equals` comparison."""
     if x != y:
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -191,6 +220,7 @@ def _ne(_env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function(">=")
 def _ge(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs a `greater than or equal` comparison."""
     if x >= y:  # type: ignore
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -198,6 +228,7 @@ def _ge(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function("<=")
 def _le(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
+    """Performs a `less than or equal` comparison."""
     if x <= y:  # type: ignore
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -205,6 +236,7 @@ def _le(env: ev.Environment, x: am.Amalgam, y: am.Amalgam) -> am.Atom:
 
 @_make_function("not")
 def _not(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
+    """Checks and negates the truthiness of :data:`expr`."""
     if _bool(_env, expr) == am.Atom("TRUE"):
         return am.Atom("FALSE")
     return am.Atom("TRUE")
@@ -212,6 +244,11 @@ def _not(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
 
 @_make_function("and", defer=True)
 def _and(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
+    """
+    Checks the truthiness of the evaluated :data:`qexprs` and performs
+    an `and` operation. Short-circuits when :data:`:FALSE` is returned
+    and does not evaluate subsequent expressions.
+    """
     for qexpr in qexprs:
         cond = _bool(env, qexpr.value.evaluate(env))
         if cond == am.Atom("FALSE"):
@@ -221,6 +258,11 @@ def _and(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
 
 @_make_function("or", defer=True)
 def _or(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
+    """
+    Checks the truthiness of the evaluated :data:`qexprs` and performs
+    an `or` operation. Short-circuits when :data:`:TRUE` is returned
+    and does not evaluate subsequent expressions.
+    """
     for qexpr in qexprs:
         cond = _bool(env, qexpr.value.evaluate(env))
         if cond == am.Atom("TRUE"):
@@ -235,6 +277,11 @@ def _if(
     qthen: am.Quoted[am.Amalgam],
     qelse: am.Quoted[am.Amalgam],
 ) -> am.Amalgam:
+    """
+    Checks the truthiness of the evaluated :data:`qcond`, evaluates and
+    returns :data:`qthen` if :data:`:TRUE`, otherwise, evaluates and
+    returns :data:`qelse`.
+    """
     cond = _bool(env, qcond.value.evaluate(env))
     if cond == am.Atom("TRUE"):
         return qthen.value.evaluate(env)
@@ -243,6 +290,11 @@ def _if(
 
 @_make_function("cond", defer=True)
 def _cond(env: ev.Environment, *qpairs: am.Quoted[am.Vector[am.Amalgam]]) -> am.Amalgam:
+    """
+    Traverses pairs of conditions and values. If the condition evaluates
+    to :data:`:TRUE`, returns the value pair and short-circuits
+    evaluation. If no conditions are met, :data:`:NIL` is returned.
+    """
     for qpair in qpairs:
         pred, expr = qpair.value.vals
         if _bool(env, pred.evaluate(env)) == am.Atom("TRUE"):
@@ -252,18 +304,21 @@ def _cond(env: ev.Environment, *qpairs: am.Quoted[am.Vector[am.Amalgam]]) -> am.
 
 @_make_function("exit")
 def _exit(env: ev.Environment, exit_code: am.Numeric = am.Numeric(0)) -> am.Amalgam:
+    """Exits the program with the given :data:`exit_code`."""
     print("Goodbye.")
     sys.exit(int(exit_code.value))
 
 
 @_make_function("print")
 def _print(_env: ev.Environment, amalgam: am.Amalgam) -> am.Amalgam:
+    """Prints the provided :data:`amalgam` and returns it."""
     print(amalgam)
     return amalgam
 
 
 @_make_function("putstrln")
 def _putstrln(_env: ev.Environment, string: am.String) -> am.String:
+    """Prints the provided :data:`string` and returns it."""
     if not isinstance(string, am.String):
         raise TypeError("putstrln only accepts a string")
     print(string.value)
@@ -272,6 +327,10 @@ def _putstrln(_env: ev.Environment, string: am.String) -> am.String:
 
 @_make_function("do", defer=True)
 def _do(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+    """
+    Evaluates a variadic amount of :data:`qexprs`, returning the final
+    expression evaluated.
+    """
     accumulator = am.Atom("NIL")
     for qexpr in qexprs:
         accumulator = qexpr.value.evaluate(env)
@@ -280,6 +339,11 @@ def _do(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
 
 @_make_function("require")
 def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
+    """
+    Runs a given :data:`module_name` and imports the exposed symbols to
+    the current :data:`env` with respect to the `~provides~` key created
+    in :func:`._provide`.
+    """
     module_path = Path(module_name.value).absolute()
     with module_path.open("r", encoding="UTF-8") as f:
         text = f.read()
@@ -306,17 +370,20 @@ def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
 
 @_make_function("provide", defer=True)
 def _provide(env: ev.Environment, *qsymbols: am.Quoted[am.Symbol]) -> am.Atom:
+    """Sets the `~provides~` key to be used in :func:`._require`."""
     env["~provides~"] = am.Vector(*(qsymbol.value for qsymbol in qsymbols))
     return am.Atom("NIL")
 
 
 @_make_function("concat")
 def _concat(_env: ev.Environment, *strings: am.String) -> am.String:
+    """Concatenates the given :data:`strings`."""
     return am.String("".join(string.value for string in strings))
 
 
 @_make_function("merge")
 def _merge(_env: ev.Environment, *vectors: am.Vector) -> am.Vector:
+    """Merges the given :data:`vectors`."""
     return am.Vector(*chain.from_iterable(vector.vals for vector in vectors))
 
 
@@ -328,6 +395,7 @@ def _slice(
     stop: am.Numeric,
     step: am.Numeric = am.Numeric(1),
 ) -> am.Vector:
+    """Returns a slice of the given :data:`vector`."""
     return am.Vector(*vector.vals[start.value:stop.value:step.value])
 
 
@@ -339,6 +407,7 @@ def _sliceup(
     stop: am.Numeric,
     update: am.Vector,
 ) -> am.Vector:
+    """Updates a slice of the given :data:`vector`."""
     vals = list(vector.vals)
     vals[start.value:stop.value] = update.vals
     return am.Vector(*vals)
@@ -346,11 +415,13 @@ def _sliceup(
 
 @_make_function("at")
 def _at(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Amalgam:
+    """Indexes :data:`vector` with :data:`index`."""
     return vector.vals[index.value]
 
 
 @_make_function("remove")
 def _remove(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Vector:
+    """Removes an item in :data:`vector` using :data:`index`."""
     vals = list(vector.vals)
     del vals[index.value]
     return am.Vector(*vals)
@@ -358,6 +429,7 @@ def _remove(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Ve
 
 @_make_function("is-map")
 def _is_map(_env: ev.Environment, vector: am.Vector) -> am.Atom:
+    """Verifies whether :data:`vector` is a mapping."""
     if vector.mapping:
         return am.Atom("TRUE")
     return am.Atom("FALSE")
@@ -365,6 +437,7 @@ def _is_map(_env: ev.Environment, vector: am.Vector) -> am.Atom:
 
 @_make_function("map-in")
 def _map_in(_env: ev.Environment, vector: am.Vector, atom: am.Atom) -> am.Atom:
+    """Checks whether :data:`atom` is a member of :data:`vector`."""
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
     if atom.value in vector.mapping:
@@ -374,6 +447,7 @@ def _map_in(_env: ev.Environment, vector: am.Vector, atom: am.Atom) -> am.Atom:
 
 @_make_function("map-at")
 def _map_at(_env: ev.Environment, vector: am.Vector, atom: am.Atom) -> am.Amalgam:
+    """Obtains the value bound to :data:`atom` in :data:`vector`."""
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
     return vector.mapping[atom.value]
@@ -386,6 +460,10 @@ def _map_up(
     atom: am.Atom,
     amalgam: am.Amalgam,
 ) -> am.Vector:
+    """
+    Updates the :data:`vector mapping with :data:`atom`, and
+    :data:`amalgam`.
+    """
     if not vector.mapping:
         raise ValueError("the given vector is not a mapping")
 
@@ -405,21 +483,28 @@ def _map_up(
 
 
 class _Return(NamedTuple):
+    """Internal utility class for signalling a return value."""
     return_value: am.Amalgam
 
 
 @_make_function("return", contextual=True)
 def _return(env: ev.Environment, result: am.Amalgam) -> am.Internal:
+    """Exits a context with a :data:`result`."""
     return am.Internal(_Return(result))
 
 
 @_make_function("break", contextual=True)
 def _break(env: ev.Environment) -> am.Internal:
+    """Exits a loop with :data:`:NIL`."""
     return am.Internal(_Return(am.Atom("NIL")))
 
 
 @_make_function("loop", defer=True, allows=("break", "return"))
 def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+    """
+    Loops through and evaluates :data:`qexprs` indefinitely until a
+    :data:`break` or :data:`return` is encountered.
+    """
     return_value = None
 
     while return_value is None:
@@ -437,6 +522,10 @@ def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
 def _when(
     env: ev.Environment, qcond: am.Quoted[am.Amalgam], qbody: am.Quoted[am.Amalgam],
 ) -> am.Amalgam:
+    """
+    Synonym for :func:`._if` that defaults :data:`qelse` to
+    :data:`:NIL`.
+    """
     cond = _bool(env, qcond.value.evaluate(env))
     if cond == am.Atom("TRUE"):
         return qbody.value.evaluate(env)
