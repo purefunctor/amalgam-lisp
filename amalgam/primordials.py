@@ -1,5 +1,5 @@
 from fractions import Fraction
-from functools import partial
+from functools import partial, wraps
 from itertools import chain
 from pathlib import Path
 import sys
@@ -42,6 +42,7 @@ def _make_function(
     if allows is None:
         allows = []
 
+    @wraps(func)
     def _func(env, *arguments, **keywords):
         with env.search_at(depth=-1):
             fns = [env[allow] for allow in allows]
