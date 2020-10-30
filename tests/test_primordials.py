@@ -53,6 +53,7 @@ from amalgam.primordials import (
     _map_up,
     _loop,
     _when,
+    _eval,
 )
 
 from pytest import fixture, mark, param, raises
@@ -581,3 +582,10 @@ def test_when(env):
 
 def test_when_nil(env):
     assert _when(env, Quoted(Atom("NIL")), Numeric(42)) == Atom("NIL")
+
+
+def test_eval(env):
+    env["x"] = Numeric(42)
+    assert _eval(env, Symbol("x")) == Numeric(42)
+    assert _eval(env, Quoted(Symbol("x"))) == Numeric(42)
+    assert _eval(env, Quoted(Quoted(Symbol("x")))) == Quoted(Symbol("x"))

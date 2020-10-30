@@ -530,3 +530,11 @@ def _when(
     if cond == am.Atom("TRUE"):
         return qbody.value.evaluate(env)
     return am.Atom("NIL")
+
+
+@_make_function("eval")
+def _eval(env: ev.Environment, amalgam: am.Amalgam) -> am.Amalgam:
+    """Evaluates a given :data:`amalgam`."""
+    if isinstance(amalgam, am.Quoted):
+        amalgam = amalgam.value
+    return amalgam.evaluate(env)
