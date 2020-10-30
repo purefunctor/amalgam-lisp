@@ -7,9 +7,11 @@
      | vector
      | quoted
 
-symbol: /(?![+-]?[0-9])[\+\-\*\/\\&<=>?!_a-zA-Z0-9]+/
+IDENTIFIER: /(?![+-]?[0-9])[\+\-\*\/\\&<=>?!_a-zA-Z0-9]+/
 
-atom: ":" symbol
+symbol: IDENTIFIER
+
+atom: ":" IDENTIFIER
 
 ?number: integral | floating | fraction
 integral: /-?(0|[1-9][0-9]*)/

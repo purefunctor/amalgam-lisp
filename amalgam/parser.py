@@ -4,7 +4,7 @@ from io import StringIO
 import re
 from typing import cast, Optional
 
-from lark import v_args, Lark, Transformer, UnexpectedInput
+from lark import v_args, Lark, Token, Transformer, UnexpectedInput
 
 import amalgam.amalgams as am
 
@@ -19,22 +19,22 @@ class Expression(Transformer):
     :class:`.amalgams.Amalgam` representations.
     """
 
-    def symbol(self, identifier: str) -> am.Symbol:
-        return am.Symbol(identifier)
+    def symbol(self, identifier: Token) -> am.Symbol:
+        return am.Symbol(str(identifier))
 
-    def atom(self, identifier: str) -> am.Atom:
-        return am.Atom(identifier)
+    def atom(self, identifier: Token) -> am.Atom:
+        return am.Atom(str(identifier))
 
-    def integral(self, number: str) -> am.Numeric:
+    def integral(self, number: Token) -> am.Numeric:
         return am.Numeric(int(number))
 
-    def floating(self, number: str) -> am.Numeric:
+    def floating(self, number: Token) -> am.Numeric:
         return am.Numeric(float(number))
 
-    def fraction(self, number: str) -> am.Numeric:
+    def fraction(self, number: Token) -> am.Numeric:
         return am.Numeric(Fraction(number))
 
-    def string(self, *values: str) -> am.String:
+    def string(self, *values: Token) -> am.String:
         value = "".join(values)
         value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
         return am.String(value.strip("\""))
@@ -42,7 +42,7 @@ class Expression(Transformer):
     def s_expression(self, *expressions: am.Amalgam) -> am.SExpression:
         return am.SExpression(*expressions)
 
-    def vector(self, *expressions: am.Amalgam) -> am.SExpression:
+    def vector(self, *expressions: am.Amalgam) -> am.Vector:
         return am.Vector(*expressions)
 
     def quoted(self, expression: am.Amalgam) -> am.Quoted:
