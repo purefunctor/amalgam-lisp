@@ -40,7 +40,7 @@ class Engine:
             continued lines.
         """
         cont = False
-        session = PromptSession()
+        session: PromptSession = PromptSession()
 
         while True:
             try:
