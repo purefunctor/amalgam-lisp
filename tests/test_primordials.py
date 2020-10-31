@@ -46,6 +46,8 @@ from amalgam.primordials import (
     _slice,
     _at,
     _len,
+    _cons,
+    _snoc,
     _remove,
     _is_map,
     _map_in,
@@ -454,6 +456,32 @@ def test_slice(env):
 def test_at(env):
     vector = Vector(Numeric(21), Numeric(42))
     assert _at(env, Numeric(1), vector) == Numeric(42)
+
+
+def test_cons(env):
+    v0 = Vector(Atom("foo"), Numeric(21))
+
+    c0 = _cons(env, Numeric(42), v0)
+    c1 = _cons(env, Atom("bar"), c0)
+
+    assert c0 == Vector(Numeric(42), Atom("foo"), Numeric(21))
+    assert c0.mapping == {}
+
+    assert c1 == Vector(Atom("bar"), Numeric(42), Atom("foo"), Numeric(21))
+    assert c1.mapping == {"bar": Numeric(42), "foo": Numeric(21)}
+
+
+def test_snoc(env):
+    v0 = Vector(Atom("foo"), Numeric(21))
+
+    c0 = _snoc(env, v0, Atom("bar"))
+    c1 = _snoc(env, c0, Numeric(42))
+
+    assert c0 == Vector(Atom("foo"), Numeric(21), Atom("bar"))
+    assert c0.mapping == {}
+
+    assert c1 == Vector(Atom("foo"), Numeric(21), Atom("bar"), Numeric(42))
+    assert c1.mapping == {"foo": Numeric(21), "bar": Numeric(42)}
 
 
 def test_remove(env):

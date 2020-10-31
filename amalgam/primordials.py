@@ -425,6 +425,18 @@ def _len(_env: ev.Environment, vector: am.Vector) -> am.Numeric:
     return am.Numeric(len(vector.vals))
 
 
+@_make_function("cons")
+def _cons(_env: ev.Environment, amalgam: am.Amalgam, vector: am.Vector) -> am.Vector:
+    """Preprends an :data:`amalgam` to :data:`vector`."""
+    return am.Vector(amalgam, *vector.vals)
+
+
+@_make_function("snoc")
+def _snoc(_env: ev.Environment, vector: am.Vector, amalgam: am.Amalgam) -> am.Vector:
+    """Appends an :data:`amalgam` to :data:`vector`."""
+    return am.Vector(*vector.vals, amalgam)
+
+
 @_make_function("is-map")
 def _is_map(_env: ev.Environment, vector: am.Vector) -> am.Atom:
     """Verifies whether :data:`vector` is a mapping."""
