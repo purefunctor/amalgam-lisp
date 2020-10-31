@@ -548,3 +548,11 @@ def _eval(env: ev.Environment, amalgam: am.Amalgam) -> am.Amalgam:
     if isinstance(amalgam, am.Quoted):
         amalgam = amalgam.value
     return amalgam.evaluate(env)
+
+
+@_make_function("unquote")
+def _unquote(_env: ev.Environment, qamalgam: am.Quoted[am.Amalgam]) -> am.Amalgam:
+    """Unquotes a given :data:`qamalgam`."""
+    if not isinstance(qamalgam, am.Quoted):
+        raise TypeError("unquotable value provided")
+    return qamalgam.value
