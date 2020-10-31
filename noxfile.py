@@ -22,6 +22,7 @@ def install_with_constraints(session, *args, **kwargs):
 @nox.session
 def docs(session):
     install_with_constraints(session, "sphinx", "sphinx_rtd_theme")
+    session.install(".")
     session.run("sphinx-build", "docs", "docs/build")
 
 
