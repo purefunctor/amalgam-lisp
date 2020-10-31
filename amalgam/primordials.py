@@ -117,14 +117,20 @@ def _setn(
 
 @_make_function("fn", defer=True)
 def _fn(
-    _env: ev.Environment,
+    env: ev.Environment,
     args: am.Quoted[am.Vector[am.Symbol]],
     body: am.Quoted[am.Amalgam],
 ) -> am.Function:
     """
     Creates an anonymous function using the provided arguments.
+
+    Binds :data:`env` to the created :class:`.amalgams.Function` if a
+    closure is formed.
     """
-    return am.create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
+    fn = am.create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
+    if env.parent is not None:
+        fn.bind(env)
+    return fn
 
 
 @_make_function("mkfn", defer=True)

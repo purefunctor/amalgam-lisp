@@ -108,6 +108,14 @@ def test_fn(env):
     assert _fn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
 
 
+def test_fn_bound(env):
+    cl_env = env.env_push()
+
+    _fn_result = _fn(cl_env, Quoted(Vector()), Quoted(SExpression()))
+
+    assert _fn_result.env == cl_env
+
+
 def test_mkfn(env):
     name = Symbol("name")
     args = Vector(Symbol("x"), Symbol("y"))
