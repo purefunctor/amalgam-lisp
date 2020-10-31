@@ -406,13 +406,13 @@ def _slice(
 
 
 @_make_function("at")
-def _at(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Amalgam:
+def _at(_env: ev.Environment, index: am.Numeric, vector: am.Vector) -> am.Amalgam:
     """Indexes :data:`vector` with :data:`index`."""
     return vector.vals[index.value]
 
 
 @_make_function("remove")
-def _remove(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Vector:
+def _remove(_env: ev.Environment, index: am.Numeric, vector: am.Vector) -> am.Vector:
     """Removes an item in :data:`vector` using :data:`index`."""
     vals = list(vector.vals)
     del vals[index.value]

@@ -452,14 +452,14 @@ def test_slice(env):
 
 def test_at(env):
     vector = Vector(Numeric(21), Numeric(42))
-    assert _at(env, vector, Numeric(1)) == Numeric(42)
+    assert _at(env, Numeric(1), vector) == Numeric(42)
 
 
 def test_remove(env):
     v0 = Vector(Atom("foo"), Numeric(21), Atom("bar"), Numeric(42))
 
-    r0 = _remove(env, v0, Numeric(0))
-    r1 = _remove(env, r0, Numeric(0))
+    r0 = _remove(env, Numeric(0), v0)
+    r1 = _remove(env, Numeric(0), r0)
 
     assert r0.vals == v0.vals[1:]
     assert r0.mapping == {}
