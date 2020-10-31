@@ -556,3 +556,25 @@ def _unquote(_env: ev.Environment, qamalgam: am.Quoted[am.Amalgam]) -> am.Amalga
     if not isinstance(qamalgam, am.Quoted):
         raise TypeError("unquotable value provided")
     return qamalgam.value
+
+
+@_make_function("setr", defer=True)
+def _setr(
+    env: ev.Environment,
+    qrname: am.Quoted[am.Symbol],
+    qamalgam: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
+    """
+    Attemps to resolve :data:`qrname` to a :class:`.amalgams.Symbol`
+    and binds it to the evaluated :data:`qamalgam` in the immediate
+    :data:`env`.
+    """
+    rname = qrname.value.evaluate(env)
+
+    if not isinstance(rname, am.Symbol):
+        raise TypeError("could not resolve to a symbol")
+
+    amalgam = qamalgam.value.evaluate(env)
+    env[rname.value] = amalgam
+
+    return amalgam

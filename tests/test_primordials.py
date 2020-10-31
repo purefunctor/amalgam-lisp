@@ -57,6 +57,7 @@ from amalgam.primordials import (
     _when,
     _eval,
     _unquote,
+    _setr,
 )
 
 from pytest import fixture, mark, param, raises
@@ -619,3 +620,19 @@ def test_unquote(env):
 
     with raises(TypeError):
         _unquote(env, Numeric(42))
+
+
+def test_setr(env):
+    env["r"] = Symbol("x")
+
+    s0 = _setr(
+        env,
+        Quoted(Symbol("r")),
+        Quoted(SExpression(Symbol("+"), Numeric(21), Numeric(21))),
+    )
+
+    assert s0 == Numeric(42)
+    assert env["x"] == Numeric(42)
+
+    with raises(TypeError):
+        _setr(env, Quoted(Symbol("x")), Numeric(21))
