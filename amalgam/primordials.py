@@ -405,20 +405,6 @@ def _slice(
     return am.Vector(*vector.vals[start.value:stop.value:step.value])
 
 
-@_make_function("sliceup")
-def _sliceup(
-    _env: ev.Environment,
-    vector: am.Vector,
-    start: am.Numeric,
-    stop: am.Numeric,
-    update: am.Vector,
-) -> am.Vector:
-    """Updates a slice of the given :data:`vector`."""
-    vals = list(vector.vals)
-    vals[start.value:stop.value] = update.vals
-    return am.Vector(*vals)
-
-
 @_make_function("at")
 def _at(_env: ev.Environment, vector: am.Vector, index: am.Numeric) -> am.Amalgam:
     """Indexes :data:`vector` with :data:`index`."""
