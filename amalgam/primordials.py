@@ -419,6 +419,12 @@ def _remove(_env: ev.Environment, index: am.Numeric, vector: am.Vector) -> am.Ve
     return am.Vector(*vals)
 
 
+@_make_function("len")
+def _len(_env: ev.Environment, vector: am.Vector) -> am.Numeric:
+    """Returns the length of a :data:`vector`."""
+    return am.Numeric(len(vector.vals))
+
+
 @_make_function("is-map")
 def _is_map(_env: ev.Environment, vector: am.Vector) -> am.Atom:
     """Verifies whether :data:`vector` is a mapping."""

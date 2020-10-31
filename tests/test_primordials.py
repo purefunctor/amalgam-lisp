@@ -45,6 +45,7 @@ from amalgam.primordials import (
     _merge,
     _slice,
     _at,
+    _len,
     _remove,
     _is_map,
     _map_in,
@@ -466,6 +467,10 @@ def test_remove(env):
 
     assert r1.vals == v0.vals[2:]
     assert r1.mapping == {"bar": Numeric(42)}
+
+
+def test_len(env):
+    assert _len(env, Vector(Numeric(21), Numeric(42))) == Numeric(2)
 
 
 @fixture
