@@ -58,6 +58,7 @@ from amalgam.primordials import (
     _eval,
     _unquote,
     _setr,
+    _macro,
 )
 
 from pytest import fixture, mark, param, raises
@@ -636,3 +637,24 @@ def test_setr(env):
 
     with raises(TypeError):
         _setr(env, Quoted(Symbol("x")), Numeric(21))
+
+
+def test_macro(env):
+    v0 = Vector(Symbol("x"), Symbol("y"))
+    q0 = Quoted(Numeric(21))
+
+    _macro_result = _macro(env, Quoted(Symbol("macro-test")), Quoted(v0), Quoted(v0))
+
+    assert env["macro-test"] == _macro_result
+    assert _macro_result.defer == True
+    assert _macro_result.fn(env, q0, q0) == Vector(q0, q0)
+
+
+def test_macro_bound(env):
+    cl_env = env.env_push()
+
+    qv0 = Quoted(Vector())
+
+    _macro_result = _macro(cl_env, Quoted(Symbol("macro-test")), qv0, qv0)
+
+    assert _macro_result.env == cl_env

@@ -578,3 +578,24 @@ def _setr(
     env[rname.value] = amalgam
 
     return amalgam
+
+
+@_make_function("macro", defer=True)
+def _macro(
+    env: ev.Environment,
+    name: am.Quoted[am.Symbol],
+    args: am.Quoted[am.Vector[am.Symbol]],
+    body: am.Quoted[am.Amalgam],
+) -> am.Amalgam:
+    """Creates a named macro using the provided arguments."""
+    fn = am.create_fn(
+        name.value.value,
+        [arg.value for arg in args.value.vals],
+        body.value,
+        defer=True,
+    )
+
+    if env.parent is not None:
+        fn.bind(env)
+
+    return _setn(env, name, am.Quoted(fn))
