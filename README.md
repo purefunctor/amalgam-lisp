@@ -14,6 +14,18 @@
   <img src="https://img.shields.io/pypi/pyversions/amalgam-lisp?style=flat-square" href="https://pypi.org/project/amalgam-lisp/">
 </p>
 
+# Installation & Basic Usage
+This package can be installed from PyPI:
+```bash
+$ pip install amalgam-lisp
+```
+This makes the `amalgam` command-line script available.
+```bash
+$ amalgam                     # To invoke the REPL
+$ amalgam hello.am            # To load and run a file
+$ amalgam --expr="(+ 42 42)"  # To evaluate an expression
+```
+
 # Development Setup
 Install the following dependencies:
 * Python 3.7 & 3.8
