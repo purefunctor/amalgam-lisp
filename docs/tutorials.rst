@@ -21,18 +21,18 @@ We can use the :data:`macro` function to define this form:
 
 .. code-block:: lisp
 
-    (macro for (qtarget in qvector qexpression) ...)
+    (macro for [qtarget in qvector qexpression] ...)
 
 :data:`target`, :data:`vector`, and :data:`expression` are prefixed
-with :data:`q` as Arguments to macros are passed literally as quoted
-values and are not evaluated, giving the macro the ability to
+with :data:`q` as arguments to macros are passed literally as quoted
+values that are not evaluated, giving the macro the ability to
 selective unquote and evaluate expressions.
 
 Let's now define what happens within the macro:
 
 .. code-block:: lisp
 
-    (macro for (qtarget in qvector qexpression)
+    (macro for [qtarget in qvector qexpression]
            (do (setn target (unquote qtarget))
                (setn vector (unquote qvector))
                (setn expression (unquote qexpression))
@@ -75,7 +75,7 @@ Let's test it out on the REPL:
 
 .. code-block:: lisp
 
-    > (macro for (qtarget in qvector qexpression)
+    > (macro for [qtarget in qvector qexpression]
     |        (do (setn target (unquote qtarget))
     |            (setn vector (unquote qvector))
     |            (setn expression (unquote qexpression))
