@@ -14,12 +14,21 @@ Welcome to amalgam-lisp's documentation!
       <img src="https://img.shields.io/codecov/c/gh/purefunctor/amalgam-lisp?label=codecov&logo=codecov&style=flat-square" href="https://codecov.io/gh/PureFunctor/amalgam-lisp/">
     </p>
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Internal Documentation
 
-   amalgams
-   engine
-   environment
-   parser
-   primordials
+.. toctree::
+    :maxdepth: 2
+    :caption: Functions & Tutorials
+
+    functions
+    tutorials
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Internal Documentation
+
+    amalgams
+    engine
+    environment
+    parser
+    primordials
