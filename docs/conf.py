@@ -23,7 +23,7 @@ copyright = '2020, PureFunctor'
 author = 'PureFunctor'
 
 # The full version, including alpha/beta/rc tags
-release = 'v1.0.0'
+release = 'v0.1.0'
 
 
 # -- General configuration ---------------------------------------------------
