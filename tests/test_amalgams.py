@@ -117,7 +117,7 @@ def test_function_call_defer(env, mocker):
     num = Numeric(42)
 
     function.call(env, sym, num)
-    fn.assert_called_once_with(env, Quoted(sym), Quoted(num))
+    fn.assert_called_once_with(env, sym, num)
 
 
 def test_function_call_contextual(env, mocker):

@@ -171,9 +171,8 @@ class Function(Amalgam):
       fn (:class:`Callable[..., Amalgam]`): The function being wrapped.
         Must have the signature: `(env, amalgams...) -> amalgam`.
 
-      defer (:class:`bool`): If set to :obj:`True`, arguments are
-        wrapped in :class:`.Quoted` before being passed to
-        :attr:`.Function.fn`.
+      defer (:class:`bool`): If set to :obj:`False`, arguments are
+        evaluated before being passed to :attr:`Function.fn`.
 
       contextual (:class:`bool`): If set to :obj:`True`, disallows
         function calls when :attr:`.Function.in_context` is set to
@@ -226,9 +225,7 @@ class Function(Amalgam):
         if self.env is not None:
             environment = self.env
 
-        if self.defer:
-            arguments = tuple(Quoted(arg) for arg in arguments)
-        else:
+        if not self.defer:
             arguments = tuple(arg.evaluate(environment) for arg in arguments)
 
         return self.fn(environment, *arguments)
