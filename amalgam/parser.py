@@ -20,33 +20,67 @@ class Expression(Transformer):
     """
 
     def symbol(self, identifier):
-        return am.Symbol(str(identifier))
+        return am.Symbol(str(identifier)).located_on(
+            lines=(identifier.line, identifier.end_line),
+            columns=(identifier.column, identifier.end_column),
+        )
 
-    def atom(self, identifier):
-        return am.Atom(str(identifier))
+    def atom(self, colon, identifier):
+        return am.Atom(str(identifier)).located_on(
+            lines=(colon.line, identifier.end_line),
+            columns=(colon.column, identifier.end_column),
+        )
 
     def integral(self, number):
-        return am.Numeric(int(number))
+        return am.Numeric(int(number)).located_on(
+            lines=(number.line, number.end_line),
+            columns=(number.column, number.end_column),
+        )
 
     def floating(self, number):
-        return am.Numeric(float(number))
+        return am.Numeric(float(number)).located_on(
+            lines=(number.line, number.end_line),
+            columns=(number.column, number.end_column),
+        )
 
     def fraction(self, number):
-        return am.Numeric(Fraction(number))
+        return am.Numeric(Fraction(number)).located_on(
+            lines=(number.line, number.end_line),
+            columns=(number.column, number.end_column),
+        )
 
     def string(self, *values):
+        l_quote, text, r_quote = values
+
         value = "".join(values)
         value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
-        return am.String(value.strip("\""))
 
-    def s_expression(self, *expressions):
-        return am.SExpression(*expressions)
+        return am.String(value.strip("\"")).located_on(
+            lines=(l_quote.line, r_quote.line),
+            columns=(l_quote.column, r_quote.column),
+        )
 
-    def vector(self, *expressions):
-        return am.Vector(*expressions)
+    def s_expression(self, *values):
+        l_paren, *expressions, r_paren = values
 
-    def quoted(self, expression):
-        return am.Quoted(expression)
+        return am.SExpression(*expressions).located_on(
+            lines=(l_paren.line, r_paren.line),
+            columns=(l_paren.column, r_paren.column),
+        )
+
+    def vector(self, *values):
+        l_bracket, *expressions, r_bracket = values
+
+        return am.Vector(*expressions).located_on(
+            lines=(l_bracket.line, r_bracket.line),
+            columns=(l_bracket.column, r_bracket.column),
+        )
+
+    def quoted(self, quote, expression):
+        return am.Quoted(expression).located_on(
+            lines=(quote.line, expression.end_line),
+            columns=(quote.column, expression.end_column),
+        )
 
 
 class ParsingError(Exception):
