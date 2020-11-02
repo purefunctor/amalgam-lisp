@@ -4,7 +4,7 @@ from io import StringIO
 import re
 from typing import cast, Optional
 
-from lark import v_args, Lark, Token, Transformer, UnexpectedInput
+from lark import v_args, Lark, Transformer, UnexpectedInput
 
 import amalgam.amalgams as am
 
@@ -19,33 +19,33 @@ class Expression(Transformer):
     :class:`.amalgams.Amalgam` representations.
     """
 
-    def symbol(self, identifier: Token) -> am.Symbol:
+    def symbol(self, identifier):
         return am.Symbol(str(identifier))
 
-    def atom(self, identifier: Token) -> am.Atom:
+    def atom(self, identifier):
         return am.Atom(str(identifier))
 
-    def integral(self, number: Token) -> am.Numeric:
+    def integral(self, number):
         return am.Numeric(int(number))
 
-    def floating(self, number: Token) -> am.Numeric:
+    def floating(self, number):
         return am.Numeric(float(number))
 
-    def fraction(self, number: Token) -> am.Numeric:
+    def fraction(self, number):
         return am.Numeric(Fraction(number))
 
-    def string(self, *values: Token) -> am.String:
+    def string(self, *values):
         value = "".join(values)
         value = re.sub(r"(?<!\\)\\([^\"\\])", r"\g<1>", value)
         return am.String(value.strip("\""))
 
-    def s_expression(self, *expressions: am.Amalgam) -> am.SExpression:
+    def s_expression(self, *expressions):
         return am.SExpression(*expressions)
 
-    def vector(self, *expressions: am.Amalgam) -> am.Vector:
+    def vector(self, *expressions):
         return am.Vector(*expressions)
 
-    def quoted(self, expression: am.Amalgam) -> am.Quoted:
+    def quoted(self, expression):
         return am.Quoted(expression)
 
 
