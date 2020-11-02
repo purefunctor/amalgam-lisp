@@ -164,10 +164,10 @@ Meta
    :data:`args`, and a :data:`body`. Binds to a closure when created
    inside of one.
 
-.. function:: (macro name [qargs...] body)
+.. function:: (macro name [args...] body)
 
    Creates a scoped macro given a :data:`name`, a vector of
-   :data:`qargs`, and a :data:`body`. Binds to a closure when created
+   :data:`args`, and a :data:`body`. Binds to a closure when created
    inside of one.
 
 .. function:: (let [[name value]...] body)
