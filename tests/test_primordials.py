@@ -98,7 +98,7 @@ def test_setn(env):
     name = Symbol("name")
     amalgam = String("string")
 
-    _setn_result = _setn(env, Quoted(name), Quoted(amalgam))
+    _setn_result = _setn(env, name, amalgam)
 
     assert env["name"] == amalgam
     assert _setn_result == amalgam
@@ -108,7 +108,7 @@ def test_fn(env):
     args = Vector(Symbol("x"), Symbol("y"))
     body = SExpression(Symbol("+"), Symbol("x"), Symbol("y"))
 
-    _fn_result = _fn(env, Quoted(args), Quoted(body))
+    _fn_result = _fn(env, args, body)
 
     assert _fn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
 
@@ -116,7 +116,7 @@ def test_fn(env):
 def test_fn_bound(env):
     cl_env = env.env_push()
 
-    _fn_result = _fn(cl_env, Quoted(Vector()), Quoted(SExpression()))
+    _fn_result = _fn(cl_env, Vector(), SExpression())
 
     assert _fn_result.env == cl_env
 
@@ -126,7 +126,7 @@ def test_mkfn(env):
     args = Vector(Symbol("x"), Symbol("y"))
     body = SExpression(Symbol("+"), Symbol("x"), Symbol("y"))
 
-    _mkfn_result = _mkfn(env, Quoted(name), Quoted(args), Quoted(body))
+    _mkfn_result = _mkfn(env, name, args, body)
 
     assert env["name"] == _mkfn_result
     assert _mkfn_result.fn(env, Numeric(21), Numeric(21)) == Numeric(42)
@@ -138,7 +138,7 @@ def test_let(env):
     bindings = Vector(Vector(Symbol("x"), Numeric(21)), Vector(Symbol("y"), Symbol("z")))
     body = SExpression(Symbol("+"), Symbol("x"), Symbol("y"))
 
-    _let_result = _let(env, Quoted(bindings), Quoted(body))
+    _let_result = _let(env, bindings, body)
 
     assert _let_result == Numeric(42)
     assert "x" not in env
@@ -146,7 +146,7 @@ def test_let(env):
 
 
 _let_failures = (
-    param(Quoted(_let_bindings), _let_exception, id=_let_name)
+    param(_let_bindings, _let_exception, id=_let_name)
     for _let_bindings, _let_exception, _let_name in (
         (Vector(Symbol("x")), ValueError, "not-a-vector"),
         (Vector(Vector(Numeric(42), Symbol("x"))), TypeError, "not-a-symbol"),
@@ -237,7 +237,7 @@ def test_and(env):
         SExpression(Symbol("setn"), Symbol("y"), Atom("TRUE")),
     )
 
-    _and_result = _and(env, *map(Quoted, exprs))
+    _and_result = _and(env, *exprs)
 
     assert _and_result == Atom("FALSE")
     assert "x" in env
@@ -255,7 +255,7 @@ def test_or(env):
         SExpression(Symbol("setn"), Symbol("y"), Atom("FALSE")),
     )
 
-    _or_result = _or(env, *map(Quoted, exprs))
+    _or_result = _or(env, *exprs)
 
     assert _or_result == Atom("TRUE")
     assert "x" in env
@@ -263,7 +263,7 @@ def test_or(env):
 
 
 def test_or_default(env):
-    assert _or(env, Quoted(Atom("FALSE"))) == Atom("FALSE")
+    assert _or(env, Atom("FALSE")) == Atom("FALSE")
 
 
 def test_if_then(env):
@@ -273,7 +273,7 @@ def test_if_then(env):
         SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
     )
 
-    _if_result_then = _if(env, Quoted(cond), *map(Quoted, then_else))
+    _if_result_then = _if(env, cond, *then_else)
 
     assert _if_result_then == Atom("THEN")
     assert "w" in env
@@ -288,7 +288,7 @@ def test_if_else(env):
         SExpression(Symbol("setn"), Symbol("y"), Atom("ELSE")),
     )
 
-    _if_result_else = _if(env, Quoted(cond), *map(Quoted, then_else))
+    _if_result_else = _if(env, cond, *then_else)
 
     assert _if_result_else == Atom("ELSE")
     assert "w" in env
@@ -307,7 +307,7 @@ def test_cond(env):
         SExpression(Symbol("setn"), Symbol("y"), Atom("SECOND")),
         SExpression(Symbol("setn"), Symbol("z"), Atom("THIRD")),
     )
-    pairs = (Quoted(Vector(*pair)) for pair in zip(predicates, values))
+    pairs = (Vector(*pair) for pair in zip(predicates, values))
 
     _cond_result = _cond(env, *pairs)
 
@@ -321,7 +321,7 @@ def test_cond(env):
 
 
 def test_cond_nil(env):
-    assert _cond(env, Quoted(Vector(Atom("FALSE"), Atom("FALSE")))) == Atom("NIL")
+    assert _cond(env, Vector(Atom("FALSE"), Atom("FALSE"))) == Atom("NIL")
 
 
 exits = (
@@ -381,7 +381,7 @@ def test_do(capsys, env):
         )
     )
 
-    assert _do(env, *map(Quoted, exprs)) == Numeric(42)
+    assert _do(env, *exprs) == Numeric(42)
     assert capsys.readouterr().out == "42\n"
 
 
@@ -397,7 +397,7 @@ def test_require(env, tmp_path, monkeypatch):
 
 
 def test_provide(env):
-    assert _provide(env, Quoted(Symbol("x")), Quoted(Symbol("y"))) == Atom("NIL")
+    assert _provide(env, Symbol("x"), Symbol("y")) == Atom("NIL")
     assert env["~provides~"] == Vector(Symbol("x"), Symbol("y"))
 
 
@@ -599,13 +599,13 @@ def test_when(env):
         Symbol("setn"), Symbol("y"), Numeric(42)
     )
 
-    assert _when(env, Quoted(cond), Quoted(body)) == Numeric(42)
+    assert _when(env, cond, body) == Numeric(42)
     assert "x" in env
     assert "y" in env
 
 
 def test_when_nil(env):
-    assert _when(env, Quoted(Atom("NIL")), Numeric(42)) == Atom("NIL")
+    assert _when(env, Atom("NIL"), Numeric(42)) == Atom("NIL")
 
 
 def test_eval(env):
@@ -628,22 +628,22 @@ def test_setr(env):
 
     s0 = _setr(
         env,
-        Quoted(Symbol("r")),
-        Quoted(SExpression(Symbol("+"), Numeric(21), Numeric(21))),
+        Symbol("r"),
+        SExpression(Symbol("+"), Numeric(21), Numeric(21)),
     )
 
     assert s0 == Numeric(42)
     assert env["x"] == Numeric(42)
 
     with raises(TypeError):
-        _setr(env, Quoted(Symbol("x")), Numeric(21))
+        _setr(env, Symbol("x"), Numeric(21))
 
 
 def test_macro(env):
     v0 = Vector(Symbol("x"), Symbol("y"))
     q0 = Quoted(Numeric(21))
 
-    _macro_result = _macro(env, Quoted(Symbol("macro-test")), Quoted(v0), Quoted(v0))
+    _macro_result = _macro(env, Symbol("macro-test"), v0, v0)
 
     assert env["macro-test"] == _macro_result
     assert _macro_result.defer == True
@@ -653,8 +653,8 @@ def test_macro(env):
 def test_macro_bound(env):
     cl_env = env.env_push()
 
-    qv0 = Quoted(Vector())
+    qv0 = Vector()
 
-    _macro_result = _macro(cl_env, Quoted(Symbol("macro-test")), qv0, qv0)
+    _macro_result = _macro(cl_env, Symbol("macro-test"), qv0, qv0)
 
     assert _macro_result.env == cl_env

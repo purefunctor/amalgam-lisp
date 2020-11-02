@@ -102,24 +102,18 @@ def _div(_env: ev.Environment, *nums: am.Numeric) -> am.Numeric:
 
 
 @_make_function("setn", defer=True)
-def _setn(
-    env: ev.Environment,
-    name: am.Quoted[am.Symbol],
-    amalgam: am.Quoted[am.Amalgam],
-) -> am.Amalgam:
+def _setn(env: ev.Environment, name: am.Symbol, amalgam: am.Amalgam) -> am.Amalgam:
     """
     Binds :data:`name` to the evaluated :data:`amalgam` value in the
     immediate :data:`env` and returns that value.
     """
-    env[name.value.value] = amalgam.value.evaluate(env)
-    return env[name.value.value]
+    env[name.value] = amalgam.evaluate(env)
+    return env[name.value]
 
 
 @_make_function("fn", defer=True)
 def _fn(
-    env: ev.Environment,
-    args: am.Quoted[am.Vector[am.Symbol]],
-    body: am.Quoted[am.Amalgam],
+    env: ev.Environment, args: am.Vector[am.Symbol], body: am.Amalgam,
 ) -> am.Function:
     """
     Creates an anonymous function using the provided arguments.
@@ -127,7 +121,7 @@ def _fn(
     Binds :data:`env` to the created :class:`.amalgams.Function` if a
     closure is formed.
     """
-    fn = am.create_fn("~lambda~", [arg.value for arg in args.value.vals], body.value)
+    fn = am.create_fn("~lambda~", [arg.value for arg in args.vals], body)
     if env.parent is not None:
         fn.bind(env)
     return fn
@@ -135,33 +129,28 @@ def _fn(
 
 @_make_function("mkfn", defer=True)
 def _mkfn(
-    env: ev.Environment,
-    name: am.Quoted[am.Symbol],
-    args: am.Quoted[am.Vector[am.Symbol]],
-    body: am.Quoted[am.Amalgam],
+    env: ev.Environment, name: am.Symbol, args: am.Vector[am.Symbol], body: am.Amalgam,
 ) -> am.Amalgam:
     """
     Creates a named function using the provided arguments.
 
     Composes :func:`._fn` and :func:`._setn`.
     """
-    return _setn(env, name, am.Quoted(_fn(env, args, body).with_name(name.value.value)))
+    return _setn(env, name, _fn(env, args, body).with_name(name.value))
 
 
 @_make_function("let", defer=True)
 def _let(
-    env: ev.Environment,
-    qpairs: am.Quoted[am.Vector[am.Vector]],
-    body: am.Quoted[am.Amalgam],
+    env: ev.Environment, pairs: am.Vector[am.Vector], body: am.Amalgam,
 ) -> am.Amalgam:
     """
     Creates temporary bindings of names to values specified in
-    :data:`qpairs` before evaluating :data:`body`.
+    :data:`pairs` before evaluating :data:`body`.
     """
     names = []
     values = []
 
-    for pos, pair in enumerate(qpairs.value.vals):
+    for pos, pair in enumerate(pairs.vals):
         if not isinstance(pair, am.Vector) or len(pair.vals) != 2:
             raise ValueError(f"{pair} at {pos} is not a pair")
 
@@ -173,7 +162,7 @@ def _let(
         names.append(name)
         values.append(value)
 
-    return _fn(env, am.Quoted(am.Vector(*names)), body).call(env, *values)
+    return _fn(env, am.Vector(*names), body).call(env, *values)
 
 
 @_make_function("bool")
@@ -249,28 +238,28 @@ def _not(_env: ev.Environment, expr: am.Amalgam) -> am.Atom:
 
 
 @_make_function("and", defer=True)
-def _and(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
+def _and(env: ev.Environment, *exprs: am.Amalgam) -> am.Atom:
     """
-    Checks the truthiness of the evaluated :data:`qexprs` and performs
+    Checks the truthiness of the evaluated :data:`exprs` and performs
     an `and` operation. Short-circuits when :data:`:FALSE` is returned
     and does not evaluate subsequent expressions.
     """
-    for qexpr in qexprs:
-        cond = _bool(env, qexpr.value.evaluate(env))
+    for expr in exprs:
+        cond = _bool(env, expr.evaluate(env))
         if cond == am.Atom("FALSE"):
             return cond
     return am.Atom("TRUE")
 
 
 @_make_function("or", defer=True)
-def _or(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
+def _or(env: ev.Environment, *exprs: am.Amalgam) -> am.Atom:
     """
-    Checks the truthiness of the evaluated :data:`qexprs` and performs
+    Checks the truthiness of the evaluated :data:`exprs` and performs
     an `or` operation. Short-circuits when :data:`:TRUE` is returned
     and does not evaluate subsequent expressions.
     """
-    for qexpr in qexprs:
-        cond = _bool(env, qexpr.value.evaluate(env))
+    for expr in exprs:
+        cond = _bool(env, expr.evaluate(env))
         if cond == am.Atom("TRUE"):
             return cond
     return am.Atom("FALSE")
@@ -278,31 +267,28 @@ def _or(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Atom:
 
 @_make_function("if", defer=True)
 def _if(
-    env: ev.Environment,
-    qcond: am.Quoted[am.Amalgam],
-    qthen: am.Quoted[am.Amalgam],
-    qelse: am.Quoted[am.Amalgam],
+    env: ev.Environment, cond: am.Amalgam, then: am.Amalgam, else_: am.Amalgam,
 ) -> am.Amalgam:
     """
-    Checks the truthiness of the evaluated :data:`qcond`, evaluates and
-    returns :data:`qthen` if :data:`:TRUE`, otherwise, evaluates and
-    returns :data:`qelse`.
+    Checks the truthiness of the evaluated :data:`cond`, evaluates and
+    returns :data:`then` if :data:`:TRUE`, otherwise, evaluates and
+    returns :data:`else_`.
     """
-    cond = _bool(env, qcond.value.evaluate(env))
+    cond = _bool(env, cond.evaluate(env))
     if cond == am.Atom("TRUE"):
-        return qthen.value.evaluate(env)
-    return qelse.value.evaluate(env)
+        return then.evaluate(env)
+    return else_.evaluate(env)
 
 
 @_make_function("cond", defer=True)
-def _cond(env: ev.Environment, *qpairs: am.Quoted[am.Vector[am.Amalgam]]) -> am.Amalgam:
+def _cond(env: ev.Environment, *pairs: am.Vector[am.Amalgam]) -> am.Amalgam:
     """
     Traverses pairs of conditions and values. If the condition evaluates
     to :data:`:TRUE`, returns the value pair and short-circuits
     evaluation. If no conditions are met, :data:`:NIL` is returned.
     """
-    for qpair in qpairs:
-        pred, expr = qpair.value.vals
+    for pair in pairs:
+        pred, expr = pair.vals
         if _bool(env, pred.evaluate(env)) == am.Atom("TRUE"):
             return expr.evaluate(env)
     return am.Atom("NIL")
@@ -332,14 +318,14 @@ def _putstrln(_env: ev.Environment, string: am.String) -> am.String:
 
 
 @_make_function("do", defer=True)
-def _do(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+def _do(env: ev.Environment, *exprs: am.Amalgam) -> am.Amalgam:
     """
-    Evaluates a variadic amount of :data:`qexprs`, returning the final
+    Evaluates a variadic amount of :data:`exprs`, returning the final
     expression evaluated.
     """
-    accumulator = am.Atom("NIL")
-    for qexpr in qexprs:
-        accumulator = qexpr.value.evaluate(env)
+    accumulator: am.Amalgam = am.Atom("NIL")
+    for expr in exprs:
+        accumulator = expr.evaluate(env)
     return accumulator
 
 
@@ -375,9 +361,9 @@ def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
 
 
 @_make_function("provide", defer=True)
-def _provide(env: ev.Environment, *qsymbols: am.Quoted[am.Symbol]) -> am.Atom:
+def _provide(env: ev.Environment, *symbols: am.Symbol) -> am.Atom:
     """Sets the `~provides~` key to be used in :func:`._require`."""
-    env["~provides~"] = am.Vector(*(qsymbol.value for qsymbol in qsymbols))
+    env["~provides~"] = am.Vector(*symbols)
     return am.Atom("NIL")
 
 
@@ -510,16 +496,16 @@ def _break(env: ev.Environment) -> am.Internal:
 
 
 @_make_function("loop", defer=True, allows=("break", "return"))
-def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
+def _loop(env: ev.Environment, *exprs: am.Amalgam) -> am.Amalgam:
     """
-    Loops through and evaluates :data:`qexprs` indefinitely until a
+    Loops through and evaluates :data:`exprs` indefinitely until a
     :data:`break` or :data:`return` is encountered.
     """
     return_value = None
 
     while return_value is None:
-        for qexpr in qexprs:
-            result = qexpr.value.evaluate(env)
+        for expr in exprs:
+            result = expr.evaluate(env)
             if isinstance(result, am.Internal):
                 if isinstance(result.value, _Return):  # pragma: no branch
                     return_value = result.value.return_value
@@ -530,15 +516,15 @@ def _loop(env: ev.Environment, *qexprs: am.Quoted[am.Amalgam]) -> am.Amalgam:
 
 @_make_function("when", defer=True)
 def _when(
-    env: ev.Environment, qcond: am.Quoted[am.Amalgam], qbody: am.Quoted[am.Amalgam],
+    env: ev.Environment, cond: am.Amalgam, body: am.Amalgam,
 ) -> am.Amalgam:
     """
-    Synonym for :func:`._if` that defaults :data:`qelse` to
+    Synonym for :func:`._if` that defaults :data:`else` to
     :data:`:NIL`.
     """
-    cond = _bool(env, qcond.value.evaluate(env))
+    cond = _bool(env, cond.evaluate(env))
     if cond == am.Atom("TRUE"):
-        return qbody.value.evaluate(env)
+        return body.evaluate(env)
     return am.Atom("NIL")
 
 
@@ -560,21 +546,19 @@ def _unquote(_env: ev.Environment, qamalgam: am.Quoted[am.Amalgam]) -> am.Amalga
 
 @_make_function("setr", defer=True)
 def _setr(
-    env: ev.Environment,
-    qrname: am.Quoted[am.Symbol],
-    qamalgam: am.Quoted[am.Amalgam],
+    env: ev.Environment, rname: am.Amalgam, amalgam: am.Amalgam,
 ) -> am.Amalgam:
     """
-    Attemps to resolve :data:`qrname` to a :class:`.amalgams.Symbol`
-    and binds it to the evaluated :data:`qamalgam` in the immediate
+    Attemps to resolve :data:`rname` to a :class:`.amalgams.Symbol`
+    and binds it to the evaluated :data:`amalgam` in the immediate
     :data:`env`.
     """
-    rname = qrname.value.evaluate(env)
+    rname = rname.evaluate(env)
 
     if not isinstance(rname, am.Symbol):
         raise TypeError("could not resolve to a symbol")
 
-    amalgam = qamalgam.value.evaluate(env)
+    amalgam = amalgam.evaluate(env)
     env[rname.value] = amalgam
 
     return amalgam
@@ -583,19 +567,19 @@ def _setr(
 @_make_function("macro", defer=True)
 def _macro(
     env: ev.Environment,
-    name: am.Quoted[am.Symbol],
-    args: am.Quoted[am.Vector[am.Symbol]],
-    body: am.Quoted[am.Amalgam],
+    name: am.Symbol,
+    args: am.Vector[am.Symbol],
+    body: am.Amalgam,
 ) -> am.Amalgam:
     """Creates a named macro using the provided arguments."""
     fn = am.create_fn(
-        name.value.value,
-        [arg.value for arg in args.value.vals],
-        body.value,
+        name.value,
+        [arg.value for arg in args.vals],
+        body,
         defer=True,
     )
 
     if env.parent is not None:
         fn.bind(env)
 
-    return _setn(env, name, am.Quoted(fn))
+    return _setn(env, name, fn)
