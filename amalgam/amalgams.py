@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import (
     cast,
@@ -17,7 +17,63 @@ from typing import (
 import amalgam.environment as ev
 
 
-class Amalgam(ABC):
+@dataclass
+class Located:
+    """
+    The base dataclass for encapsulating location data of nodes.
+
+    Provides an API similar to Lark's :class:`Token` class for
+    convenience.
+
+    Attributes:
+      line_span (:class:`Tuple[int, int]`): Lines spanned by a node
+      column_span (:class:`Tuple[int, int]`): Columns spanned by a node
+    """
+
+    line_span: Tuple[int, int] = field(
+        init=False, compare=False, repr=False, default=(-1, -1),
+    )
+
+    column_span: Tuple[int, int] = field(
+        init=False, compare=False, repr=False, default=(-1, -1),
+    )
+
+    @property
+    def line(self) -> int:
+        """The starting line number of a node."""
+        return self.line_span[0]
+
+    @property
+    def end_line(self) -> int:
+        """The ending line number of a node."""
+        return self.line_span[1]
+
+    @property
+    def column(self) -> int:
+        """The starting column number of a node."""
+        return self.column_span[0]
+
+    @property
+    def end_column(self) -> int:
+        """The ending column number of a node."""
+        return self.column_span[1]
+
+    def located_on(
+        self,
+        *,
+        lines: Tuple[int, int] = (-1, -1),
+        columns: Tuple[int, int] = (-1, -1),
+    ) -> Located:
+        """
+        Helper method for setting :attr:`Located.line_span` and
+        :attr:`Located.column_span`.
+        """
+        self.line_span = lines
+        self.column_span = columns
+        return self
+
+
+class Amalgam(Located, ABC):
     """The abstract base class for language constructs."""
 
     @abstractmethod

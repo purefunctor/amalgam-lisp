@@ -4,6 +4,7 @@ from amalgam.amalgams import (
     DisallowedContextError,
     Function,
     Internal,
+    Located,
     Numeric,
     Quoted,
     SExpression,
@@ -20,6 +21,30 @@ from pytest import fixture, mark, param, raises
 @fixture
 def env():
     return Environment(FUNCTIONS)
+
+
+def test_located():
+    located = Located()
+
+    assert located.line_span == (-1, -1)
+    assert located.column_span == (-1, -1)
+
+    assert located.line == -1
+    assert located.end_line == -1
+
+    assert located.column == -1
+    assert located.end_column == -1
+
+    assert located.located_on(lines=(5, 5), columns=(10, 10)) == located
+
+    assert located.line_span == (5, 5)
+    assert located.column_span == (10, 10)
+
+    assert located.line == 5
+    assert located.end_line == 5
+
+    assert located.column == 10
+    assert located.end_column == 10
 
 
 amalgams = (

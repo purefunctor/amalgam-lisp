@@ -5,6 +5,9 @@ Amalgams
 
 Internal documentation for the :mod:`amalgam.amalgams` module.
 
+.. autoclass:: amalgam.amalgams.Located
+    :members:
+
 .. autoclass:: amalgam.amalgams.Amalgam
     :members:
     :private-members: _make_repr
