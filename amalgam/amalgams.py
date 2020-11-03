@@ -105,10 +105,13 @@ class Amalgam(Located, ABC):
 
         This base implementation is responsible for making the type
         signature of :attr:`SExpression.func` to properly type check
-        when :meth:`SExpression.evaluate` is called, as well as raising
-        :class:`NotImplementedError` for non-callable types.
+        when :meth:`SExpression.evaluate` is called, as well as
+        returning a fatal :class:`.Notification` for non-callable
+        types.
         """
-        raise NotImplementedError(f"{self.__class__.__name__} is not callable")
+        notification = Notification()
+        notification.push(self, environment, "not a callable")
+        return notification
 
     def _make_repr(self, value: Any) -> str:  # pragma: no cover
         """Helper method for creating a :meth:`__repr__`."""
@@ -202,21 +205,22 @@ class Symbol(Amalgam):
         """
         Searches the provided `environment` fully with
         :attr:`Symbol.value`. Returns the :class:`.Amalgam` object
-        bound to the :attr:`Symbol.value` in the environment. Raises
-        :class:`.environment.SymbolNotFound` if a binding is not found.
+        bound to the :attr:`Symbol.value` in the environment. Returns
+        a fatal :class:`.Notification` if a binding is not found.
         """
-        with environment.search_at(depth=-1):
-            return environment[self.value]
+        try:
+            with environment.search_at(depth=-1):
+                return environment[self.value]
+        except ev.SymbolNotFound:
+            notification = Notification()
+            notification.push(self, environment, "unbound symbol")
+            return notification
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
 
     def __str__(self) -> str:
         return self.value
-
-
-class DisallowedContextError(Exception):
-    """Raised on functions outside of their intended contexts."""
 
 
 @dataclass(repr=False)
@@ -244,7 +248,7 @@ class Function(Amalgam):
 
       in_context (:class:`bool`): Predicate that disallows functions
         to be called outside of specific contexts. Makes
-        :meth:`.Function.call` raise :class:`.DisallowedContextError`
+        :meth:`.Function.call` return a fatal :class:`.Notification`
         when set to :obj:`False` and :attr:`.Function.contextual` is
         set to :obj:`True`.
     """
@@ -279,15 +283,26 @@ class Function(Amalgam):
         :attr:`.Function.in_context`,
         """
         if self.contextual and not self.in_context:
-            raise DisallowedContextError(f"invalid context for {self.name}")
+            notification = Notification()
+            notification.push(self, environment, "invalid context")
+            return notification
 
         if self.env is not None:
             environment = self.env
 
-        if not self.defer:
-            arguments = tuple(arg.evaluate(environment) for arg in arguments)
+        args = []
+        for argument in arguments:
+            if not self.defer:
+                argument = argument.evaluate(environment)
+                if isinstance(argument, Notification):
+                    if argument.fatal:
+                        argument.push(
+                            Atom(self.name), environment, "inherited",
+                        )
+                    return argument
+            args.append(argument)
 
-        return self.fn(environment, *arguments)
+        return self.fn(environment, *args)
 
     def with_name(self, name: str) -> Function:
         """
@@ -335,7 +350,11 @@ class SExpression(Amalgam):
         the :meth:`call` method with `environment` and
         :attr:`SExpression.args`.
         """
-        return self.func.evaluate(environment).call(environment, *self.args)
+        result = self.func.evaluate(environment).call(environment, *self.args)
+        if isinstance(result, Notification):
+            if result.fatal:
+                result.push(self, environment, "inherited")
+        return result
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
@@ -369,12 +388,20 @@ class Vector(Amalgam, Generic[T]):
         self.vals = vals
         self.mapping = self._as_mapping()
 
-    def evaluate(self, environment: ev.Environment) -> Vector:
+    def evaluate(self, environment: ev.Environment) -> Amalgam:
         """
         Creates a new :class:`.Vector` by evaluating every value in
         :attr:`Vector.vals`.
         """
-        return Vector(*(val.evaluate(environment) for val in self.vals))
+        vals = []
+        for val in self.vals:
+            val = val.evaluate(environment)
+            if isinstance(val, Notification):
+                if val.fatal:
+                    val.push(self, environment, "inherited")
+                return val
+            vals.append(val)
+        return Vector(*vals)
 
     def _as_mapping(self) -> Mapping[str, Amalgam]:
         """
