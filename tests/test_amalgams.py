@@ -1,7 +1,6 @@
 from amalgam.amalgams import (
     create_fn,
     Atom,
-    DisallowedContextError,
     Function,
     Internal,
     Located,
@@ -152,8 +151,7 @@ def test_function_call_contextual(env, mocker):
     fn = mocker.Mock()
     function = Function("function-call-contextual-test", fn, False, True)
 
-    with raises(DisallowedContextError):
-        assert function.call(env)
+    assert isinstance(function.call(env), Notification)
 
     function.in_context = True
 

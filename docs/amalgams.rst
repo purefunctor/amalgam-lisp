@@ -42,6 +42,3 @@ Internal documentation for the :mod:`amalgam.amalgams` module.
 
 .. autoclass:: amalgam.amalgams.Notification
     :members:
-
-.. autoclass:: amalgam.amalgams.DisallowedContextError
-    :members:
