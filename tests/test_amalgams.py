@@ -5,11 +5,13 @@ from amalgam.amalgams import (
     Function,
     Internal,
     Located,
+    Notification,
     Numeric,
     Quoted,
     SExpression,
     String,
     Symbol,
+    Trace,
     Vector,
 )
 from amalgam.environment import Environment
@@ -56,6 +58,7 @@ amalgams = (
         Quoted(Numeric(42)),
         Function("self-eval", lambda *_: None),
         Internal(42),
+        Notification(),
     )
 )
 
@@ -168,6 +171,21 @@ def test_function_call_env_override(env, mocker):
 
     function.call(Environment(), sym)
     fn.assert_called_once_with(env, sym)
+
+
+def test_notification(env):
+    sym = Symbol("x")
+
+    t0 = Trace(sym, env, "test-notification-0")
+    t1 = Trace(sym, env, "test-notification-0")
+
+    n = Notification()
+    n.push(*t0)
+    n.push(*t1)
+
+    assert list(n) == [t1, t0]
+    assert n.pop() == t1
+    assert n.pop() == t0
 
 
 def test_create_fn_simple(env):

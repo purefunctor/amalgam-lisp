@@ -8,7 +8,10 @@ from typing import (
     Any,
     Callable,
     Generic,
+    Iterator,
+    List,
     Mapping,
+    NamedTuple,
     Sequence,
     Tuple,
     TypeVar,
@@ -456,6 +459,57 @@ class Internal(Amalgam, Generic[P]):
 
     def __str__(self) -> str:  # pragma: no cover
         return f"~{self.value!s}~"
+
+
+class Trace(NamedTuple):
+    """Encapsulates information for tracking notifications."""
+    amalgam: Amalgam
+    environment: ev.Environment
+    message: str
+
+
+@dataclass(init=False, repr=False)
+class Notification(Amalgam):
+    """
+    An :class:`Amalgam` that encapsulates and tracks notifications.
+
+    Attributes:
+      fatal (:class:`bool`): Specifies whether the notification should
+        unconditionally propagate and halt evaluation.
+      payload (:class:`Optional[Amalgam]`): An optional payload to be
+        carried by a notification.
+      trace (:class:`List[Trace]`): A stack of :class:`.Trace` objects
+        that tell how the notification propagated.
+    """
+
+    def __init__(
+        self, *, fatal: bool = True, payload: Amalgam = None,
+    ) -> None:
+        self.fatal = fatal
+        self.payload = payload
+        self.trace: List[Trace] = []
+
+    def evaluate(self, _environment: ev.Environment) -> Notification:
+        """Evaluates to the same :class:`.Notification` reference."""
+        return self
+
+    def push(
+        self, amalgam: Amalgam, environment: ev.Environment, message: str,
+    ) -> None:
+        """Pushes a :class:`.Trace` into :attr:`Notification.trace`."""
+        self.trace.append(Trace(amalgam, environment, message))
+
+    def pop(self) -> Trace:
+        """Pops a :class:`.Trace` from :attr:`Notification.trace`."""
+        return self.trace.pop()
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return self._make_repr(
+            f"fatal={self.fatal}, payload={self.payload}, trace={self.trace}"
+        )
+
+    def __iter__(self) -> Iterator[Trace]:
+        return reversed(self.trace)
 
 
 def create_fn(
