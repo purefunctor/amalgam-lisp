@@ -9,6 +9,7 @@ from amalgam.amalgams import (
     SExpression,
     String,
     Symbol,
+    Trace,
     Vector,
 )
 from amalgam.engine import Engine
@@ -589,6 +590,19 @@ def test_loop_break(env):
 
     assert broken.evaluate(env) == Atom("NIL")
     assert "x" not in env
+
+
+def test_loop_fatal(env):
+    symbol = Symbol("x")
+    sexpr = SExpression(Symbol("loop"), symbol)
+
+    notification = sexpr.evaluate(env)
+
+    assert notification.trace == [
+        Trace(symbol, env, "unbound symbol"),
+        Trace(Atom("loop"), env, "inherited"),
+        Trace(sexpr, env, "inherited",)
+    ]
 
 
 def test_when(env):
