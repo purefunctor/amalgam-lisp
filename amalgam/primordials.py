@@ -4,7 +4,7 @@ from itertools import chain
 from pathlib import Path
 import sys
 from typing import (
-    cast, Callable, Dict, List, NamedTuple, Sequence, TypeVar, Union
+    cast, Callable, Dict, List, Sequence, TypeVar, Union
 )
 
 import amalgam.amalgams as am
@@ -478,21 +478,16 @@ def _map_up(
     return new_vector
 
 
-class _Return(NamedTuple):
-    """Internal utility class for signalling a return value."""
-    return_value: am.Amalgam
-
-
 @_make_function("return", contextual=True)
 def _return(env: ev.Environment, result: am.Amalgam) -> am.Internal:
     """Exits a context with a :data:`result`."""
-    return am.Internal(_Return(result))
+    return am.Notification(fatal=False, payload=result)
 
 
 @_make_function("break", contextual=True)
 def _break(env: ev.Environment) -> am.Internal:
     """Exits a loop with :data:`:NIL`."""
-    return am.Internal(_Return(am.Atom("NIL")))
+    return am.Notification(fatal=False, payload=am.Atom("NIL"))
 
 
 @_make_function("loop", defer=True, allows=("break", "return"))
@@ -506,9 +501,12 @@ def _loop(env: ev.Environment, *exprs: am.Amalgam) -> am.Amalgam:
     while return_value is None:
         for expr in exprs:
             result = expr.evaluate(env)
-            if isinstance(result, am.Internal):
-                if isinstance(result.value, _Return):  # pragma: no branch
-                    return_value = result.value.return_value
+            if isinstance(result, am.Notification):
+                if result.fatal:
+                    result.push(am.Atom("loop"), env, "inherited")
+                    return_value = result
+                else:
+                    return_value = result.payload
                 break
 
     return return_value
