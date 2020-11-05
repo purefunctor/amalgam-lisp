@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 * Changed deferred functions/macros to unquote unevaluated arguments.
+* Added the `Notification` `Amalgam` subclass for representing failures.
 
 ## [0.1.0] 2020-11-2
 This marks the first volatile feature release before `v1.0.0`.
