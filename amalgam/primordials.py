@@ -499,20 +499,15 @@ def _loop(env: Environment, *exprs: am.Amalgam) -> am.Amalgam:
     Loops through and evaluates :data:`exprs` indefinitely until a
     :data:`break` or :data:`return` is encountered.
     """
-    return_value = None
-
-    while return_value is None:
+    while True:
         for expr in exprs:
             result = expr.evaluate(env)
             if isinstance(result, am.Notification):
                 if result.fatal:
                     result.push(am.Atom("loop"), env, "inherited")
-                    return_value = result
+                    return result
                 else:
-                    return_value = result.payload
-                break
-
-    return return_value
+                    return result.payload
 
 
 @_make_function("when", defer=True)
