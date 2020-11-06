@@ -503,14 +503,14 @@ class Notification(Amalgam):
     Attributes:
       fatal (:class:`bool`): Specifies whether the notification should
         unconditionally propagate and halt evaluation.
-      payload (:class:`Optional[Amalgam]`): An optional payload to be
-        carried by a notification.
+      payload (:class:`Amalgam`): An optional payload to be carried by
+        a notification.
       trace (:class:`List[Trace]`): A stack of :class:`.Trace` objects
         that tell how the notification propagated.
     """
 
     def __init__(
-        self, *, fatal: bool = True, payload: Amalgam = None,
+        self, *, fatal: bool = True, payload: Amalgam = Atom("NIL"),
     ) -> None:
         self.fatal = fatal
         self.payload = payload
