@@ -482,13 +482,13 @@ def _map_up(
 
 
 @_make_function("return", contextual=True)
-def _return(env: Environment, result: am.Amalgam) -> am.Internal:
+def _return(env: Environment, result: am.Amalgam) -> am.Notification:
     """Exits a context with a :data:`result`."""
     return am.Notification(fatal=False, payload=result)
 
 
 @_make_function("break", contextual=True)
-def _break(env: Environment) -> am.Internal:
+def _break(env: Environment) -> am.Notification:
     """Exits a loop with :data:`:NIL`."""
     return am.Notification(fatal=False, payload=am.Atom("NIL"))
 
