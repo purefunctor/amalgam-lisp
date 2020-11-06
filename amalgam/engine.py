@@ -25,7 +25,7 @@ class Engine:
     def __init__(self) -> None:
         self.parser = pr.Parser()
         self.environment = ev.Environment(
-            {**pd.FUNCTIONS, "~engine~": am.Internal(self)}
+            bindings={**pd.FUNCTIONS}, name="global", engine=self,
         )
 
     def repl(self, *, prompt: str = "> ", prompt_cont: str = "| ") -> None:
