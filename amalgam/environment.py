@@ -228,3 +228,6 @@ class Environment:
             return self.parent
         else:
             raise TopLevelPop("cannot discard top-level Environment")
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<Environment \"name={self.name}\" @ {hex(id(self))}>"
