@@ -12,6 +12,7 @@ from typing import (
 
 if TYPE_CHECKING:  # pragma: no cover
     from amalgam.amalgams import Amalgam
+    from amalgam.engine import Engine
 
     Bindings = Mapping[str, Amalgam]
 
@@ -47,17 +48,27 @@ class Environment:
         :meth:`~.Environment.__delitem__`,
         :meth:`~.Environment.__getitem__`, and
         :meth:`~.Environment.__setitem__` methods.
+
+      name (:class:`str`): The name of the execution environment.
+
+      engine (:class:`str`): A reference to the engine managing the
+        :class:`.parser.Parser` instance and the global
+        :class:`.Environment` instance.
     """
 
     def __init__(
         self,
         bindings: Bindings = None,
         parent: Environment = None,
+        name: str = "unknown",
+        engine: Engine = None,
     ) -> None:
         self.bindings: Dict[str, Amalgam] = {**bindings} if bindings else {}
         self.parent: Optional[Environment] = parent
         self.level: int = parent.level + 1 if parent else 0
         self.search_depth: int = 0
+        self.name = name
+        self.engine = cast("Engine", engine)
 
     def __getitem__(self, item: str) -> Amalgam:
         """
