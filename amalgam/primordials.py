@@ -8,7 +8,6 @@ from typing import (
 )
 
 import amalgam.amalgams as am
-import amalgam.engine as en
 import amalgam.environment as ev
 
 
@@ -342,8 +341,7 @@ def _require(env: ev.Environment, module_name: am.String) -> am.Atom:
 
     snapshot = env.bindings.copy()
 
-    internal_engine = cast(am.Internal[en.Engine], env["~engine~"])
-    internal_engine.value.parse_and_run(text)
+    env.engine.parse_and_run(text)
 
     if "~provides~" in env:
         symbols = cast(am.Vector[am.Symbol], env["~provides~"])
