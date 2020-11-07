@@ -208,12 +208,16 @@ class Environment:
         finally:
             self.search_depth = 0
 
-    def env_push(self, bindings: Bindings = None) -> Environment:
+    def env_push(self, bindings: Bindings = None, name: str = None) -> Environment:
         """
         Creates a new :class:`Environment` and binds the calling
         instance as its parent environment.
         """
-        return Environment(bindings, self)
+        if name is None:
+            name = f"{self.name}-child"
+        return Environment(
+            bindings=bindings, parent=self, name=name, engine=self.engine,
+        )
 
     def env_pop(self) -> Environment:
         """

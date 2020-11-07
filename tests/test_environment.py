@@ -12,7 +12,7 @@ from pytest import fixture, raises
 
 @fixture
 def flat_environment():
-    return Environment({"foo": 21, "bar": 42})
+    return Environment({"foo": 21, "bar": 42}, engine="engine")
 
 
 @fixture
@@ -38,11 +38,14 @@ def test_environment_increments_level(flat_environment):
 
 def test_environment_env_push(flat_environment):
     bindings = {"x": 21, "y": 42}
-    new_env = flat_environment.env_push(bindings)
+    new_env = flat_environment.env_push(bindings, "env")
 
     assert new_env.parent == flat_environment
     assert new_env.bindings == bindings
     assert new_env.level == flat_environment.level + 1
+    assert new_env.name == "env"
+    assert new_env.engine == flat_environment.engine
+    assert new_env.env_push().name == "env-child"
 
 
 def test_environment_env_pop(flat_environment):
