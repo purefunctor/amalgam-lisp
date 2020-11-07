@@ -47,7 +47,7 @@ class Environment:
 
       name (:class:`str`): The name of the execution environment.
 
-      engine (:class:`str`): A reference to the engine managing the
+      engine (:class:`Engine`): A reference to the engine managing the
         :class:`.parser.Parser` instance and the global
         :class:`.Environment` instance.
     """
