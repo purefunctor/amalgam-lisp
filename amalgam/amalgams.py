@@ -15,9 +15,12 @@ from typing import (
     Sequence,
     Tuple,
     TypeVar,
+    TYPE_CHECKING,
 )
 
-import amalgam.environment as ev
+
+if TYPE_CHECKING:  # pragma: no cover
+    from amalgam.environment import Environment
 
 
 @dataclass
@@ -80,12 +83,12 @@ class Amalgam(Located, ABC):
     """The abstract base class for language constructs."""
 
     @abstractmethod
-    def evaluate(self, environment: ev.Environment) -> Any:
+    def evaluate(self, environment: Environment) -> Any:
         """
         Protocol for evaluating or unwrapping :class:`Amalgam` objects.
         """
 
-    def bind(self, environment: ev.Environment) -> Amalgam:  # pragma: no cover
+    def bind(self, environment: Environment) -> Amalgam:  # pragma: no cover
         """
         Protocol for implementing environment binding for
         :class:`Function`.
@@ -97,7 +100,7 @@ class Amalgam(Located, ABC):
         return self
 
     def call(
-        self, environment: ev.Environment, *arguments: Amalgam
+        self, environment: Environment, *arguments: Amalgam
     ) -> Amalgam:  # pragma: no cover
         """
         Protocol for implementing function calls for
@@ -129,7 +132,7 @@ class Atom(Amalgam):
 
     value: str
 
-    def evaluate(self, _environment: ev.Environment) -> Atom:
+    def evaluate(self, _environment: Environment) -> Atom:
         """Evaluates to the same :class:`.Atom` reference."""
         return self
 
@@ -157,7 +160,7 @@ class Numeric(Amalgam, Generic[N]):
 
     value: N
 
-    def evaluate(self, _environment: ev.Environment) -> Numeric:
+    def evaluate(self, _environment: Environment) -> Numeric:
         """Evaluates to the same :class:`.Numeric` reference."""
         return self
 
@@ -179,7 +182,7 @@ class String(Amalgam):
 
     value: str
 
-    def evaluate(self, _environment: ev.Environment) -> String:
+    def evaluate(self, _environment: Environment) -> String:
         """Evaluates to the same :class:`.String` reference."""
         return self
 
@@ -201,7 +204,7 @@ class Symbol(Amalgam):
 
     value: str
 
-    def evaluate(self, environment: ev.Environment) -> Amalgam:
+    def evaluate(self, environment: Environment) -> Amalgam:
         """
         Searches the provided `environment` fully with
         :attr:`Symbol.value`. Returns the :class:`.Amalgam` object
@@ -259,14 +262,14 @@ class Function(Amalgam):
     contextual: bool = False
 
     def __post_init__(self):
-        self.env = cast(ev.Environment, None)
+        self.env = cast("Environment", None)
         self.in_context = False
 
-    def evaluate(self, _environment: ev.Environment) -> Function:
+    def evaluate(self, _environment: Environment) -> Function:
         """Evaluates to the same :class:`.Function` reference."""
         return self
 
-    def bind(self, environment: ev.Environment) -> Function:
+    def bind(self, environment: Environment) -> Function:
         """
         Sets the :attr:`.Function.env` attribute and returns the same
         :class:`.Function` reference.
@@ -274,7 +277,7 @@ class Function(Amalgam):
         self.env = environment
         return self
 
-    def call(self, environment: ev.Environment, *arguments: Amalgam) -> Amalgam:
+    def call(self, environment: Environment, *arguments: Amalgam) -> Amalgam:
         """
         Performs the call to the :attr:`.Function.fn` attribute.
 
@@ -344,7 +347,7 @@ class SExpression(Amalgam):
         """The rest of the :attr:`SExpression.vals`."""
         return self.vals[1:]
 
-    def evaluate(self, environment: ev.Environment) -> Amalgam:
+    def evaluate(self, environment: Environment) -> Amalgam:
         """
         Evaluates :attr:`func` using `environment` before invoking
         the :meth:`call` method with `environment` and
@@ -388,7 +391,7 @@ class Vector(Amalgam, Generic[T]):
         self.vals = vals
         self.mapping = self._as_mapping()
 
-    def evaluate(self, environment: ev.Environment) -> Amalgam:
+    def evaluate(self, environment: Environment) -> Amalgam:
         """
         Creates a new :class:`.Vector` by evaluating every value in
         :attr:`Vector.vals`.
@@ -449,7 +452,7 @@ class Quoted(Amalgam, Generic[T]):
 
     value: T
 
-    def evaluate(self, _environment: ev.Environment) -> Quoted:
+    def evaluate(self, _environment: Environment) -> Quoted:
         """Evaluates to the same :class:`.Quoted` reference."""
         return self
 
@@ -477,7 +480,7 @@ class Internal(Amalgam, Generic[P]):
 
     value: P
 
-    def evaluate(self, _environment: ev.Environment) -> Internal:
+    def evaluate(self, _environment: Environment) -> Internal:
         """Evaluates to the same :class:`.Internal` reference."""
         return self
 
@@ -491,7 +494,7 @@ class Internal(Amalgam, Generic[P]):
 class Trace(NamedTuple):
     """Encapsulates information for tracking notifications."""
     amalgam: Amalgam
-    environment: ev.Environment
+    environment: Environment
     message: str
 
 
@@ -516,12 +519,12 @@ class Notification(Amalgam):
         self.payload = payload
         self.trace: List[Trace] = []
 
-    def evaluate(self, _environment: ev.Environment) -> Notification:
+    def evaluate(self, _environment: Environment) -> Notification:
         """Evaluates to the same :class:`.Notification` reference."""
         return self
 
     def push(
-        self, amalgam: Amalgam, environment: ev.Environment, message: str,
+        self, amalgam: Amalgam, environment: Environment, message: str,
     ) -> None:
         """Pushes a :class:`.Trace` into :attr:`Notification.trace`."""
         self.trace.append(Trace(amalgam, environment, message))
@@ -553,7 +556,7 @@ def create_fn(
     creates a new `closure_fn` to be wrapped by a `Function`.
     """
 
-    def closure_fn(environment: ev.Environment, *arguments: Amalgam) -> Amalgam:
+    def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
         """Callable responsible for evaluating `fbody`."""
 
         # Create a child environment and bind args to their names.
