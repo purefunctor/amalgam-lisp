@@ -64,16 +64,16 @@ class Expression(Transformer):
         l_paren, *expressions, r_paren = values
 
         return am.SExpression(*expressions).located_on(
-            lines=(l_paren.line, r_paren.line),
-            columns=(l_paren.column, r_paren.column),
+            lines=(l_paren.line, r_paren.end_line),
+            columns=(l_paren.column, r_paren.end_column),
         )
 
     def vector(self, *values):
         l_bracket, *expressions, r_bracket = values
 
         return am.Vector(*expressions).located_on(
-            lines=(l_bracket.line, r_bracket.line),
-            columns=(l_bracket.column, r_bracket.column),
+            lines=(l_bracket.line, r_bracket.end_line),
+            columns=(l_bracket.column, r_bracket.end_column),
         )
 
     def quoted(self, quote, expression):
