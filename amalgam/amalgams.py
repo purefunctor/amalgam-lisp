@@ -211,7 +211,7 @@ class Symbol(Amalgam):
         try:
             with environment.search_at(depth=-1):
                 return environment[self.value]
-        except ev.SymbolNotFound:
+        except KeyError:
             notification = Notification()
             notification.push(self, environment, "unbound symbol")
             return notification

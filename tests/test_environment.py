@@ -4,7 +4,6 @@ from itertools import chain
 from amalgam.amalgams import Amalgam
 from amalgam.environment import (
     Environment,
-    SymbolNotFound,
     TopLevelPop,
 )
 
@@ -70,7 +69,7 @@ def test_environment_search_at(nested_environment):
 def test_environment_getitem_immediate(flat_environment):
     assert flat_environment["foo"] == flat_environment.bindings["foo"]
 
-    with raises(SymbolNotFound):
+    with raises(KeyError):
         flat_environment["nil"]
 
 
@@ -87,7 +86,7 @@ def test_environment_delitem_immediate(flat_environment):
 
     assert "foo" not in flat_environment.bindings
 
-    with raises(SymbolNotFound):
+    with raises(KeyError):
         del flat_environment["nil"]
 
 
@@ -102,7 +101,7 @@ def test_environment_getitem_infinite(nested_environment):
         assert nested_environment["baz"] == nested_environment.parent.bindings["baz"]
         assert nested_environment["foo"] == nested_environment.parent.parent.bindings["foo"]
 
-    with raises(SymbolNotFound):
+    with raises(KeyError):
         with nested_environment.search_at(depth=-1):
             nested_environment["new"]
 
@@ -143,7 +142,7 @@ def test_environment_getitem_limited(nested_environment):
         assert nested_environment["baz"] == nested_environment.parent.bindings["baz"]
 
     with nested_environment.search_at(depth=1):
-        with raises(SymbolNotFound):
+        with raises(KeyError):
             nested_environment["foo"]
 
 
@@ -167,7 +166,7 @@ def test_environment_delitem_limited(nested_environment):
     assert "baz" not in nested_environment.parent.bindings
 
     with nested_environment.search_at(depth=1):
-        with raises(SymbolNotFound):
+        with raises(KeyError):
             del nested_environment["foo"]
 
 

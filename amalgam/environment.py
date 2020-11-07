@@ -17,10 +17,6 @@ if TYPE_CHECKING:  # pragma: no cover
     Bindings = Mapping[str, Amalgam]
 
 
-class SymbolNotFound(Exception):
-    """Synonym for :class:`KeyError`."""
-
-
 class TopLevelPop(Exception):
     """Raised at :meth:`Environment.env_pop`."""
 
@@ -94,7 +90,7 @@ class Environment:
             except KeyError:
                 _self = cast(Environment, _self.parent)
         else:
-            raise SymbolNotFound(item)
+            raise KeyError(item)
 
     def __setitem__(self, item: str, value: Amalgam) -> None:
         """
@@ -148,7 +144,7 @@ class Environment:
             except KeyError:
                 _self = cast(Environment, _self.parent)
         else:
-            raise SymbolNotFound(item)
+            raise KeyError(item)
 
     def __contains__(self, item: str) -> bool:
         """
