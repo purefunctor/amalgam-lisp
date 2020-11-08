@@ -90,14 +90,18 @@ class ParsingError(Exception):
     Attributes:
       line (:class:`int`): the line number nearest to the error
       column (:class:`int`): the column number nearest to the error
+      text (:class:`str`): the original text being parsed
+      source (:class:`str`): the source of the original text
     """
 
-    def __init__(self, line: int, column: int):
+    def __init__(self, line: int, column: int, text: str, source: str):
         self.line = line
         self.column = column
+        self.text = text
+        self.source = source
 
     def __str__(self):  # pragma: no cover
-        return f"near line {self.line}, column {self.column}"
+        return f"in {self.source}, near line {self.line}, column {self.column}"
 
 
 class ExpectedEOF(ParsingError):
@@ -162,7 +166,7 @@ class Parser:
         text = self.parse_buffer.read()
 
         try:
-            expr = self.parse(text)
+            expr = self.parse(text, source="<stdin>")
 
         except MissingClosing:
             return None
@@ -175,7 +179,7 @@ class Parser:
             self.parse_buffer = StringIO()
             return expr
 
-    def parse(self, text: str) -> am.Amalgam:
+    def parse(self, text: str, source: str = "<unknown>") -> am.Amalgam:
         """Facilitates regular parsing that can fail."""
         try:
             return cast(am.Amalgam, EXPR_PARSER.parse(text))
@@ -185,4 +189,4 @@ class Parser:
             )
             if exc_cls is None:
                 raise
-            raise exc_cls(u.line, u.column) from None
+            raise exc_cls(u.line, u.column, text, source) from None
