@@ -3,7 +3,6 @@ from __future__ import annotations
 from fractions import Fraction
 from functools import partial, wraps
 from itertools import chain
-from pathlib import Path
 import sys
 from typing import (
     cast, Callable, Dict, List, Sequence, TypeVar, Union, TYPE_CHECKING,
@@ -331,43 +330,6 @@ def _do(env: Environment, *exprs: am.Amalgam) -> am.Amalgam:
     for expr in exprs:
         accumulator = expr.evaluate(env)
     return accumulator
-
-
-@_make_function("require")
-def _require(env: Environment, module_name: am.String) -> am.Atom:
-    """
-    Runs a given :data:`module_name` and imports the exposed symbols to
-    the current :data:`env` with respect to the `~provides~` key created
-    in :func:`._provide`.
-    """
-    module_path = Path(module_name.value).absolute()
-    with module_path.open("r", encoding="UTF-8") as f:
-        text = f.read()
-
-    snapshot = env.bindings.copy()
-
-    env.engine.parse_and_run(text)
-
-    if "~provides~" in env:
-        symbols = cast(am.Vector[am.Symbol], env["~provides~"])
-        exports = {symbol.value for symbol in symbols.vals}
-
-        changes = {
-            name: env[name]
-            for name in exports.intersection(env.bindings)
-        }
-
-        snapshot.update(changes)
-        env.bindings = snapshot
-
-    return am.Atom("NIL")
-
-
-@_make_function("provide", defer=True)
-def _provide(env: Environment, *symbols: am.Symbol) -> am.Atom:
-    """Sets the `~provides~` key to be used in :func:`._require`."""
-    env["~provides~"] = am.Vector(*symbols)
-    return am.Atom("NIL")
 
 
 @_make_function("concat")

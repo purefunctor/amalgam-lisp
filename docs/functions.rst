@@ -125,17 +125,6 @@ IO
 Meta
 ----
 
-.. function:: (require module-path)
-
-   Loads a module given its :data:`module-path`, importing the exposed
-   symbols to the current environment with respect to the export list
-   created by :data:`provide`.
-
-.. function:: (provide symbols...)
-
-   Creates an export list of :data:`symbols` when loaded through
-   :data:`require`.
-
 .. function:: (setn name value)
 
    Lexically binds a literal :data:`name` to a :data:`value`.
