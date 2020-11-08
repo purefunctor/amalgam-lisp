@@ -55,17 +55,6 @@ def test_engine_repl(mocker, capsys):
     assert capsys.readouterr().out == "Goodbye.\n"
 
 
-def test_engine_parse_and_run(capsys):
-    engine = Engine()
-
-    assert engine.parse_and_run("(setn x 21)") == Numeric(21)
-    assert engine.parse_and_run("(+ x x x x)") == Numeric(84)
-
-    assert engine.parse_and_run("(putstrln \"hello\")") == String("hello")
-
-    assert capsys.readouterr().out == "hello\n"
-
-
 def test_engine_internal_interpret():
     engine = Engine()
 

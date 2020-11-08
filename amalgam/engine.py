@@ -68,10 +68,6 @@ class Engine:
                     cont = False
                 print(f"{e.__class__.__qualname__}: {e}")
 
-    def parse_and_run(self, text: str) -> am.Amalgam:
-        """Parses and runs the given `text` string."""
-        return self.parser.parse(text).evaluate(self.environment)
-
     def _interpret(self, text: str, source: str = "<unknown>") -> am.Amalgam:
         """
         Parses and runs a :data:`text` from a :data:`source`.
