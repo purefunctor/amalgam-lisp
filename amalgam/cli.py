@@ -1,3 +1,6 @@
+import io
+import sys
+
 import click
 
 import amalgam.engine as en
@@ -10,19 +13,20 @@ def amalgam_main(file, expr):
     has_file = file is not None
     has_expr = expr is not None
 
-    if not has_file and not has_expr:
-        en.Engine().repl()  # Guarantees SystemExit
-
-    elif has_file and not has_expr:
-        text = file.read()
-
-    elif not has_file and has_expr:
-        text = expr
-
-    else:
+    if has_file and has_expr:
         raise click.BadParameter("Cannot use FILE and --expr together")
 
-    result = en.Engine().parse_and_run(text)
+    elif not has_file and not has_expr:
+        en.Engine().repl()  # Guarantees SystemExit
 
-    if not has_file and has_expr:
-        print(result)
+    if has_file:
+        text = file.read()
+        source = f"<{file.name}>"
+
+    elif has_expr:  # pragma: no branch
+        text = expr
+        source = "<expr-parameter>"
+
+    en.Engine().interpret(
+        text, source, io.StringIO() if has_file else sys.stdout
+    )
