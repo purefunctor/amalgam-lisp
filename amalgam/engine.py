@@ -1,3 +1,6 @@
+import sys
+from typing import IO
+
 from prompt_toolkit import PromptSession
 
 import amalgam.amalgams as am
@@ -68,3 +71,28 @@ class Engine:
     def parse_and_run(self, text: str) -> am.Amalgam:
         """Parses and runs the given `text` string."""
         return self.parser.parse(text).evaluate(self.environment)
+
+    def _interpret(self, text: str, source: str = "<unknown>") -> am.Amalgam:
+        """
+        Parses and runs a :data:`text` from a :data:`source`.
+
+        Internal-facing method intended for use within
+        :mod:`amalgam.primordials`.
+        """
+        return self.parser.parse(text, source).evaluate(self.environment)
+
+    def interpret(
+        self, text: str, source: str = "<unknown>", file: IO = sys.stdout
+    ) -> None:
+        """
+        Parses and runs a :data:`text` from a :data:`source`.
+
+        User-facing method intended for use within :mod:`amalgam.cli`.
+        Prints the result to :data:`sys.stdout` unless specified.
+        Handles pretty-printing of :class:`.amalgams.Notifications`.
+        """
+        result = self._interpret(text, source)
+        if isinstance(result, am.Notification):
+            print(result, file=sys.stderr)
+        else:
+            print(result, file=file)

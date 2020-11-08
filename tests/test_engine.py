@@ -1,3 +1,5 @@
+import re
+
 from amalgam.amalgams import Numeric, String
 from amalgam.engine import Engine
 
@@ -62,3 +64,23 @@ def test_engine_parse_and_run(capsys):
     assert engine.parse_and_run("(putstrln \"hello\")") == String("hello")
 
     assert capsys.readouterr().out == "hello\n"
+
+
+def test_engine_internal_interpret():
+    engine = Engine()
+
+    assert engine._interpret("(setn x 21)") == Numeric(21)
+    assert engine._interpret("(+ x x x x)") == Numeric(84)
+
+
+def test_engine_external_interpret(capsys):
+    engine = Engine()
+
+    numeric = engine._interpret("(+ 21 21)")
+    engine.interpret("(print (+ 21 21))")
+
+    assert capsys.readouterr().out == "42\n"
+
+    engine.interpret("(+ x x)")
+
+    assert re.match("<Notification .+?>", capsys.readouterr().err)
