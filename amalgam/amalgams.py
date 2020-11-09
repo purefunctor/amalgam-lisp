@@ -561,7 +561,9 @@ def create_fn(
 
         # Create a child environment and bind args to their names.
         # TODO: Raise an error when missing arguments instead.
-        cl_env = environment.env_push(dict(zip(fargs, arguments)))
+        cl_env = environment.env_push(
+            dict(zip(fargs, arguments)), f"{fname}-closure",
+        )
 
         # Call the `evaluate` method on the function body with
         # `cl_env` and then call `bind` on the result with the
