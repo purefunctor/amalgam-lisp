@@ -3,15 +3,23 @@ import re
 from amalgam.amalgams import Numeric, String
 from amalgam.engine import Engine
 
-from pytest import raises
+from pytest import fixture, raises
 
 
-def test_engine_repl(mocker, capsys):
+@fixture
+def mock_prompt(mocker):
     MockClassPromptSession = mocker.Mock()
     MockSelfPromptSession = mocker.Mock()
 
     MockClassPromptSession.return_value = MockSelfPromptSession
-    MockSelfPromptSession.prompt.side_effect = (
+
+    mocker.patch("amalgam.engine.PromptSession", MockClassPromptSession)
+
+    return MockSelfPromptSession.prompt
+
+
+def test_engine_repl(mock_prompt, capsys):
+    mock_prompt.side_effect = (
         "(+ 42 42)",
 
         "(+ 1",
@@ -34,8 +42,6 @@ def test_engine_repl(mocker, capsys):
         "(exit 0)",
     )
 
-    mocker.patch("amalgam.engine.PromptSession", MockClassPromptSession)
-
     with raises(SystemExit):
         Engine().repl()
 
@@ -53,7 +59,10 @@ def test_engine_repl(mocker, capsys):
 
     assert err != ""
 
-    MockSelfPromptSession.prompt.side_effect = EOFError
+
+
+def test_engine_repl_eof(mock_prompt, capsys):
+    mock_prompt.side_effect = EOFError
 
     with raises(SystemExit):
         Engine().repl()
