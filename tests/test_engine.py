@@ -29,6 +29,8 @@ def test_engine_repl(mocker, capsys):
         " 0",
         ")",
 
+        "(+ x)",
+
         "(exit 0)",
     )
 
@@ -37,7 +39,9 @@ def test_engine_repl(mocker, capsys):
     with raises(SystemExit):
         Engine().repl()
 
-    assert capsys.readouterr().out == (
+    out, err = capsys.readouterr()
+
+    assert out == (
         "84\n"
         "6\n"
         "[1 2 3 4]\n"
@@ -46,6 +50,8 @@ def test_engine_repl(mocker, capsys):
         "ZeroDivisionError: division by zero\n"
         "Goodbye.\n"
     )
+
+    assert err != ""
 
     MockSelfPromptSession.prompt.side_effect = EOFError
 
@@ -72,4 +78,4 @@ def test_engine_external_interpret(capsys):
 
     engine.interpret("(+ x x)")
 
-    assert re.match("<Notification .+?>", capsys.readouterr().err)
+    assert capsys.readouterr().err != ""
