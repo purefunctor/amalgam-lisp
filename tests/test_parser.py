@@ -3,19 +3,14 @@ import amalgam.parser as pr
 from pytest import fixture, mark, param, raises
 
 
-@fixture
-def parser():
-    return pr.Parser()
-
-
-def test_symbol_parser_allowed_characters(parser):
+def test_symbol_parser_allowed_characters():
     text = r"-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
-    assert text == str(parser.parse(text))
+    assert text == str(pr.parse(text))
 
 
-def test_atom_parser_allowed_characters(parser):
+def test_atom_parser_allowed_characters():
     text = r":-+*/<?Spam21&+-*/\&<=>?!_=42Eggs!>\*+-"
-    assert text == str(parser.parse(text))
+    assert text == str(pr.parse(text))
 
 
 _string_contents = "Spam21 Eggs42 +-*/&<=>?!_="
@@ -35,8 +30,8 @@ strings = (
 
 
 @mark.parametrize(("string",), strings)
-def test_string_parser(parser, string):
-    parsed = parser.parse(string)
+def test_string_parser(string):
+    parsed = pr.parse(string)
     assert _as_string(parsed.value) == str(parsed)
 
 
@@ -54,8 +49,8 @@ numerics = (
 
 
 @mark.parametrize(("numeric",), numerics)
-def test_numeric_parser(parser, numeric):
-    parsed = parser.parse(numeric)
+def test_numeric_parser(numeric):
+    parsed = pr.parse(numeric)
     assert str(parsed.value) == str(parsed)
 
 
@@ -85,8 +80,8 @@ quoted_multi = (
 
 
 @mark.parametrize(("quoted",), (*quoted_single, *quoted_multi))
-def test_quoted(parser, quoted):
-    assert quoted == str(parser.parse(quoted))
+def test_quoted(quoted):
+    assert quoted == str(pr.parse(quoted))
 
 
 s_expressions = (
@@ -99,8 +94,8 @@ s_expressions = (
 
 
 @mark.parametrize(("s_expression"), s_expressions)
-def test_s_expression(parser, s_expression):
-    assert s_expression == str(parser.parse(s_expression))
+def test_s_expression(s_expression):
+    assert s_expression == str(pr.parse(s_expression))
 
 
 vectors = [
@@ -113,45 +108,9 @@ vectors = [
 
 
 @mark.parametrize(("vector",), vectors)
-def test_vector(parser, vector):
-    assert vector == str(parser.parse(vector))
+def test_vector(vector):
+    assert vector == str(pr.parse(vector))
 
-
-chunked = (
-    param(first, then, id=iden)
-    for first, then, iden in (
-        ("[1 2", "\n3]", "vector"),
-        ("(+ 1", "\n1)", "s-expression"),
-        ("\"42", "\n\"", "string"),
-        ("(+ 1 [1 2", "\n3 4])", "s-expression-vector"),
-        ("[1 2 (+ 1", "\n3 4)]", "vector-s-expression"),
-        ("(+ 1 \"42", "\n\")", "s-expression-string"),
-        ("[+ 1 \"42", "\n\"]", "vector-string"),
-    )
-)
-
-
-@mark.parametrize(("first", "then"), chunked)
-def test_parser_repl_mode(parser, first, then):
-    full = first + then
-
-    assert parser.repl_parse(first) == None
-    assert parser.parse_buffer.tell() == len(first)
-
-    assert parser.repl_parse(then) == parser.parse(full)
-    assert parser.parse_buffer.tell() == 0
-
-
-repl_failures = (
-    param(text, error, id=f"'{text}'-{error.__name__}")
-    for text, error in (
-        ("42 42", pr.ExpectedEOF),
-        ("", pr.ExpectedExpression),
-        ("[1 2 3)", pr.MissingOpening),
-        ("(+ 1 2]", pr.MissingOpening),
-        ("42 . 42", pr.UnexpectedInput),
-    )
-)
 
 norm_failures = (
     param(text, error, id=f"'{text}'-{error.__name__}")
@@ -163,12 +122,6 @@ norm_failures = (
 
 
 @mark.parametrize(("text", "error"), norm_failures)
-def test_parser_parse_raises(parser, text, error):
+def test_parser_parse_raises(text, error):
     with raises(error):
-        parser.parse(text)
-
-
-@mark.parametrize(("text", "error"), repl_failures)
-def test_parser_repl_parser_raises(parser, text, error):
-    with raises(error):
-        parser.repl_parse(text)
+        pr.parse(text)

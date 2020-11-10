@@ -1,8 +1,7 @@
 from fractions import Fraction
 import importlib.resources as resources
-from io import StringIO
 import re
-from typing import cast, Optional
+from typing import cast
 
 from lark import v_args, Lark, Transformer, UnexpectedInput
 
@@ -131,65 +130,6 @@ ERROR_EXAMPLES = {
 
 
 EXPR_PARSER = Lark(GRAMMAR, parser="lalr", transformer=Expression())
-
-
-class Parser:
-    """
-    Class that serves as the frontend for parsing text.
-
-    Attributes:
-      parse_buffer (:class:`StringIO`): The text buffer used within
-        :meth:`.Parser.repl_parse`.
-    """
-
-    def __init__(self) -> None:
-        self.parse_buffer = StringIO()
-
-    def repl_parse(self, text: str) -> Optional[am.Amalgam]:
-        """
-        Facilitates multi-line parsing for the REPL.
-
-        Writes the given `text` string to the :attr:`parse_buffer` and
-        attempts to parse `text`.
-
-        If :class:`MissingClosing` is raised, returns `None` to allow
-        for parsing to continue.
-
-        If another subclass of :class:`ParsingError` is raised, clears
-        the :attr:`parse_buffer` and re-raises the exception.
-
-        Otherwise, if parsing succeeds, clears the :attr:`parse_buffer`
-        and returns the parsed expression.
-        """
-        self.parse_buffer.write(text)
-        self.parse_buffer.seek(0)
-        text = self.parse_buffer.read()
-
-        try:
-            expr = self.parse(text, source="<stdin>")
-
-        except MissingClosing:
-            return None
-
-        except (UnexpectedInput, ParsingError):
-            self.parse_buffer = StringIO()
-            raise
-
-        else:
-            self.parse_buffer = StringIO()
-            return expr
-
-    def parse(self, text: str, source: str = "<unknown>") -> am.Amalgam:
-        """Facilitates regular parsing that can fail."""
-        try:
-            return cast(am.Amalgam, EXPR_PARSER.parse(text))
-        except UnexpectedInput as u:
-            exc_cls = u.match_examples(
-                EXPR_PARSER.parse, ERROR_EXAMPLES.items(),
-            )
-            if exc_cls is None:
-                raise
-            raise exc_cls(u.line, u.column, text, source) from None
 
 
 def parse(text: str, source: str = "<unknown>") -> am.Amalgam:

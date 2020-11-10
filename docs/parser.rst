@@ -5,8 +5,7 @@ Parser
 
 Internal documentation for the :mod:`amalgam.parser` module.
 
-.. autoclass:: amalgam.parser.Parser
-    :members:
+.. autofunction:: amalgam.parser.parse
 
 .. autoclass:: amalgam.parser.Expression
     :members:
