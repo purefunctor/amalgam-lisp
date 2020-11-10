@@ -117,6 +117,7 @@ norm_failures = (
     for text, error in (
         ("(+ 1 2", pr.MissingClosing),
         ("[1 2 3", pr.MissingClosing),
+        ("\"    ", pr.UnexpectedInput),
     )
 )
 
