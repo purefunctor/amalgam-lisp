@@ -6,8 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-* Changed deferred functions/macros to unquote unevaluated arguments.
+* Added the `Located` mixin dataclass for AST nodes.
+* Added a `__repr__` method to `Environment`.
+* Added the `name` and `engine` parameters and attributes to `Engine`.
+* Added the `_interpret` and `interpret` methods to `Engine`.
 * Added the `Notification` `Amalgam` subclass for representing failures.
+* Added the `make_report` method for `Notification` to visualize failures.
+* Added a way to keep track of the original text and its source.
+* Changed deferred functions/macros to unquote unevaluated arguments.
+* Changed user-facing documentation for the `macro` function.
+* Changed the `env_push` method of `Environment` to propagate metadata from a parent.
+* Changed the `repl` method of `Engine` to use its own parse buffer and continuation logic.
+* Changed the `repl` method of `Engine` to visualize `Notification`s.
+* Changed the `_loop`, `_return`, and `_break` methods to use `Notification`s.
+* Fixed unnecessary imports for type checking using `TYPE_CHECKING`.
+* Removed the `_require` and `_provide` built-in functions.
+* Removed the `DisallowedContextError` exception.
+* Removed the `SymbolNotFound` exception.
+* Removed the `parse_and_run` method of `Engine`.
+* Removed `Parser` in favor of the `parse` function.
+* Removed type annotations for the transformer methods in `Expression`.
 
 ## [0.1.0] 2020-11-2
 This marks the first volatile feature release before `v1.0.0`.
