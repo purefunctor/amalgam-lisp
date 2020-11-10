@@ -190,3 +190,16 @@ class Parser:
             if exc_cls is None:
                 raise
             raise exc_cls(u.line, u.column, text, source) from None
+
+
+def parse(text: str, source: str = "<unknown>") -> am.Amalgam:
+    """Facilitates regular parsing that can fail."""
+    try:
+        return cast(am.Amalgam, EXPR_PARSER.parse(text))
+    except UnexpectedInput as u:
+        exc_cls = u.match_examples(
+            EXPR_PARSER.parse, ERROR_EXAMPLES.items(),
+        )
+        if exc_cls is None:
+            raise
+        raise exc_cls(u.line, u.column, text, source) from None
