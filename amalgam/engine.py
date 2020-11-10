@@ -14,9 +14,6 @@ class Engine:
     Class that serves as the frontend for parsing and running programs.
 
     Attributes:
-      parser (:class:`.parser.Parser`): A :class:`.parser.Parser`
-        instance.
-
       environment (:class:`.environment.Environment`): An
         :class:`.environment.Environment` instance containing the
         built-in functions and a reference to the
@@ -26,7 +23,6 @@ class Engine:
     """
 
     def __init__(self) -> None:
-        self.parser = pr.Parser()
         self.environment = ev.Environment(
             bindings={**pd.FUNCTIONS}, name="global", engine=self,
         )
@@ -43,38 +39,40 @@ class Engine:
             continued lines.
         """
         cont = False
-        session: PromptSession = PromptSession()
+        buffer = []
+        session:  PromptSession = PromptSession()
 
         while True:
             try:
-                text = session.prompt(prompt if not cont else prompt_cont)
+                line = session.prompt(prompt if not cont else prompt_cont)
 
-                if cont:
-                    text = "\n" + text
+                buffer.append(line)
 
-                # For notification reporting
-                self.parser.parse_buffer.seek(0)
-                _text = " ".join((self.parser.parse_buffer.read(), text))
+                lines = "\n".join(buffer)
 
-                expr = self.parser.repl_parse(text)
+                expr = pr.parse(lines)
 
-                if expr is not None:
-                    result = expr.evaluate(self.environment)
-                    if isinstance(result, am.Notification):
-                        print(result.make_report(_text, "<stdin>"), file=sys.stderr)
-                    else:
-                        print(result)
-                    cont = False
-                else:
-                    cont = True
+                result = expr.evaluate(self.environment)
+
+            except pr.MissingClosing:
+                cont = True
 
             except EOFError:
                 pd._exit(self.environment)
 
             except Exception as e:
-                if cont:
-                    cont = False
+                buffer.clear()
+                cont = False
                 print(f"{e.__class__.__qualname__}: {e}")
+
+            else:
+                if isinstance(result, am.Notification):
+                    print(result.make_report(lines, "<stdin>"), file=sys.stderr)
+                else:
+                    print(result)
+
+                buffer.clear()
+                cont = False
 
     def _interpret(self, text: str, source: str = "<unknown>") -> am.Amalgam:
         """
@@ -83,7 +81,7 @@ class Engine:
         Internal-facing method intended for use within
         :mod:`amalgam.primordials`.
         """
-        return self.parser.parse(text, source).evaluate(self.environment)
+        return pr.parse(text, source).evaluate(self.environment)
 
     def interpret(
         self, text: str, source: str = "<unknown>", file: IO = sys.stdout
