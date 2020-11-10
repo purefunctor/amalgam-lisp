@@ -125,7 +125,9 @@ ERROR_EXAMPLES = {
     MissingClosing: (
         "(", "[", "(foo", "[foo", "(foo bar", "[foo bar", "\"foo", "\"foo bar",
     ),
-    MissingOpening: (")", "]", "[foo bar)", "(foo bar]"),
+    MissingOpening: (
+        ")", "]", "[)]", "(])", "[(]", "([)", "[foo bar)", "(foo bar]",
+    ),
 }
 
 
