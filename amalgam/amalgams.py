@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from fractions import Fraction
+from io import StringIO
 from typing import (
     cast,
     Any,
@@ -532,6 +533,60 @@ class Notification(Amalgam):
     def pop(self) -> Trace:
         """Pops a :class:`.Trace` from :attr:`Notification.trace`."""
         return self.trace.pop()
+
+    def make_report(
+        self, text: str, source: str = "<unknown>"
+    ) -> str:  # pragma: no cover
+        """
+        Generates a report to be printed to :data:`sys.stderr`.
+
+        Accepts :data:`text` and :data:`source` for prettified output.
+        """
+        trace = []
+        for a, e, m in self.trace:
+            if isinstance(a, Atom):
+                continue
+            if a.line_span == (-1, -1) or a.column_span == (-1, -1):
+                continue
+            trace.append((a, e, m))
+            if isinstance(a, (SExpression, Vector)):
+                break
+
+        lines = text.splitlines()
+
+        if len(trace) > 1:
+            (atom_a, atom_e, atom_m), *_, (expr_a, _, _) = trace
+
+            snippets = lines[expr_a.line - 1:expr_a.end_line]
+            _code_block = []
+            for line_no, snippet in enumerate(snippets, start=expr_a.line):
+                padding = 6 - len(str(line_no))
+                _code_block.append(f"{line_no:>{padding}} | {snippet}")
+            code_block = "\n".join(_code_block)
+
+        else:
+            (atom_a, atom_e, atom_m), *_ = trace
+
+            snippet = lines[atom_a.line - 1]
+            padding = 6 - len(str(atom_a.line))
+            code_block = f"{atom_a.line:>{padding}} | {snippet}"
+
+        line_span = f"{atom_a.line}~{atom_a.end_line}"
+        column_span = f"{atom_a.column}~{atom_a.end_column}"
+        message = f"{atom_a!s} ~ {atom_m}"
+        environment = atom_e.name
+
+        report = StringIO()
+        report.write(
+            f"In file \"{source}\" "
+            f"near lines {line_span}, columns {column_span}\n"
+            f"      |\n"
+            f"{code_block}\n"
+            f"      |\n"
+            f"      Message: {message}, Environment: {environment}\n"
+        )
+        report.seek(0)
+        return report.read()
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(

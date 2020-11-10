@@ -52,10 +52,18 @@ class Engine:
                 if cont:
                     text = "\n" + text
 
+                # For notification reporting
+                self.parser.parse_buffer.seek(0)
+                _text = " ".join((self.parser.parse_buffer.read(), text))
+
                 expr = self.parser.repl_parse(text)
 
                 if expr is not None:
-                    print(expr.evaluate(self.environment))
+                    result = expr.evaluate(self.environment)
+                    if isinstance(result, am.Notification):
+                        print(result.make_report(_text, "<stdin>"), file=sys.stderr)
+                    else:
+                        print(result)
                     cont = False
                 else:
                     cont = True
@@ -89,6 +97,6 @@ class Engine:
         """
         result = self._interpret(text, source)
         if isinstance(result, am.Notification):
-            print(result, file=sys.stderr)
+            print(result.make_report(text, source), file=sys.stderr)
         else:
             print(result, file=file)
