@@ -113,8 +113,14 @@ class Amalgam(Located, ABC):
         returning a fatal :class:`.Notification` for non-callable
         types.
         """
-        notification = Notification()
-        notification.push(self, environment, "not a callable")
+        if isinstance(self, Notification):
+            notification = self
+            value = Atom("call")
+        else:
+            notification = Notification()
+            value = self
+
+        notification.push(value, environment, "not a callable")
         return notification
 
     def _make_repr(self, value: Any) -> str:  # pragma: no cover
