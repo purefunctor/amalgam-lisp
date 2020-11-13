@@ -237,9 +237,10 @@ class Function(Amalgam):
     defer: bool = False
     contextual: bool = False
 
-    def __post_init__(self):
-        self.env = cast("Environment", None)
-        self.in_context = False
+    env: Environment = field(
+        init=False, compare=False, default=cast("Environment", None)
+    )
+    in_context: bool = field(init=False, compare=False, default=False)
 
     def evaluate(self, _environment: Environment) -> Function:
         """Evaluates to the same :class:`.Function` reference."""
