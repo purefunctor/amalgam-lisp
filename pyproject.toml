@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "amalgam-lisp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Lisp-like interpreted language implemented in Python"
 authors = ["PureFunctor <purefunctor@gmail.com>"]
 license = "MIT"
