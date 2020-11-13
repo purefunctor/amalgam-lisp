@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from fractions import Fraction
 from io import StringIO
@@ -83,7 +83,7 @@ class Located:
         return self
 
 
-class Amalgam(Located, ABC):
+class Amalgam(Located, metaclass=ABCMeta):
     """The abstract base class for language constructs."""
 
     @abstractmethod
