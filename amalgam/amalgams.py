@@ -92,29 +92,6 @@ class Amalgam(Located, metaclass=ABCMeta):
         Protocol for evaluating or unwrapping :class:`Amalgam` objects.
         """
 
-    def call(
-        self, environment: Environment, *arguments: Amalgam
-    ) -> Amalgam:  # pragma: no cover
-        """
-        Protocol for implementing function calls for
-        :class:`Function`.
-
-        This base implementation is responsible for making the type
-        signature of :attr:`SExpression.func` to properly type check
-        when :meth:`SExpression.evaluate` is called, as well as
-        returning a fatal :class:`.Notification` for non-callable
-        types.
-        """
-        if isinstance(self, Notification):
-            notification = self
-            value = Atom("call")
-        else:
-            notification = Notification()
-            value = self
-
-        notification.push(value, environment, "not a callable")
-        return notification
-
     def _make_repr(self, value: Any) -> str:  # pragma: no cover
         """Helper method for creating a :meth:`__repr__`."""
         return f"<{self.__class__.__name__} '{value!s}' @ {hex(id(self))}>"
@@ -352,11 +329,22 @@ class SExpression(Amalgam):
         the :meth:`call` method with `environment` and
         :attr:`SExpression.args`.
         """
-        result = self.func.evaluate(environment).call(environment, *self.args)
-        if isinstance(result, Notification):
-            if result.fatal:
-                result.push(self, environment, "inherited")
-        return result
+        head = self.func.evaluate(environment)
+        if isinstance(head, Function):
+            result = head.call(environment, *self.args)
+            if isinstance(result, Notification):
+                if result.fatal:
+                    result.push(self, environment, "inherited")
+            return result
+        elif isinstance(head, Notification):
+            head.push(Atom("call"), environment, "not a callable")
+            head.push(self, environment, "inherited")
+            return head
+        else:
+            notification = Notification()
+            notification.push(head, environment, "not a callable")
+            notification.push(self, environment, "inherited")
+            return notification
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
