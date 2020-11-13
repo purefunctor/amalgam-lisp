@@ -92,17 +92,6 @@ class Amalgam(Located, metaclass=ABCMeta):
         Protocol for evaluating or unwrapping :class:`Amalgam` objects.
         """
 
-    def bind(self, environment: Environment) -> Amalgam:  # pragma: no cover
-        """
-        Protocol for implementing environment binding for
-        :class:`Function`.
-
-        This base implementation is responsible for allowing `bind`
-        to be called on other :class:`Amalgam` subclasses by
-        performing no operation aside from returning :data:`self`.
-        """
-        return self
-
     def call(
         self, environment: Environment, *arguments: Amalgam
     ) -> Amalgam:  # pragma: no cover
@@ -629,9 +618,10 @@ def create_fn(
             dict(zip(fargs, arguments)), f"{fname}-closure",
         )
 
-        # Call the `evaluate` method on the function body with
-        # `cl_env` and then call `bind` on the result with the
-        # same environment.
-        return fbody.evaluate(cl_env).bind(cl_env)
+        result = fbody.evaluate(cl_env)
+        if isinstance(result, Function):
+            return result.bind(cl_env)
+        else:
+            return result
 
     return Function(fname, closure_fn, defer, contextual)
