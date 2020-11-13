@@ -24,6 +24,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from amalgam.environment import Environment
 
 
+L = TypeVar("L", bound="Located")
+
+
 @dataclass
 class Located:
     """
@@ -66,11 +69,11 @@ class Located:
         return self.column_span[1]
 
     def located_on(
-        self,
+        self: L,
         *,
         lines: Tuple[int, int] = (-1, -1),
         columns: Tuple[int, int] = (-1, -1),
-    ) -> Located:
+    ) -> L:
         """
         Helper method for setting :attr:`Located.line_span` and
         :attr:`Located.column_span`.
