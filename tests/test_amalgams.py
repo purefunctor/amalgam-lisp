@@ -99,6 +99,11 @@ def test_vector_mapping(env):
     assert v4.mapping == {"FOO": Numeric(42), "BAR": Numeric(42)}
 
 
+def test_vector_iter():
+    vector = Vector(Numeric(21), Numeric(42), Numeric(63))
+    assert list(vector) == list(vector.vals)
+
+
 def test_s_expression_evaluate(env):
     sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
     assert sexpr.evaluate(env) == Numeric(42)
@@ -123,6 +128,11 @@ def test_s_expression_evaluate_non_callable_head(env):
         Trace(Numeric(21), env, "not a callable"),
         Trace(sexpr, env, "inherited"),
     ]
+
+
+def test_s_expression_iter():
+    sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
+    assert list(sexpr) == list(sexpr.vals)
 
 
 def test_function_bind(env):
