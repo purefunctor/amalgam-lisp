@@ -104,6 +104,27 @@ def test_s_expression_evaluate(env):
     assert sexpr.evaluate(env) == Numeric(42)
 
 
+def test_s_expression_evaluate_unresolved_head(env):
+    sexpr = SExpression(Symbol("x"), Numeric(21), Numeric(21))
+    notification = sexpr.evaluate(env)
+
+    assert notification.trace == [
+        Trace(Symbol("x"), env, "unbound symbol"),
+        Trace(Atom("call"), env, "not a callable"),
+        Trace(sexpr, env, "inherited"),
+    ]
+
+
+def test_s_expression_evaluate_non_callable_head(env):
+    sexpr = SExpression(Numeric(21), Numeric(21), Numeric(21))
+    notification = sexpr.evaluate(env)
+
+    assert notification.trace == [
+        Trace(Numeric(21), env, "not a callable"),
+        Trace(sexpr, env, "inherited"),
+    ]
+
+
 def test_function_bind(env):
     function = Function("function-bind-test", lambda _e, *_a: Vector(*_a), False)
 
