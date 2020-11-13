@@ -124,7 +124,7 @@ def _fn(
     Binds :data:`env` to the created :class:`.amalgams.Function` if a
     closure is formed.
     """
-    fn = am.create_fn("~lambda~", [arg.value for arg in args.vals], body)
+    fn = am.create_fn("~lambda~", [arg.value for arg in args], body)
     if env.parent is not None:
         fn.bind(env)
     return fn
@@ -153,11 +153,11 @@ def _let(
     names = []
     values = []
 
-    for pos, pair in enumerate(pairs.vals):
-        if not isinstance(pair, am.Vector) or len(pair.vals) != 2:
+    for pos, pair in enumerate(pairs):
+        if not isinstance(pair, am.Vector) or len(pair) != 2:
             raise ValueError(f"{pair} at {pos} is not a pair")
 
-        name, value = pair.vals
+        name, value = pair
 
         if not isinstance(name, am.Symbol):
             raise TypeError(f"{name} at {pos} is not a symbol")
@@ -291,7 +291,7 @@ def _cond(env: Environment, *pairs: am.Vector[am.Amalgam]) -> am.Amalgam:
     evaluation. If no conditions are met, :data:`:NIL` is returned.
     """
     for pair in pairs:
-        pred, expr = pair.vals
+        pred, expr = pair
         if _bool(env, pred.evaluate(env)) == am.Atom("TRUE"):
             return expr.evaluate(env)
     return am.Atom("NIL")
@@ -341,7 +341,7 @@ def _concat(_env: Environment, *strings: am.String) -> am.String:
 @_make_function("merge")
 def _merge(_env: Environment, *vectors: am.Vector) -> am.Vector:
     """Merges the given :data:`vectors`."""
-    return am.Vector(*chain.from_iterable(vector.vals for vector in vectors))
+    return am.Vector(*chain.from_iterable(vectors))
 
 
 @_make_function("slice")
@@ -365,7 +365,7 @@ def _at(_env: Environment, index: am.Numeric, vector: am.Vector) -> am.Amalgam:
 @_make_function("remove")
 def _remove(_env: Environment, index: am.Numeric, vector: am.Vector) -> am.Vector:
     """Removes an item in :data:`vector` using :data:`index`."""
-    vals = list(vector.vals)
+    vals = list(vector)
     del vals[index.value]
     return am.Vector(*vals)
 
@@ -373,19 +373,19 @@ def _remove(_env: Environment, index: am.Numeric, vector: am.Vector) -> am.Vecto
 @_make_function("len")
 def _len(_env: Environment, vector: am.Vector) -> am.Numeric:
     """Returns the length of a :data:`vector`."""
-    return am.Numeric(len(vector.vals))
+    return am.Numeric(len(vector))
 
 
 @_make_function("cons")
 def _cons(_env: Environment, amalgam: am.Amalgam, vector: am.Vector) -> am.Vector:
     """Preprends an :data:`amalgam` to :data:`vector`."""
-    return am.Vector(amalgam, *vector.vals)
+    return am.Vector(amalgam, *vector)
 
 
 @_make_function("snoc")
 def _snoc(_env: Environment, vector: am.Vector, amalgam: am.Amalgam) -> am.Vector:
     """Appends an :data:`amalgam` to :data:`vector`."""
-    return am.Vector(*vector.vals, amalgam)
+    return am.Vector(*vector, amalgam)
 
 
 @_make_function("is-map")
@@ -532,7 +532,7 @@ def _macro(
     """Creates a named macro using the provided arguments."""
     fn = am.create_fn(
         name.value,
-        [arg.value for arg in args.vals],
+        [arg.value for arg in args],
         body,
         defer=True,
     )
