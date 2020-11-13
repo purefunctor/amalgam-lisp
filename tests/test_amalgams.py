@@ -104,6 +104,11 @@ def test_vector_iter():
     assert list(vector) == list(vector.vals)
 
 
+def test_vector_len():
+    vector = Vector(Numeric(21), Numeric(42), Numeric(63))
+    assert len(vector) == len(vector.vals)
+
+
 def test_s_expression_evaluate(env):
     sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
     assert sexpr.evaluate(env) == Numeric(42)
@@ -133,6 +138,11 @@ def test_s_expression_evaluate_non_callable_head(env):
 def test_s_expression_iter():
     sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
     assert list(sexpr) == list(sexpr.vals)
+
+
+def test_s_expression_len():
+    sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
+    assert len(sexpr) == len(sexpr.vals)
 
 
 def test_function_bind(env):

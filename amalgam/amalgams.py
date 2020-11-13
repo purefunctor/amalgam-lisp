@@ -350,6 +350,9 @@ class SExpression(Amalgam):
     def __iter__(self) -> Iterator[Amalgam]:
         return iter(self.vals)
 
+    def __len__(self) -> int:
+        return len(self.vals)
+
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(f"{self.func!r} {' '.join(map(repr, self.args))}")
 
@@ -423,6 +426,9 @@ class Vector(Amalgam, Generic[T]):
 
     def __iter__(self) -> Iterator[T]:
         return iter(self.vals)
+
+    def __len__(self) -> int:
+        return len(self.vals)
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(" ".join(map(repr, self.vals)))
