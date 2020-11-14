@@ -87,10 +87,10 @@ class ParsingError(Exception):
     Base exception for errors during parsing.
 
     Attributes:
-      line (:class:`int`): the line number nearest to the error
-      column (:class:`int`): the column number nearest to the error
-      text (:class:`str`): the original text being parsed
-      source (:class:`str`): the source of the original text
+      line (:class:`int`): The line number nearest to the error
+      column (:class:`int`): The column number nearest to the error
+      text (:class:`str`): The original text being parsed
+      source (:class:`str`): The source of the original text
     """
 
     def __init__(self, line: int, column: int, text: str, source: str):
