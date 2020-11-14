@@ -23,7 +23,7 @@ def amalgam_main(file, expr):
         text = file.read()
         source = f"<{file.name}>"
 
-    elif has_expr:  # pragma: no branch
+    else:
         text = expr
         source = "<expr-parameter>"
 
