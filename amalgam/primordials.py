@@ -158,14 +158,18 @@ def _let(
     names = []
     values = []
 
-    for pos, pair in enumerate(pairs):
+    for pair in pairs:
         if not isinstance(pair, am.Vector) or len(pair) != 2:
-            raise ValueError(f"{pair} at {pos} is not a pair")
+            notification = am.Notification()
+            notification.push(pair, env, "not a pair")
+            return notification
 
         name, value = pair
 
         if not isinstance(name, am.Symbol):
-            raise TypeError(f"{name} at {pos} is not a symbol")
+            notification = am.Notification()
+            notification.push(name, env, "not a symbol")
+            return notification
 
         names.append(name)
         values.append(value)

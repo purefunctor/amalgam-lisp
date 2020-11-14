@@ -159,18 +159,18 @@ def test_let(env):
 _let_failures = (
     param(_let_bindings, _let_exception, id=_let_name)
     for _let_bindings, _let_exception, _let_name in (
-        (Vector(Symbol("x")), ValueError, "not-a-vector"),
-        (Vector(Vector(Numeric(42), Symbol("x"))), TypeError, "not-a-symbol"),
-        (Vector(Vector(Symbol("x"))), ValueError, "too-short"),
-        (Vector(Vector(Symbol("x"), Symbol("y"), Symbol("z"))), ValueError, "too-long"),
+        (Vector(Symbol("x")), "not a pair", "not-a-vector"),
+        (Vector(Vector(Numeric(42), Symbol("x"))), "not a symbol", "not-a-symbol"),
+        (Vector(Vector(Symbol("x"))), "not a pair", "too-short"),
+        (Vector(Vector(Symbol("x"), Symbol("y"), Symbol("z"))), "not a pair", "too-long"),
     )
 )
 
 
 @mark.parametrize(("bindings", "exception"), _let_failures)
 def test_let_fails(env, bindings, exception):
-    with raises(exception):
-        _let(env, bindings, SExpression())
+    _let_result = _let(env, bindings, SExpression())
+    assert _let_result.trace[-1].message == exception
 
 
 _t = Atom("TRUE")
