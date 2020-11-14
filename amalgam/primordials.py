@@ -110,8 +110,13 @@ def _setn(env: Environment, name: am.Symbol, amalgam: am.Amalgam) -> am.Amalgam:
     Binds :data:`name` to the evaluated :data:`amalgam` value in the
     immediate :data:`env` and returns that value.
     """
-    env[name.value] = amalgam.evaluate(env)
-    return env[name.value]
+    value = amalgam.evaluate(env)
+    if isinstance(value, am.Notification):
+        value.push(am.Atom("setn"), env, "inherited")
+        return value
+    else:
+        env[name.value] = value
+        return env[name.value]
 
 
 @_make_function("fn", defer=True)

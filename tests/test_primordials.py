@@ -103,6 +103,18 @@ def test_setn(env):
     assert _setn_result == amalgam
 
 
+def test_setn_fail(env):
+    name = Symbol("name")
+    amalgam = Symbol("x")
+
+    _setn_result = _setn(env, name, amalgam)
+
+    assert _setn_result.trace == [
+        Trace(amalgam, env, "unbound symbol"),
+        Trace(Atom("setn"), env, "inherited"),
+    ]
+
+
 def test_fn(env):
     args = Vector(Symbol("x"), Symbol("y"))
     body = SExpression(Symbol("+"), Symbol("x"), Symbol("y"))
