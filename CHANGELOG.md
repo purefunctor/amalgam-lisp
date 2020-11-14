@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+* Added the `__iter__` and `__len__` methods for the `SExpression` and `Vector` classes.
+* Changed the `Amalgam` base class to use `ABCMeta` as a metaclass instead of inheriting from `ABC`.
+* Changed the `evaluate` method of `SExpression` to handle uncallable types manually.
+* Changed the `located_on` method of `Located` to type check for subclasses.
+* Removed `bind` and `call` from `Amalgam`, opting into manual checks intead.
+
 ## [0.2.0] 2020-11-13
 This marks the second volative release before `v1.0.0`.
 
