@@ -30,7 +30,7 @@ We can use the :data:`macro` function to define this form:
                      (eval expression)
                      (setn index (+ index 1)))))
 
-Analysing this example, two procedures are to be observerd,
+Analysing this example, two procedures are to be observed,
 specifically, the use of :data:`setr` and :data:`eval`. First, the
 :data:`vector` that is passed to the macro contains unevaluated
 expressions that first have to be evaluated using :data:`eval`. As
