@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Changed the `Amalgam` base class to use `ABCMeta` as a metaclass instead of inheriting from `ABC`.
 * Changed the `evaluate` method of `SExpression` to handle uncallable types manually.
 * Changed the `located_on` method of `Located` to type check for subclasses.
+* Changed function organization for `primordials.py`, opting into making it a subpackage.
 * Removed `bind` and `call` from `Amalgam`, opting into manual checks intead.
 
 ## [0.2.0] 2020-11-13
