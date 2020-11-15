@@ -6,46 +6,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-* Added the `__iter__` and `__len__` methods for the `SExpression` and `Vector` classes.
-* Changed the `Amalgam` base class to use `ABCMeta` as a metaclass instead of inheriting from `ABC`.
-* Changed the `evaluate` method of `SExpression` to handle uncallable types manually.
-* Changed the `located_on` method of `Located` to type check for subclasses.
-* Changed function organization for `primordials.py`, opting into making it a subpackage.
-* Removed `bind` and `call` from `Amalgam`, opting into manual checks intead.
+### Added
+* `__iter__` and `__len__` for `SExpression` and `Vector`.
+
+### Changed
+* Use `ABCMeta` for `Amalgam` instead of inheriting from `ABC`.
+* Manually handle uncallable types in `SExpression.evaluate`.
+* Account for subclasses when type checking `Located.located_on`.
+* Reorganize `primordials.py`, transforming it into a subpackage.
+
+### Removed
+* The `bind` and `call` methods from `Amalgam`, favoring manual checks instead.
+
 
 ## [0.2.0] 2020-11-13
 This marks the second volative release before `v1.0.0`.
 
-* Added the `Located` mixin dataclass for AST nodes.
-* Added a `__repr__` method to `Environment`.
-* Added the `name` and `engine` parameters and attributes to `Engine`.
-* Added the `_interpret` and `interpret` methods to `Engine`.
-* Added the `Notification` `Amalgam` subclass for representing failures.
-* Added the `make_report` method for `Notification` to visualize failures.
-* Added a way to keep track of the original text and its source.
-* Changed deferred functions/macros to unquote unevaluated arguments.
-* Changed user-facing documentation for the `macro` function.
-* Changed the `env_push` method of `Environment` to propagate metadata from a parent.
-* Changed the `repl` method of `Engine` to use its own parse buffer and continuation logic.
-* Changed the `repl` method of `Engine` to visualize `Notification`s.
-* Changed the `_loop`, `_return`, and `_break` methods to use `Notification`s.
-* Fixed unnecessary imports for type checking using `TYPE_CHECKING`.
-* Removed the `_require` and `_provide` built-in functions.
-* Removed the `DisallowedContextError` exception.
-* Removed the `SymbolNotFound` exception.
-* Removed the `parse_and_run` method of `Engine`.
-* Removed `Parser` in favor of the `parse` function.
-* Removed type annotations for the transformer methods in `Expression`.
+### Added
+* `Located` mixin dataclass for AST nodes.
+* `__repr__` for `Environment`.
+* `name` and `engine` parameters and attributes to `Engine`.
+* `_interpret` and `interpret` methods to `Engine`.
+* `Notification` class for representing failures.
+* Tracking of the original text and its source during parsing and evaluation.
+
+### Changed
+* Unquote unevaluated arguments in deferred functions and macros.
+* Update user-facing documentation for the `macro` function.
+* Move parse buffer and continuation logic to `Engine.repl`.
+* Visualize `Notification`s in `Engine.repl`.
+* Use `Notification`s in `_loop`, `_return`, and `_break`.
+
+### Fixed
+* Unnecessary imports for type checking.
+
+### Removed
+* The `_require` and `_provide` built-in functions.
+* The `DisallowedContextError` exception.
+* The `SymbolNotFound` exception.
+* The `parse_and_run` method of `Engine`.
+* The `Parser` class in favor of the `parse` function.
+* Type annotations for the transformer methods in `Expression`.
+
 
 ## [0.1.0] 2020-11-2
 This marks the first volatile feature release before `v1.0.0`.
 
-* Added implementations and tests for the following:
+### Added
+* Implementations and tests for the following:
   * Language entities: `amalgam.amalgams`.
   * Execution environments: `amalgam.environment`.
   * Runtime engine: `amalgam.engine`.
   * Built-in functions: `amalgam.primordials`.
   * Parser built with Lark: `amalgam.parser`.
   * Command-line interface: `amalgam.cli`.
-* Added user-facing and internal documentation.
+* User-facing and internal documentation.
 * Type annotaions and runtime casts for `mypy`.
