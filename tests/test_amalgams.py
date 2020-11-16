@@ -16,7 +16,7 @@ from amalgam.amalgams import (
 from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS
 
-from pytest import fixture, mark, param, raises
+from pytest import fixture, mark, param
 
 
 @fixture

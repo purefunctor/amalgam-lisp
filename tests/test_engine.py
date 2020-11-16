@@ -1,6 +1,4 @@
-import re
-
-from amalgam.amalgams import Numeric, String
+from amalgam.amalgams import Numeric
 from amalgam.engine import Engine
 
 from pytest import fixture, raises

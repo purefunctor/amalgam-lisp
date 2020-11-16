@@ -1,6 +1,6 @@
 import amalgam.parser as pr
 
-from pytest import fixture, mark, param, raises
+from pytest import mark, param, raises
 
 
 def test_symbol_parser_allowed_characters():

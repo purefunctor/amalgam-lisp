@@ -15,7 +15,6 @@ from amalgam.amalgams import (
 from amalgam.engine import Engine
 from amalgam.environment import Environment
 from amalgam.primordials import (
-    FUNCTIONS,
     _add,
     _sub,
     _mul,
@@ -52,7 +51,6 @@ from amalgam.primordials import (
     _map_in,
     _map_at,
     _map_up,
-    _loop,
     _when,
     _eval,
     _unquote,
