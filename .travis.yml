@@ -26,11 +26,10 @@ matrix:
     env: NOXSESSION=test-3.8
 
 install:
-  - pip install coverage poetry
-  - poetry install
+  - pip install coverage poetry nox
 
 script:
-  - poetry run nox
+  - nox
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
