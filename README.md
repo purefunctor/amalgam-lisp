@@ -30,6 +30,7 @@ $ amalgam --expr="(+ 42 42)"  # To evaluate an expression
 Install the following dependencies:
 * Python 3.7 & 3.8
 * [Poetry](https://python-poetry.org)
+* [Nox](https://nox.thea.codes/en/stable/) (Optional)
 
 Clone and then navigate to the repository:
 ```bash
@@ -44,15 +45,14 @@ $ poetry run pre-commit install
 ```
 
 ## Running Tests / Coverage Reports / Building Documentation
-`nox` is used for the automation of the execution of tests, which generates, combines, and reports coverage data for Python 3.7 and 3.8, as well as building documentation for the project.
-```bash
-$ poetry run nox
+This project uses `nox` for automating various tasks like running tests and building documentation.
+```
+$ nox
 ```
 
 Alternatively, tests, coverage reports, and the documentation can be generated manually.
 ```bash
 $ poetry run coverage run -m pytest
-$ poetry run coverage combine
 $ poetry run coverage report -m
 $ poetry run coverage html
 $ poetry run sphinx-build docs docs/build
