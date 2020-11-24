@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from fractions import Fraction
 from io import StringIO
-from itertools import takewhile
+from itertools import chain
 from typing import (
     cast,
     Any,
@@ -614,15 +614,24 @@ def create_fn(
     def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
         """Callable responsible for evaluating `fbody`."""
 
-        _fargs = iter(fargs)
-        _arguments = iter(arguments)
+        try:
+            l_count = fargs.index("&rest")
+            r_count = len(fargs) - l_count - 1
 
-        pos_args = zip(takewhile(lambda arg: arg != "&rest", _fargs), _arguments)
+            l_names = zip(fargs[:l_count], arguments[:l_count])
 
-        namespace = dict(pos_args)
-        namespace["&rest"] = Vector(*_arguments)
+            if r_count == 0:
+                bindings = dict(l_names)
+                bindings["&rest"] = Vector(*arguments[l_count:])
+            else:
+                r_names = zip(fargs[-r_count:], arguments[-r_count:])
+                m_name = ("&rest", Vector(*arguments[l_count:-r_count]))
+                bindings = dict(chain(l_names, (m_name,), r_names))
 
-        cl_env = environment.env_push(namespace, f"{fname}-closure")
+        except ValueError:
+            bindings = dict(zip(fargs, arguments))
+
+        cl_env = environment.env_push(bindings, f"{fname}-closure")
 
         result = fbody.evaluate(cl_env)
         if isinstance(result, Function):
