@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from fractions import Fraction
 from io import StringIO
+from itertools import takewhile
 from typing import (
     cast,
     Any,
@@ -613,11 +614,15 @@ def create_fn(
     def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
         """Callable responsible for evaluating `fbody`."""
 
-        # Create a child environment and bind args to their names.
-        # TODO: Raise an error when missing arguments instead.
-        cl_env = environment.env_push(
-            dict(zip(fargs, arguments)), f"{fname}-closure",
-        )
+        _fargs = iter(fargs)
+        _arguments = iter(arguments)
+
+        pos_args = zip(takewhile(lambda arg: arg != "&rest", _fargs), _arguments)
+
+        namespace = dict(pos_args)
+        namespace["&rest"] = Vector(*_arguments)
+
+        cl_env = environment.env_push(namespace, f"{fname}-closure")
 
         result = fbody.evaluate(cl_env)
         if isinstance(result, Function):
