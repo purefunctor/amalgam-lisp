@@ -147,17 +147,34 @@ Meta
    Creates a scoped lambda given a vector of :data:`args`, and a
    :data:`body`. Binds to a closure when created inside of one.
 
+   :data:`args` can include :data:`&rest` to signify variadic
+   arguments, and can be used in the following forms.
+
+   .. code-block:: lisp
+
+         ;; Variadic for all arguments
+         (= ((fn [&rest] [&rest]) 1 2 3) [[1 2 3]])
+
+         ;; Non-variadic for first :data:`n` arguments
+         (= ((fn [x &rest] [x &rest]) 1 2 3) [1 [2 3]])
+
+         ;; Non-variadic for last :data:`n` arguments
+         (= ((fn [&rest x] [&rest x]) 1 2 3) [[1 2] 3])
+
+         ;; Non-variadic for first :data:`n` and last:data:`m` arguments
+         (= ((fn [x &rest y] [x &rest y]) 1 2 3)) [1 [2] 3])
+
 .. function:: (mkfn name [args...] body)
 
    Creates a scoped function given a :data:`name`, a vector of
    :data:`args`, and a :data:`body`. Binds to a closure when created
-   inside of one.
+   inside of one. Allows :data:`&rest` syntax as described in :data:`fn`.
 
 .. function:: (macro name [args...] body)
 
    Creates a scoped macro given a :data:`name`, a vector of
    :data:`args`, and a :data:`body`. Binds to a closure when created
-   inside of one.
+   inside of one. Allows :data:`&rest` syntax as described in :data:`fn`.
 
 .. function:: (let [[name value]...] body)
 
