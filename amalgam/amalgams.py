@@ -604,11 +604,28 @@ def create_fn(
     defer: bool = False,
     contextual: bool = False,
 ) -> Function:
-    """Helper function for creating `Function` objects.
+    """
+    Helper function for creating :class:`Function` objects.
 
-    Given the name of the function: `fname`, a sequence of argument
-    names: `fargs`, and the `Amalgam` to be evaluated: `fbody`,
-    creates a new `closure_fn` to be wrapped by a `Function`.
+    Given the name of the function: :data:`fname`, a sequence of
+    argument names: :data:`fargs`, and the :class:`Amalgam` to be
+    evaluated: :data:`fbody`, creates a new :data:`closure_fn` to be
+    wrapped by a :class:`Function`.
+
+    :data:`fargs` can include :data:`&rest` to signify variadic
+    arguments, and can be used in the following forms.
+
+    Variadic for all arguments
+    (λ [&rest]-> [&rest]) 1 2 3 == [[1 2 3]]
+
+    Non-variadic for first :data:`n` arguments
+    (λ [x &rest] -> [x &rest]) 1 2 3 == [1 [2 3]]
+
+    Non-variadic for last :data:`n` arguments
+    (λ [&rest x] -> [&rest x]) 1 2 3 == [[1 2] 3]
+
+    Non-variadic for first :data:`n` and last:data:`m` arguments
+    (λ [x &rest y] -> [x &rest y]) 1 2 3 == [1 [2] 3]
     """
 
     def closure_fn(environment: Environment, *arguments: Amalgam) -> Amalgam:
