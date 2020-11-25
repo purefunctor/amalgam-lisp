@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/logo.png"></img>
+  <img src="https://raw.githubusercontent.com/PureFunctor/amalgam-lisp/develop/docs/logo.png"></img>
 </p>
 
 <p align="center">
