@@ -1,0 +1,46 @@
+name: Tests
+
+on:
+  push:
+    branches: [ develop ]
+
+  pull_request:
+    branches: [ develop ]
+
+  workflow_dispatch:
+
+jobs:
+
+  tests:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2.1.4
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: x64
+
+    - name: Install dependencies
+      run: pip install coverage[toml] nox poetry
+
+    - name: Generate coverage data
+      env:
+        NOXSESSION: test-${{ matrix.python-version }}
+        COVERAGE_FILE: .coverage.${{ matrix.python-version }}
+      run: |
+        nox
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        name: Test Python ${{ matrix.python-version }}
