@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * `__iter__` and `__len__` for `SExpression` and `Vector`.
+* Special `&rest` syntax for `fn`, `mkfn`, and `macro` through `create_fn`.
 
 ### Changed
 * Use `ABCMeta` for `Amalgam` instead of inheriting from `ABC`.
