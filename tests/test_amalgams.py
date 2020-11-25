@@ -17,6 +17,7 @@ from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS
 
 from pytest import fixture, mark, param
+from tests.utils import amalgam_ast_to_python
 
 
 @fixture
@@ -311,17 +312,6 @@ def test_create_fn_closure(env):
     assert closure.call(env, _21) == vec
 
 
-def to_list(xs):
-    ys = []
-    for x in xs:
-        if isinstance(x, Vector):
-            y = to_list(x)
-        else:
-            y = x.value
-        ys.append(y)
-    return ys
-
-
 var_args = (
     param(names, result, id=identifier)
     for names, result, identifier in (
@@ -336,5 +326,6 @@ var_args = (
 @mark.parametrize(("names", "result"), var_args)
 def test_create_fn_var_args(env, names, result):
     fn = create_fn("create_fn-var-args", names, Vector(*map(Symbol, names)))
+    rs = fn.call(env, *map(Numeric, (1, 2, 3, 4, 5)))
 
-    assert to_list(fn.call(env, *map(Numeric, (1, 2, 3, 4, 5)))) == result
+    assert amalgam_ast_to_python(rs) == result
