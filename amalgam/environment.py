@@ -74,16 +74,18 @@ class Environment:
         instances.
         """
         yield self.bindings
-        _self = self.parent
+
+        if self.parent is None:
+            return
 
         if self.search_depth >= 0:
             depth = self.search_depth
         else:
             depth = self.level
 
+        _self = self.parent
         for _ in range(depth):
-            if _self is not None:
-                yield _self.bindings
+            yield _self.bindings
             _self = _self.parent
 
     def __getitem__(self, item: str) -> Amalgam:
