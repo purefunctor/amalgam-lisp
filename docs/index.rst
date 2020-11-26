@@ -1,7 +1,7 @@
 Welcome to amalgam-lisp's documentation!
 ========================================
 
-.. image:: logo.png
+.. image:: https://raw.githubusercontent.com/PureFunctor/amalgam-lisp/develop/docs/logo.png
     :align: center
 
 .. centered::
