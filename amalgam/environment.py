@@ -95,22 +95,10 @@ class Environment:
         is encountered at a certain depth less than the target depth,
         returns that `item`, otherwise, raises :class:`SymbolNotFound`.
         """
-        _self = self
-
-        if self.search_depth >= 0:
-            depth = self.search_depth + 1
-        else:
-            depth = self.level + 1
-
-        # Search until the top-most environment,
-        # raise SymbolNotFound otherwise.
-        for _ in range(depth):
-            try:
-                return _self.bindings[item]
-            except KeyError:
-                _self = cast(Environment, _self.parent)
-        else:
-            raise KeyError(item)
+        for bindings in self.search_chain:
+            if item in bindings:
+                return bindings[item]
+        raise KeyError(item)
 
     def __setitem__(self, item: str, value: Amalgam) -> None:
         """
@@ -121,23 +109,13 @@ class Environment:
         encountered at a certain depth less than the target depth,
         overrides that `item` instead.
         """
-        _self = self
-
-        if self.search_depth >= 0:
-            depth = self.search_depth
-        else:
-            depth = self.level
-
-        # Search until the second-to-last environment,
-        # set at the top-most environment otherwise.
-        for _ in range(depth):
-            if item in _self.bindings:
-                _self.bindings[item] = value
+        _search_chain = list(self.search_chain)
+        for bindings in _search_chain:
+            if item in bindings:
+                bindings[item] = value
                 break
-            else:
-                _self = cast(Environment, _self.parent)
         else:
-            _self.bindings[item] = value
+            _search_chain[-1][item] = value
 
     def __delitem__(self, item: str) -> None:
         """
@@ -148,21 +126,10 @@ class Environment:
         encountered at a certain depth less than the target depth,
         deletes that `item` instead.
         """
-        _self = self
-
-        if self.search_depth >= 0:
-            depth = self.search_depth + 1
-        else:
-            depth = self.level + 1
-
-        # Search until the top-most environment,
-        # raise SymbolNotFound otherwise.
-        for _ in range(depth):
-            try:
-                del _self.bindings[item]
+        for bindings in self.search_chain:
+            if item in bindings:
+                del bindings[item]
                 break
-            except KeyError:
-                _self = cast(Environment, _self.parent)
         else:
             raise KeyError(item)
 
@@ -175,22 +142,10 @@ class Environment:
         encountered at a certain depth less than the target depth,
         immediately returns `True`, otherwise, returns `False`.
         """
-        _self = self
-
-        if self.search_depth >= 0:
-            depth = self.search_depth + 1
-        else:
-            depth = self.level + 1
-
-        # Search until an `item` is found,
-        # return False otherwise
-        for _ in range(depth):
-            if item in _self.bindings:
+        for bindings in self.search_chain:
+            if item in bindings:
                 return True
-            else:
-                _self = cast(Environment, _self.parent)
-        else:
-            return False
+        return False
 
     @contextmanager
     def search_at(self, *, depth=0):
