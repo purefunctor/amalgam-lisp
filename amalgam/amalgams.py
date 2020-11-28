@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
+from functools import wraps
 from fractions import Fraction
 from io import StringIO
 from itertools import chain
@@ -84,7 +85,29 @@ class Located:
         return self
 
 
-class Amalgam(Located, metaclass=ABCMeta):
+class AmalgamMeta(ABCMeta):
+    """
+    Metaclass used to build :class:`Amalgam` subclasses.
+
+    Allows for customized pre and post method execution behaviour, such
+    as logging calls or tracking exceptions, effectively reducing
+    boilerplate code.
+    """
+
+    def __new__(cls, name, bases, namespace):
+
+        namespace["__evaluate"] = namespace["evaluate"]
+
+        @wraps(namespace["__evaluate"])
+        def evaluate(self: Amalgam, environment: Environment) -> Amalgam:
+            return namespace["__evaluate"](self, environment)
+
+        namespace["evaluate"] = evaluate
+
+        return super().__new__(cls, name, bases, namespace)
+
+
+class Amalgam(Located, metaclass=AmalgamMeta):
     """The abstract base class for language constructs."""
 
     @abstractmethod
