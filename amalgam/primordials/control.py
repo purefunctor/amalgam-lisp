@@ -71,15 +71,15 @@ def _do(env: Environment, *exprs: am.Amalgam) -> am.Amalgam:
 
 
 @make_function(CONTROL, "return", contextual=True)
-def _return(env: Environment, result: am.Amalgam) -> am.Notification:
+def _return(env: Environment, result: am.Amalgam) -> am.Vector:
     """Exits a context with a :data:`result`."""
-    return am.Notification(fatal=False, payload=result)
+    return am.Vector(am.Atom("payload"), result)
 
 
 @make_function(CONTROL, "break", contextual=True)
-def _break(env: Environment) -> am.Notification:
+def _break(env: Environment) -> am.Vector:
     """Exits a loop with :data:`:NIL`."""
-    return am.Notification(fatal=False, payload=am.Atom("NIL"))
+    return am.Vector(am.Atom("payload"), am.Atom("NIL"))
 
 
 @make_function(CONTROL, "loop", defer=True, allows=("break", "return"))
@@ -91,9 +91,7 @@ def _loop(env: Environment, *exprs: am.Amalgam) -> am.Amalgam:
     while True:
         for expr in exprs:
             result = expr.evaluate(env)
-            if isinstance(result, am.Notification):
-                if result.fatal:
-                    result.push(am.Atom("loop"), env, "inherited")
-                    return result
-                else:
-                    return result.payload
+            try:
+                return result.mapping["payload"]
+            except (AttributeError, KeyError):
+                pass
