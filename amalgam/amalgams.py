@@ -123,6 +123,57 @@ class FailureStack(Exception):
         """Pushes a :class:`Failure` into the :attr:`failures` stack."""
         self.failures.append(failure)
 
+    @property
+    def unpacked_failures(self) -> Iterator[Tuple[Amalgam, Environment, str]]:
+        """Helper property for unpacking :class:`Failure`s."""
+        for failure in self.failures:
+            yield (failure.amalgam, failure.environment, failure.message)
+
+    def make_report(
+        self, text: str, source: str = "<unknown>"
+    ) -> str:  # pragma: no cover
+        """
+        Generates a report to be printed to :data:`sys.stderr`.
+
+        Accepts :data:`text` and :data:`source` for prettified output.
+        """
+
+        lines = text.splitlines()
+
+        if len(self.failures) > 1:
+            (atom_a, atom_e, atom_m), *_, (expr_a, _, _) = self.unpacked_failures
+
+            snippets = lines[expr_a.line - 1:expr_a.end_line]
+            _code_block = []
+            for line_no, snippet in enumerate(snippets, start=expr_a.line):
+                padding = 6 - len(str(line_no))
+                _code_block.append(f"{line_no:>{padding}} | {snippet}")
+            code_block = "\n".join(_code_block)
+
+        else:
+            (atom_a, atom_e, atom_m), *_ = self.unpacked_failures
+
+            snippet = lines[atom_a.line - 1]
+            padding = 6 - len(str(atom_a.line))
+            code_block = f"{atom_a.line:>{padding}} | {snippet}"
+
+        line_span = f"{atom_a.line}~{atom_a.end_line}"
+        column_span = f"{atom_a.column}~{atom_a.end_column}"
+        message = f"{atom_a!s} ~ {atom_m}"
+        environment = atom_e.name
+
+        report = StringIO()
+        report.write(
+            f"In file \"{source}\" "
+            f"near lines {line_span}, columns {column_span}\n"
+            f"      |\n"
+            f"{code_block}\n"
+            f"      |\n"
+            f"      Message: {message}, Environment: {environment}\n"
+        )
+        report.seek(0)
+        return report.read()
+
 
 class AmalgamMeta(ABCMeta):
     """
