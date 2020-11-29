@@ -43,15 +43,14 @@ class Engine:
         session:  PromptSession = PromptSession()
 
         while True:
+            line = session.prompt(prompt if not cont else prompt_cont)
+
+            buffer.append(line)
+
+            lines = "\n".join(buffer)
+
             try:
-                line = session.prompt(prompt if not cont else prompt_cont)
-
-                buffer.append(line)
-
-                lines = "\n".join(buffer)
-
                 expr = pr.parse(lines)
-
                 result = expr.evaluate(self.environment)
 
             except pr.MissingClosing:
@@ -60,17 +59,18 @@ class Engine:
             except EOFError:
                 pd._exit(self.environment)
 
+            except am.FailureStack as s:
+                print(s.make_report(lines, "<stdin>"), file=sys.stderr)
+                buffer.clear()
+                cont = False
+
             except Exception as e:
                 buffer.clear()
                 cont = False
                 print(f"{e.__class__.__qualname__}: {e}")
 
             else:
-                if isinstance(result, am.Notification):
-                    print(result.make_report(lines, "<stdin>"), file=sys.stderr)
-                else:
-                    print(result)
-
+                print(result)
                 buffer.clear()
                 cont = False
 
@@ -93,8 +93,9 @@ class Engine:
         Prints the result to :data:`sys.stdout` unless specified.
         Handles pretty-printing of :class:`.amalgams.Notifications`.
         """
-        result = self._interpret(text, source)
-        if isinstance(result, am.Notification):
-            print(result.make_report(text, source), file=sys.stderr)
+        try:
+            result = self._interpret(text, source)
+        except am.FailureStack as s:
+            print(s.make_report(text, source), file=sys.stderr)
         else:
             print(result, file=file)
