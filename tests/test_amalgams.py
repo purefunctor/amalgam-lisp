@@ -236,51 +236,6 @@ def test_notification(env):
     assert n.pop() == t0
 
 
-def test_notification_s_expression_propagation(env):
-    plus_sym = Symbol("+")
-    fatal_sym = Symbol("x")
-
-    s_expression = SExpression(plus_sym, fatal_sym)
-    notification = s_expression.evaluate(env)
-
-    assert notification.trace == [
-        Trace(fatal_sym, env, "unbound symbol"),
-        Trace(Atom("+"), env, "inherited"),
-        Trace(s_expression, env, "inherited"),
-    ]
-
-
-def test_notification_vector_propagation(env):
-    fatal_sym = Symbol("x")
-
-    vector = Vector(fatal_sym)
-    notification = vector.evaluate(env)
-
-    assert notification.trace == [
-        Trace(fatal_sym, env, "unbound symbol"),
-        Trace(vector, env, "inherited"),
-    ]
-
-
-def test_notification_s_expression_unconditional(env):
-    s_expression = SExpression(
-        Function("no-op", lambda e, a: a),
-        Notification(fatal=False),
-    )
-
-    notification = s_expression.evaluate(env)
-
-    assert notification.trace == []
-
-
-def test_notification_vector_unconditional(env):
-    vector = Vector(Notification(fatal=False))
-
-    notification = vector.evaluate(env)
-
-    assert notification.trace == []
-
-
 def test_create_fn_simple(env):
     function = create_fn(
         "create_fn-simple-test",
