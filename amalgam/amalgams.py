@@ -383,24 +383,15 @@ class Function(Amalgam):
         :attr:`.Function.in_context`,
         """
         if self.contextual and not self.in_context:
-            notification = Notification()
-            notification.push(self, environment, "invalid context")
-            return notification
+            raise Failure(self, environment, "invalid context")
 
         if self.env is not None:
             environment = self.env
 
-        args = []
-        for argument in arguments:
-            if not self.defer:
-                argument = argument.evaluate(environment)
-                if isinstance(argument, Notification):
-                    if argument.fatal:
-                        argument.push(
-                            Atom(self.name), environment, "inherited",
-                        )
-                    return argument
-            args.append(argument)
+        args = [
+            argument if self.defer else argument.evaluate(environment)
+            for argument in arguments
+        ]
 
         return self.fn(environment, *args)
 
