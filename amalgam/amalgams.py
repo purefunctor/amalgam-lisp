@@ -139,7 +139,15 @@ class AmalgamMeta(ABCMeta):
 
         @wraps(namespace["__evaluate"])
         def evaluate(self: Amalgam, environment: Environment) -> Amalgam:
-            return namespace["__evaluate"](self, environment)
+            try:
+                return namespace["__evaluate"](self, environment)
+            except Failure as f:
+                raise FailureStack([f])
+            except FailureStack as s:
+                s.push(Failure(self, environment, "inherited"))
+                raise
+            except Exception:
+                raise
 
         namespace["evaluate"] = evaluate
 
