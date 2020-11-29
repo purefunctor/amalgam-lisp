@@ -107,11 +107,11 @@ def test_setn_fail(env):
     name = Symbol("name")
     amalgam = Symbol("x")
 
-    _setn_result = _setn(env, name, amalgam)
+    with raises(FailureStack) as f:
+        _setn(env, name, amalgam)
 
-    assert _setn_result.trace == [
-        Trace(amalgam, env, "unbound symbol"),
-        Trace(Atom("setn"), env, "inherited"),
+    assert list(f.value.unpacked_failures) == [
+        (amalgam, env, "unbound symbol"),
     ]
 
 
