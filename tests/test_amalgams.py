@@ -1,6 +1,7 @@
 from amalgam.amalgams import (
     create_fn,
     Atom,
+    FailureStack,
     Function,
     Internal,
     Located,
@@ -16,7 +17,7 @@ from amalgam.amalgams import (
 from amalgam.environment import Environment
 from amalgam.primordials import FUNCTIONS
 
-from pytest import fixture, mark, param
+from pytest import fixture, mark, param, raises
 from tests.utils import amalgam_ast_to_python
 
 
@@ -117,22 +118,25 @@ def test_s_expression_evaluate(env):
 
 def test_s_expression_evaluate_unresolved_head(env):
     sexpr = SExpression(Symbol("x"), Numeric(21), Numeric(21))
-    notification = sexpr.evaluate(env)
 
-    assert notification.trace == [
-        Trace(Symbol("x"), env, "unbound symbol"),
-        Trace(Atom("call"), env, "not a callable"),
-        Trace(sexpr, env, "inherited"),
+    with raises(FailureStack) as f:
+        sexpr.evaluate(env)
+
+    assert list(f.value.unpacked_failures) == [
+        (Symbol("x"), env, "unbound symbol"),
+        (sexpr, env, "inherited"),
     ]
 
 
 def test_s_expression_evaluate_non_callable_head(env):
     sexpr = SExpression(Numeric(21), Numeric(21), Numeric(21))
-    notification = sexpr.evaluate(env)
 
-    assert notification.trace == [
-        Trace(Numeric(21), env, "not a callable"),
-        Trace(sexpr, env, "inherited"),
+    with raises(FailureStack) as f:
+        sexpr.evaluate(env)
+
+    assert list(f.value.unpacked_failures) == [
+        (Numeric(21), env, "not a callable"),
+        (sexpr, env, "inherited")
     ]
 
 
