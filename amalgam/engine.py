@@ -43,9 +43,12 @@ class Engine:
         session:  PromptSession = PromptSession()
 
         while True:
-            line = session.prompt(prompt if not cont else prompt_cont)
+            try:
+                line = session.prompt(prompt if not cont else prompt_cont)
+                buffer.append(line)
 
-            buffer.append(line)
+            except EOFError:
+                pd._exit(self.environment)
 
             lines = "\n".join(buffer)
 
@@ -55,9 +58,6 @@ class Engine:
 
             except pr.MissingClosing:
                 cont = True
-
-            except EOFError:
-                pd._exit(self.environment)
 
             except am.FailureStack as s:
                 print(s.make_report(lines, "<stdin>"), file=sys.stderr)
