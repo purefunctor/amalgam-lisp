@@ -141,6 +141,18 @@ def test_s_expression_evaluate_non_callable_head(env):
     ]
 
 
+def test_s_expression_evaluate_invalid_context(env):
+    sexpr = SExpression(Symbol("return"), Numeric(21))
+
+    with raises(FailureStack) as f:
+        sexpr.evaluate(env)
+
+    assert list(f.value.unpacked_failures) == [
+        (Symbol("return"), env, "invalid context"),
+        (sexpr, env, "inherited"),
+    ]
+
+
 def test_s_expression_iter():
     sexpr = SExpression(Symbol("+"), Numeric(21), Numeric(21))
     assert list(sexpr) == list(sexpr.vals)
