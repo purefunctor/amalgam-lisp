@@ -123,16 +123,12 @@ def _let(
 
     for pair in pairs:
         if not isinstance(pair, am.Vector) or len(pair) != 2:
-            notification = am.Notification()
-            notification.push(pair, env, "not a pair")
-            return notification
+            raise am.Failure(pair, env, "not a pair")
 
         name, value = pair
 
         if not isinstance(name, am.Symbol):
-            notification = am.Notification()
-            notification.push(name, env, "not a symbol")
-            return notification
+            raise am.Failure(name, env, "not a symbol")
 
         names.append(name)
         values.append(value)
