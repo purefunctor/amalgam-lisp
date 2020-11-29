@@ -254,9 +254,7 @@ class Symbol(Amalgam):
             with environment.search_at(depth=-1):
                 return environment[self.value]
         except KeyError:
-            notification = Notification()
-            notification.push(self, environment, "unbound symbol")
-            return notification
+            raise Failure(self, environment, "unbound symbol")
 
     def __repr__(self) -> str:  # pragma: no cover
         return self._make_repr(self.value)
