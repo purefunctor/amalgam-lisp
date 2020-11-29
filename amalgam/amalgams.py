@@ -452,20 +452,9 @@ class SExpression(Amalgam):
         """
         head = self.func.evaluate(environment)
         if isinstance(head, Function):
-            result = head.call(environment, *self.args)
-            if isinstance(result, Notification):
-                if result.fatal:
-                    result.push(self, environment, "inherited")
-            return result
-        elif isinstance(head, Notification):
-            head.push(Atom("call"), environment, "not a callable")
-            head.push(self, environment, "inherited")
-            return head
+            return head.call(environment, *self.args)
         else:
-            notification = Notification()
-            notification.push(head, environment, "not a callable")
-            notification.push(self, environment, "inherited")
-            return notification
+            raise Failure(self, environment, "not a callable")
 
     def __iter__(self) -> Iterator[Amalgam]:
         return iter(self.vals)
@@ -510,15 +499,7 @@ class Vector(Amalgam, Generic[T]):
         Creates a new :class:`.Vector` by evaluating every value in
         :attr:`Vector.vals`.
         """
-        vals = []
-        for val in self.vals:
-            val = val.evaluate(environment)
-            if isinstance(val, Notification):
-                if val.fatal:
-                    val.push(self, environment, "inherited")
-                return val
-            vals.append(val)
-        return Vector(*vals)
+        return Vector(*(val.evaluate(environment) for val in self.vals))
 
     def _as_mapping(self) -> Mapping[str, Amalgam]:
         """
