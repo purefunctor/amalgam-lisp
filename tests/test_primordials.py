@@ -573,12 +573,12 @@ def test_loop_fatal(env):
     symbol = Symbol("x")
     sexpr = SExpression(Symbol("loop"), symbol)
 
-    notification = sexpr.evaluate(env)
+    with raises(FailureStack) as f:
+        sexpr.evaluate(env)
 
-    assert notification.trace == [
-        Trace(symbol, env, "unbound symbol"),
-        Trace(Atom("loop"), env, "inherited"),
-        Trace(sexpr, env, "inherited",)
+    assert list(f.value.unpacked_failures) == [
+        (symbol, env, "unbound symbol"),
+        (sexpr, env, "inherited"),
     ]
 
 
