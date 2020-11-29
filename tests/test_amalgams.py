@@ -4,6 +4,7 @@ from amalgam.amalgams import (
     FailureStack,
     Function,
     Internal,
+    InvalidContextError,
     Located,
     Notification,
     Numeric,
@@ -197,7 +198,10 @@ def test_function_call_contextual(env, mocker):
     fn = mocker.Mock()
     function = Function("function-call-contextual-test", fn, False, True)
 
-    assert isinstance(function.call(env), Notification)
+    with raises(InvalidContextError) as f:
+        function.call(env)
+
+    assert f.value.environment == env
 
     function.in_context = True
 
