@@ -322,6 +322,19 @@ class Symbol(Amalgam):
         return self.value
 
 
+class InvalidContextError(Exception):
+    """
+    Raised when calling a :class:`Function` in invalid contexts.
+
+    Attributes:
+      environment (:class:`Environment`): The environment used in
+        calling the :class:`Function`.
+    """
+
+    def __init__(self, environment: Environment) -> None:
+        self.environment = environment
+
+
 @dataclass(repr=False)
 class Function(Amalgam):
     """
@@ -382,11 +395,11 @@ class Function(Amalgam):
         :attr:`.Function.defer`, :attr:`.Function.contextual`, and
         :attr:`.Function.in_context`,
         """
-        if self.contextual and not self.in_context:
-            raise Failure(self, environment, "invalid context")
-
         if self.env is not None:
             environment = self.env
+
+        if self.contextual and not self.in_context:
+            raise InvalidContextError(environment)
 
         args = [
             argument if self.defer else argument.evaluate(environment)
@@ -443,7 +456,14 @@ class SExpression(Amalgam):
         """
         head = self.func.evaluate(environment)
         if isinstance(head, Function):
-            return head.call(environment, *self.args)
+            try:
+                return head.call(environment, *self.args)
+            except InvalidContextError as e:
+                # Instead of raising Failure with the Function instance,
+                # we try to reconstruct a sensible Failure using func,
+                # assuming that it's an AST node that we can use for
+                # error reporting.
+                raise Failure(self.func, e.environment, "invalid context")
         else:
             raise Failure(self, environment, "not a callable")
 
