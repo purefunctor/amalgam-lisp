@@ -2,6 +2,8 @@ from fractions import Fraction
 
 from amalgam.amalgams import (
     Atom,
+    Failure,
+    FailureStack,
     Function,
     Internal,
     Numeric,
@@ -167,8 +169,8 @@ _let_failures = (
 
 @mark.parametrize(("bindings", "exception"), _let_failures)
 def test_let_fails(env, bindings, exception):
-    _let_result = _let(env, bindings, SExpression())
-    assert _let_result.trace[-1].message == exception
+    with raises((Failure, FailureStack), match=exception):
+        _let(env, bindings, SExpression())
 
 
 _t = Atom("TRUE")
