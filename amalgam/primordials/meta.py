@@ -21,12 +21,8 @@ def _setn(env: Environment, name: am.Symbol, amalgam: am.Amalgam) -> am.Amalgam:
     immediate :data:`env` and returns that value.
     """
     value = amalgam.evaluate(env)
-    if isinstance(value, am.Notification):
-        value.push(am.Atom("setn"), env, "inherited")
-        return value
-    else:
-        env[name.value] = value
-        return env[name.value]
+    env[name.value] = value
+    return value
 
 
 @make_function(META, "setr", defer=True)
