@@ -85,6 +85,45 @@ class Located:
         return self
 
 
+class Failure(Exception):
+    """
+    Represents failures during evaluation.
+
+    Attribute:
+      amalgam (:class:`Amalgam`): The :class:`Amalgam` where evaluation
+        failed.
+
+      environment (:class:`Environment`): The execution environment
+        used to evaluate :data:`amalgam`.
+
+      message (:class:`str`): An error message attached to the failure.
+    """
+
+    def __init__(
+        self, amalgam: Amalgam, environment: Environment, message: str
+    ) -> None:
+        self.amalgam = amalgam
+        self.environment = environment
+        self.message = message
+
+
+class FailureStack(Exception):
+    """
+    Represents a collection of :class:`Failure`s.
+
+    Attributes:
+      failures (:class:`List[Failure]`): A stack of :class:`Failure`
+        objects.
+    """
+
+    def __init__(self, failures: List[Failure]) -> None:
+        self.failures = failures
+
+    def push(self, failure: Failure) -> None:
+        """Pushes a :class:`Failure` into the :attr:`failures` stack."""
+        self.failures.append(failure)
+
+
 class AmalgamMeta(ABCMeta):
     """
     Metaclass used to build :class:`Amalgam` subclasses.
