@@ -463,9 +463,11 @@ class SExpression(Amalgam):
                 # we try to reconstruct a sensible Failure using func,
                 # assuming that it's an AST node that we can use for
                 # error reporting.
-                raise Failure(self.func, e.environment, "invalid context")
+                raise FailureStack(
+                    [Failure(self.func, e.environment, "invalid context")],
+                )
         else:
-            raise Failure(self, environment, "not a callable")
+            raise FailureStack([Failure(head, environment, "not a callable")])
 
     def __iter__(self) -> Iterator[Amalgam]:
         return iter(self.vals)
