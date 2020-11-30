@@ -34,13 +34,13 @@ def _setr(
     and binds it to the evaluated :data:`amalgam` in the immediate
     :data:`env`.
     """
-    rname = rname.evaluate(env)
+    name = rname.evaluate(env)
 
-    if not isinstance(rname, am.Symbol):
-        raise TypeError("could not resolve to a symbol")
+    if not isinstance(name, am.Symbol):
+        raise am.Failure(rname, env, "could not resolve to a symbol")
 
     amalgam = amalgam.evaluate(env)
-    env[rname.value] = amalgam
+    env[name.value] = amalgam
 
     return amalgam
 
@@ -49,7 +49,7 @@ def _setr(
 def _unquote(env: Environment, qamalgam: am.Quoted[am.Amalgam]) -> am.Amalgam:
     """Unquotes a given :data:`qamalgam`."""
     if not isinstance(qamalgam, am.Quoted):
-        raise TypeError("unquotable value provided")
+        raise am.Failure(qamalgam, env, "unquotable value")
     return qamalgam.value
 
 
