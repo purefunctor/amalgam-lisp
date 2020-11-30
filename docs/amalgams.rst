@@ -33,3 +33,9 @@ Internal documentation for the :mod:`amalgam.amalgams` module.
 
 .. autoclass:: amalgam.amalgams.Quoted
     :members:
+
+.. autoclass:: amalgam.amalgams.Failure
+    :members:
+
+.. autoclass:: amalgam.amalgams.FailureStack
+    :members:
