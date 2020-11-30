@@ -11,7 +11,6 @@ from amalgam.amalgams import (
     SExpression,
     String,
     Symbol,
-    Trace,
     Vector,
 )
 from amalgam.engine import Engine
