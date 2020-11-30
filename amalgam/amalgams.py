@@ -88,7 +88,7 @@ class Failure(Exception):
     """
     Represents failures during evaluation.
 
-    Attribute:
+    Attributes:
       amalgam (:class:`Amalgam`): The :class:`Amalgam` where evaluation
         failed.
 
@@ -108,11 +108,11 @@ class Failure(Exception):
 
 class FailureStack(Exception):
     """
-    Represents a collection of :class:`Failure`s.
+    Represents a collection of :class:`Failure` instances.
 
     Attributes:
       failures (:class:`List[Failure]`): A stack of :class:`Failure`
-        objects.
+        instances.
     """
 
     def __init__(self, failures: List[Failure]) -> None:
@@ -124,7 +124,7 @@ class FailureStack(Exception):
 
     @property
     def unpacked_failures(self) -> Iterator[Tuple[Amalgam, Environment, str]]:
-        """Helper property for unpacking :class:`Failure`s."""
+        """Helper property for unpacking :class:`Failure` s."""
         for failure in self.failures:
             yield (failure.amalgam, failure.environment, failure.message)
 
