@@ -8,16 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * `__iter__` and `__len__` for `SExpression` and `Vector`.
-* Special `&rest` syntax for `fn`, `mkfn`, and `macro` through `create_fn`.
+* Special `&rest` syntax for `fn`, `mkfn`, and `macro` through `createfn`.
+* `AmalgamMeta` to be used by `Amalgam` instead of inheriting from `ABC`.
+* `Failure` and `FailureStack` to implement a notification framework through `AmalgamMeta`.
 
 ### Changed
-* Use `ABCMeta` for `Amalgam` instead of inheriting from `ABC`.
 * Manually handle uncallable types in `SExpression.evaluate`.
 * Account for subclasses when type checking `Located.located_on`.
 * Reorganize `primordials.py`, transforming it into a subpackage.
+* Refactor internal code to use the new notification framework.
 
 ### Removed
 * The `bind` and `call` methods from `Amalgam`, favoring manual checks instead.
+* The `Internal`, `Trace`, and `Notification` classes in favor of `Failure` and `FailureStack`.
 
 
 ## [0.2.0] 2020-11-13
