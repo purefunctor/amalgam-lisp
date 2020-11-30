@@ -608,8 +608,12 @@ def test_unquote(env):
     q0 = Quoted(Numeric(42))
     assert _unquote(env, q0) == Numeric(42)
 
-    with raises(TypeError):
+    with raises(Failure) as f:
         _unquote(env, Numeric(42))
+
+    assert f.value.amalgam == Numeric(42)
+    assert f.value.environment == env
+    assert f.value.message == "unquotable value"
 
 
 def test_setr(env):
@@ -624,8 +628,12 @@ def test_setr(env):
     assert s0 == Numeric(42)
     assert env["x"] == Numeric(42)
 
-    with raises(TypeError):
+    with raises(Failure) as f:
         _setr(env, Symbol("x"), Numeric(21))
+
+    assert f.value.amalgam == Symbol("x")
+    assert f.value.environment == env
+    assert f.value.message == "could not resolve to a symbol"
 
 
 def test_macro(env):
