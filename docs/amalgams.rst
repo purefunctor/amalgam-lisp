@@ -33,12 +33,3 @@ Internal documentation for the :mod:`amalgam.amalgams` module.
 
 .. autoclass:: amalgam.amalgams.Quoted
     :members:
-
-.. autoclass:: amalgam.amalgams.Internal
-    :members:
-
-.. autoclass:: amalgam.amalgams.Trace
-    :members:
-
-.. autoclass:: amalgam.amalgams.Notification
-    :members:
