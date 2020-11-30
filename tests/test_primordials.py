@@ -5,7 +5,6 @@ from amalgam.amalgams import (
     Failure,
     FailureStack,
     Function,
-    Internal,
     Numeric,
     Quoted,
     SExpression,

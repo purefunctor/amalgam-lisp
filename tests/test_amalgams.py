@@ -3,7 +3,6 @@ from amalgam.amalgams import (
     Atom,
     FailureStack,
     Function,
-    Internal,
     InvalidContextError,
     Located,
     Numeric,
@@ -57,7 +56,6 @@ amalgams = (
         Numeric(42),
         Quoted(Numeric(42)),
         Function("self-eval", lambda *_: None),
-        Internal(42),
     )
 )
 
