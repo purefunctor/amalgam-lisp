@@ -46,7 +46,7 @@ def test(session):
 
 @nox.session(name="test-pypy-3.7", python=("pypy3.7"))
 def test_pypy(session):
-    env = {"COVERAGE_FILE": f".coverage.{session.python}"}
+    env = {"COVERAGE_FILE": ".coverage.pypy-3.7"}
 
     install_with_constraints(session, "pytest", "pytest-mock", "coverage")
     session.install(".")
