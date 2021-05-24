@@ -34,8 +34,18 @@ def lint(session):
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session(python=("3.7", "3.8", "3.9", "pypy3.7"))
+@nox.session(python=("3.7", "3.8", "3.9"))
 def test(session):
+    env = {"COVERAGE_FILE": f".coverage.{session.python}"}
+
+    install_with_constraints(session, "pytest", "pytest-mock", "coverage")
+    session.install(".")
+    session.run("coverage", "run", "--branch", "-m", "pytest", "-vs", env=env)
+    session.run("coverage", "report", "-m", env=env)
+
+
+@nox.session(name="test-pypy-3.7", python=("pypy3.7"))
+def test_pypy(session):
     env = {"COVERAGE_FILE": f".coverage.{session.python}"}
 
     install_with_constraints(session, "pytest", "pytest-mock", "coverage")
