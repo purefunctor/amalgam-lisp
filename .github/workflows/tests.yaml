@@ -2,13 +2,9 @@ name: Tests
 
 on:
   push:
-    branches:
-    - stable
-    - develop
-    - 'feature/**'
 
   pull_request:
-    branches: [ develop ]
+    branches: [ main ]
 
   workflow_dispatch:
 
