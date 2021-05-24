@@ -34,7 +34,7 @@ def lint(session):
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session(python=("3.7", "3.8", "3.9"))
+@nox.session(python=("3.7", "3.8", "3.9", "pypy3.7"))
 def test(session):
     env = {"COVERAGE_FILE": f".coverage.{session.python}"}
 
