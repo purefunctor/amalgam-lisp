@@ -86,6 +86,8 @@ class Environment:
         _self = self.parent
         for _ in range(depth):
             yield _self.bindings
+            if _self.parent is None:
+                return
             _self = _self.parent
 
     def __getitem__(self, item: str) -> Amalgam:
