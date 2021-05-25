@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from functools import wraps
-from mypy_extensions import Arg, KwArg, VarArg
 from typing import (
     cast,
     Callable,
@@ -17,6 +16,7 @@ import amalgam.amalgams as am
 
 if TYPE_CHECKING:  # pragma: no cover
     from amalgam.environment import Environment
+    from mypy_extensions import Arg, KwArg, VarArg
 
     Store = MutableMapping[str, am.Function]
 
